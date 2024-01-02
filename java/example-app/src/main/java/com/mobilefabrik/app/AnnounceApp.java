@@ -68,6 +68,8 @@ public class AnnounceApp {
         this.transport.registerAnnounceHandler(new AnnounceHandler() {
             @Override
             public String getAspectFilter() {
+                log.info("getAspectFilter called.");
+                //return APP_NAME;
                 return null;
             }
 
@@ -80,6 +82,7 @@ public class AnnounceApp {
                 }
             }
         });
+        log.debug("announce handlers: {}", this.transport.getAnnounceHandlers());
     }
 
     private void announceLoop() {
