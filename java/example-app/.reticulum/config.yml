@@ -16,7 +16,7 @@ reticulum:
   # always-on. This directive is optional and can be removed
   # for brevity.
 
-  enable_transport: true
+  enable_transport: false
 
   # By default, the first program to launch the Reticulum
   # Network Stack will create a shared instance, that other
@@ -83,5 +83,7 @@ interfaces:
     target_host: phantom.mobilefabrik.com
     target_port: 4242
     network_name: qortal
-    ifac_size: 16
+    #ifac_size: null
+    accesCodes: false
+    identity: null
 

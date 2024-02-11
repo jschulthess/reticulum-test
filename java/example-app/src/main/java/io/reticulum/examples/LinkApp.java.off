@@ -1,0 +1,116 @@
+package io.reticulum.examples;
+
+import io.reticulum.Reticulum;
+import io.reticulum.Transport;
+import io.reticulum.destination.Destination;
+import io.reticulum.destination.DestinationType;
+import io.reticulum.destination.Direction;
+import io.reticulum.destination.ProofStrategy;
+import io.reticulum.identity.Identity;
+import lombok.extern.slf4j.Slf4j;
+//import org.apache.logging.log4j.Logger;
+//import org.apache.logging.log4j.LogManager;
+//import org.apache.commons.codec.binary.Hex;
+
+import java.io.IOException;
+//import java.nio.file.Path;
+import java.util.concurrent.Executors;
+//import java.util.concurrent.TimeUnit;
+
+//import java.time.Instant;
+//import java.util.List;
+//import java.util.Random;
+
+//import java.io.File;
+//import java.nio.file.Files;
+//import java.nio.file.StandardCopyOption;
+//import static java.nio.charset.StandardCharsets.UTF_8;
+
+@Slf4j
+public class LinkApp {
+    private static final String APP_NAME = "link_example";
+
+    Reticulum reticulum;
+    Identity identity;
+    Transport transport;
+    Destination destination1;
+    static final  String defaultConfigPath = new String(".reticulum"); // if empty will look in Reticulums default paths
+
+    private void setup() {
+        try {
+            reticulum = new Reticulum(".reticulum");
+        } catch (IOException e) {
+            log.error("unable to create Reticulum network", e);
+        }
+        identity = new Identity();
+
+        destination1 = new Destination(
+            identity,
+            Direction.IN,
+            DestinationType.SINGLE,
+            APP_NAME,
+            "announcesample",
+            "fruits"
+        );
+        log.info("destination1 hash: "+destination1.getHexHash());
+
+        destination1.setProofStrategy(ProofStrategy.PROVE_ALL);
+
+        // create a custom announce handler instance
+        var announceHandler = new ExampleAnnounceHandler();
+
+        // register announce handler
+        transport = Transport.getInstance();
+        transport.registerAnnounceHandler(announceHandler);
+        log.debug("announce handlers: {}", transport.getAnnounceHandlers());
+    }
+
+    public void run() {
+        announceLoop(destination2);
+    }
+
+    public void announceLoop(Destination d1, Destination d3) {
+        
+        Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(
+            () -> {
+                var random = new Random();
+                //if (Instant.now().toEpochMilli() % 10_000 == 0) {
+                    var fruit = FRUITS.get(random.nextInt(FRUITS.size()));
+                    destination1.announce(fruit.getBytes(UTF_8));
+                     
+                    log.debug("Sent announce from {} ({})", Hex.encodeHexString(destination1.getHash()), destination1.getName());
+                    
+                    var nobleGas = NOBLE_GASES.get(random.nextInt(NOBLE_GASES.size()));
+                    destination2.announce(nobleGas.getBytes(UTF_8));
+                     
+                    log.debug("Sent announce from {} ({})", Hex.encodeHexString(destination2.getHash()), destination2.getName());
+                //}
+            }, 15,15, TimeUnit.SECONDS
+        );
+    }
+
+    public static void main(String[] args) throws IOException {
+        // main to run application directly
+        var instance = new LinkApp();
+        //instance.setup();
+        //instance.run();
+    }
+
+    private class ExampleAnnounceHandler implements AnnounceHandler {
+        @Override
+        public String getAspectFilter() {
+            log.info("getAspectFilter called.");
+            //return APP_NAME;
+            return null;
+        }
+        
+        @Override
+        public void receivedAnnounce(byte[] destinationHash, Identity announcedIdentity, byte[] appData) {
+            log.info("Received an announce from {}", Hex.encodeHexString(destinationHash));
+            
+            if (appData != null) {
+                log.info("The announce contained the following app data: {}", new String(appData));
+            }
+        }
+    }
+}
