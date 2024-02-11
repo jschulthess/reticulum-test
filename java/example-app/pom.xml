@@ -28,6 +28,10 @@
       <id>project.local</id>
       <name>project</name>
       <url>file:${project.basedir}/lib</url>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
     </repository>
   </repositories>
 
