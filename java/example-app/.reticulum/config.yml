@@ -67,7 +67,7 @@ interfaces:
 
   "Default Interface":
     type: AutoInterface
-    enabled: false
+    enabled: true
 
   #"TCP Server Interface":
   #  type: TCPServerInterface
@@ -84,6 +84,6 @@ interfaces:
     target_port: 4242
     network_name: qortal
     #ifac_size: null
-    accesCodes: false
-    identity: null
+    #accesCodes: false
+    #identity: null
 
