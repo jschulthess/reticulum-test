@@ -82,8 +82,5 @@ interfaces:
     enabled: true
     target_host: phantom.mobilefabrik.com
     target_port: 4242
-    network_name: qortal
-    #ifac_size: null
-    #accesCodes: false
-    #identity: null
+    #network_name: qortal
 
