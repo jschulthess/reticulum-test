@@ -17,14 +17,13 @@ import io.reticulum.utils.IdentityUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-//import java.util.Random;
-//import java.util.concurrent.Executors;
-//import java.util.concurrent.TimeUnit;
-import static java.nio.charset.StandardCharsets.UTF_8;
+//import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.Scanner;
 
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
 @Slf4j
@@ -80,14 +79,6 @@ public class EchoApp {
             destination.announce();
             log.info("Sent announce from {} ({})", Hex.encodeHexString(destination.getHash()), destination.getName());
         }
-        //Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(
-        //    () -> {
-        //        var appDataString = new String("echo_app");
-        //        d1.announce(appDataString.getBytes(UTF_8));
-        //         
-        //        log.debug("Sent announce from {} ({}), data: {}", Hex.encodeHexString(d1.getHash()), d1.getName(), d1.getDefaultAppData());
-        //    }, 30,30, TimeUnit.SECONDS
-        //);k
     }
 
     public void server_callback (byte[] message, Packet packet) {
@@ -111,6 +102,7 @@ public class EchoApp {
         @Override
         public void receivedAnnounce(byte[] destinationHash, Identity announcedIdentity, byte[] appData) {
             log.info("Received an announce from {}", Hex.encodeHexString(destinationHash));
+            log.info("Received an announce from (raw) {}", destinationHash);
             
             if (appData != null) {
                 log.info("The announce contained the following app data: {}", new String(appData));
@@ -125,42 +117,58 @@ public class EchoApp {
         } catch (IOException e) {
             log.error("unable to create Reticulum network", e);
         }
-        log.info("Echo client ready, hit enter to send echo request to {} (Ctrl-C to quit)", destinationHash);
+        log.info("Echo client ready, hit enter to send echo request to {} (Ctrl-C to quit)", Hex.encodeHexString(destinationHash));
 
         String inData;
         Identity serverIdentity;
         Destination requestDestination;
         Scanner scan = new Scanner( System.in );
 
-        try {
+        //try {
             while (true) {
                 inData = scan.nextLine();
+                System.out.println("You entered: " + inData );
+
                 serverIdentity = recall(destinationHash);
+                log.info("client - serverIdentity: {}", serverIdentity);
 
-                requestDestination = new Destination(
-                    serverIdentity,
-                    Direction.OUT,
-                    DestinationType.SINGLE,
-                    APP_NAME,
-                    "echo",
-                    "request"
-                );
-                Packet echoRequest = new Packet(requestDestination, IdentityUtils.getRandomHash(), PacketType.DATA);
-                PacketReceipt packetReceipt = echoRequest.send();
+                // note: Transport.java doesn't have a "hasPath" method (like Python).
+                //       We can check the recall result instead.
+                if (isNull(serverIdentity)) {
+                    log.info("Destination is not yet known. (recall returned serverIdentity {})", serverIdentity);
+                    log.info("=> Hit enter on the server side to trigger an announcement, then hit enter here again.");
+                } else {
+                    //log.info("client - destination hash (input): {}", Hex.encodeHexString(destinationHash));
+                    requestDestination = new Destination(
+                        serverIdentity,
+                        Direction.OUT,
+                        DestinationType.SINGLE,
+                        APP_NAME,
+                        "echo",
+                        "request"
+                    );
+                    
+                    log.info("client - destination hash (requestDestination): {}", requestDestination.getHexHash());
+                    log.info("client - sending packet to (requested) {}, (actual): {}", Hex.encodeHexString(destinationHash), requestDestination.getHexHash());
+                    Packet echoRequest = new Packet(requestDestination, IdentityUtils.getRandomHash(), PacketType.DATA);
+                    PacketReceipt packetReceipt = echoRequest.send();
 
-                packetReceipt.setTimeout(timeout);
-                packetReceipt.setTimeoutCallback(this::packetTimeoutCallback);
+                    packetReceipt.setTimeout(timeout);
+                    packetReceipt.setTimeoutCallback(this::packetTimeoutCallback);
 
-                packetReceipt.setDeliveryCallback(this::packetDeliveredCallback);
+                    packetReceipt.setDeliveryCallback(this::packetDeliveredCallback);
+                }
             }
-        } catch (Exception e) {
-            scan.close();
-        }
+        //} catch (Exception e) {
+        //    scan.close();
+        //}
     }
 
     public void packetDeliveredCallback(PacketReceipt receipt) {
         if (receipt.getStatus() == PacketReceiptStatus.DELIVERED) {
             log.info("Valid reply received from {}", receipt.getDestination().getHash());
+        } else {
+            log.info("NO valid reply, receipt status: {}", receipt.getStatus());
         }
     }
 
@@ -181,7 +189,13 @@ public class EchoApp {
             if (isBlank(args[1])) {
                 System.out.println("Usage: run_echo.sh c <destination_hash>");
             } else {
-                instance.client_setup(args[1].getBytes(UTF_8), 20*1000L); // timeout: 20s
+                log.info("client - cli inputs: {}, {}", args[0], args[1]);
+                try {
+                    //log.info("client - decoded hex sting input[1]: {}", Hex.decodeHex(args[1]));
+                    instance.client_setup(Hex.decodeHex(args[1]), 20*1000L); // timeout: 20s
+                } catch (DecoderException e) {
+                    log.error("DecoderException: {}", e.fillInStackTrace());
+                }
             }
         } else {
             System.out.println("Usage (server): run_echo.sh s");
