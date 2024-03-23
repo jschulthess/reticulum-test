@@ -51,8 +51,8 @@ public class EchoApp {
             Direction.IN,
             DestinationType.SINGLE,
             APP_NAME,
-            "announcesample",
-            "fruits"
+            "echo",
+            "request"
         );
         log.info("destination1 hash: "+destination1.getHexHash());
         destination1.setProofStrategy(ProofStrategy.PROVE_ALL);
@@ -87,7 +87,7 @@ public class EchoApp {
         //         
         //        log.debug("Sent announce from {} ({}), data: {}", Hex.encodeHexString(d1.getHash()), d1.getName(), d1.getDefaultAppData());
         //    }, 30,30, TimeUnit.SECONDS
-        //);
+        //);k
     }
 
     public void server_callback (byte[] message, Packet packet) {
