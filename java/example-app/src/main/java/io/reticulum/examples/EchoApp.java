@@ -72,7 +72,7 @@ public class EchoApp {
     }
 
     public void announceLoop(Destination destination) {
-        log.info("Echo server {} running, hit enter to manually send an announce (Ctrl-C to quit)", Hex.encodeHexString(destination.getHash()));
+        log.info("***> Echo server * {} * running, hit enter to manually send an announce (Ctrl-C to quit)", Hex.encodeHexString(destination.getHash()));
         String inData;
         while (true) {
             Scanner scan = new Scanner( System.in );
