@@ -8,6 +8,7 @@ import io.reticulum.destination.Direction;
 import io.reticulum.destination.ProofStrategy;
 import io.reticulum.identity.Identity;
 import io.reticulum.packet.Packet;
+import io.reticulum.packet.PacketContextType;
 import io.reticulum.packet.PacketType;
 import io.reticulum.packet.PacketReceipt;
 import io.reticulum.packet.PacketReceiptStatus;
@@ -137,6 +138,7 @@ public class EchoApp {
                 if (isNull(serverIdentity)) {
                     log.info("Destination is not yet known. (recall returned serverIdentity {})", serverIdentity);
                     log.info("=> Hit enter on the server side to trigger an announcement, then hit enter here again.");
+                    //Transport.requestPath(destinationHash,null,null,false);
                 } else {
                     //log.info("client - destination hash (input): {}", Hex.encodeHexString(destinationHash));
                     requestDestination = new Destination(
@@ -151,8 +153,9 @@ public class EchoApp {
                     log.info("client - destination hash (requestDestination): {}", requestDestination.getHexHash());
                     log.info("client - sending packet to (requested) {}, (actual): {}", Hex.encodeHexString(destinationHash), requestDestination.getHexHash());
                     Packet echoRequest = new Packet(requestDestination, IdentityUtils.getRandomHash(), PacketType.DATA);
+                    //Packet echoRequest = new Packet(requestDestination, IdentityUtils.getRandomHash(), PacketType.DATA, null, null, true);
                     PacketReceipt packetReceipt = echoRequest.send();
-
+                    
                     packetReceipt.setTimeout(timeout);
                     packetReceipt.setTimeoutCallback(this::packetTimeoutCallback);
 
@@ -186,7 +189,8 @@ public class EchoApp {
             instance.server_setup();
             instance.server_run();
         } else if ("c".equals(args[0])) {
-            if (isBlank(args[1])) {
+            if (args.length <= 1) {
+                log.info("number of args entered: {}", args.length);
                 System.out.println("Usage: run_echo.sh c <destination_hash>");
             } else {
                 log.info("client - cli inputs: {}, {}", args[0], args[1]);
