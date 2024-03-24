@@ -138,7 +138,7 @@ public class EchoApp {
                 if (isNull(serverIdentity)) {
                     log.info("Destination is not yet known. (recall returned serverIdentity {})", serverIdentity);
                     log.info("=> Hit enter on the server side to trigger an announcement, then hit enter here again.");
-                    //Transport.requestPath(destinationHash,null,null,false);
+                    //Transport.requestPath(destinationHash);
                 } else {
                     //log.info("client - destination hash (input): {}", Hex.encodeHexString(destinationHash));
                     requestDestination = new Destination(
