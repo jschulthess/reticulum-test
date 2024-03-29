@@ -18,6 +18,8 @@ import io.reticulum.utils.IdentityUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.nio.file.Files;
+
 //import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -31,7 +33,7 @@ import org.apache.commons.codec.binary.Hex;
 public class EchoApp {
     private static final String APP_NAME = "echo_example";
     Reticulum reticulum;
-    Identity identity;
+    Identity server_identity;
     Transport transport;
     public Destination destination1, destination2;
 
@@ -44,10 +46,20 @@ public class EchoApp {
         } catch (IOException e) {
             log.error("unable to create Reticulum network", e);
         }
-        identity = new Identity();
+
+        // create identity either from file or new (creating new keys)
+        var serverIdentityPath = reticulum.getStoragePath().resolve("identities/"+APP_NAME);
+        if (Files.isReadable(serverIdentityPath)) {
+            server_identity = Identity.fromFile(serverIdentityPath);
+            log.info("server identity loaded from file {}", serverIdentityPath.toString());
+        } else {
+            server_identity = new Identity();
+            log.info("new server identity created dynamically.");
+        }
+        log.debug("Server Identity: {}", server_identity.toString());
 
         destination1 = new Destination(
-            identity,
+            server_identity,
             Direction.IN,
             DestinationType.SINGLE,
             APP_NAME,
