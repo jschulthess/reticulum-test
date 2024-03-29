@@ -208,7 +208,7 @@ public class EchoApp {
                 log.info("client - cli inputs: {}, {}", args[0], args[1]);
                 try {
                     //log.info("client - decoded hex sting input[1]: {}", Hex.decodeHex(args[1]));
-                    instance.client_setup(Hex.decodeHex(args[1]), 20*1000L); // timeout: 20s
+                    instance.client_setup(Hex.decodeHex(args[1]), 13*1000L); // timeout: 13s
                 } catch (DecoderException e) {
                     log.error("DecoderException: {}", e.fillInStackTrace());
                 }
