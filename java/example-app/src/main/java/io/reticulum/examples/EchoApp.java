@@ -166,6 +166,7 @@ public class EchoApp {
                     log.info("client - sending packet to (requested) {}, (actual): {}", Hex.encodeHexString(destinationHash), requestDestination.getHexHash());
                     Packet echoRequest = new Packet(requestDestination, IdentityUtils.getRandomHash(), PacketType.DATA);
                     //Packet echoRequest = new Packet(requestDestination, IdentityUtils.getRandomHash(), PacketType.DATA, null, null, true);
+                    echoRequest.setCreateReceipt(true);
                     PacketReceipt packetReceipt = echoRequest.send();
                     
                     packetReceipt.setTimeout(timeout);
@@ -208,7 +209,7 @@ public class EchoApp {
                 log.info("client - cli inputs: {}, {}", args[0], args[1]);
                 try {
                     //log.info("client - decoded hex sting input[1]: {}", Hex.decodeHex(args[1]));
-                    instance.client_setup(Hex.decodeHex(args[1]), 13*1000L); // timeout: 13s
+                    instance.client_setup(Hex.decodeHex(args[1]), 8*1000L); // timeout: 8s
                 } catch (DecoderException e) {
                     log.error("DecoderException: {}", e.fillInStackTrace());
                 }
