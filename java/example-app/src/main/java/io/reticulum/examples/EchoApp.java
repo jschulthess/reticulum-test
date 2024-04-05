@@ -42,7 +42,7 @@ public class EchoApp {
     /** Server */
     private void server_setup() {
         try {
-            reticulum = new Reticulum(".reticulum");
+            reticulum = new Reticulum(defaultConfigPath);
         } catch (IOException e) {
             log.error("unable to create Reticulum network", e);
         }
@@ -126,7 +126,7 @@ public class EchoApp {
     /** Client */
     private void client_setup(byte[] destinationHash, Long timeout) {
         try {
-            reticulum = new Reticulum(".reticulum");
+            reticulum = new Reticulum(defaultConfigPath);
         } catch (IOException e) {
             log.error("unable to create Reticulum network", e);
         }
