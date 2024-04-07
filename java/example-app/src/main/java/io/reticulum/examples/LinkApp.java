@@ -161,9 +161,6 @@ public class LinkApp {
         Link link;
         Scanner scan = new Scanner( System.in );
 
-        log.info("Echo client ready, hit enter to establish Link to {} (Ctrl-C to quit)", Hex.encodeHexString(destinationHash));
-        inData = scan.nextLine();
-
         if (isFalse(Transport.getInstance().hasPath(destinationHash))) {
             log.info("Destination is not yet known. Requesting path and waiting for announce to arrive...");
             Transport.getInstance().requestPath(destinationHash);
@@ -176,6 +173,8 @@ public class LinkApp {
             }
         }
 
+        log.info("Echo client ready, hit enter to establish Link to {} (Ctrl-C to quit)", Hex.encodeHexString(destinationHash));
+        inData = scan.nextLine();
         // recall server identity and inform user that we'll begin connecting
         serverIdentity = recall(destinationHash);
         log.info("Establishing link with server...");
