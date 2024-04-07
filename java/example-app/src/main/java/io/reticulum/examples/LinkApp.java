@@ -162,8 +162,9 @@ public class LinkApp {
         Identity serverIdentity;
         Destination serverDestination;
         Link link;
-        Scanner scan = new Scanner( System.in );
+        //Scanner scan = new Scanner( System.in );
 
+        // check if we know the destination
         if (isFalse(Transport.getInstance().hasPath(destinationHash))) {
             log.info("Destination is not yet known. Requesting path and waiting for announce to arrive...");
             Transport.getInstance().requestPath(destinationHash);
@@ -176,8 +177,8 @@ public class LinkApp {
             }
         }
 
-        log.info("Echo client ready, hit enter to establish Link to {} (Ctrl-C to quit)", Hex.encodeHexString(destinationHash));
-        inData = scan.nextLine();
+        //log.info("Echo client ready, hit enter to establish Link to {} (Ctrl-C to quit)", Hex.encodeHexString(destinationHash));
+        //inData = scan.nextLine();
         // recall server identity and inform user that we'll begin connecting
         serverIdentity = recall(destinationHash);
         log.info("Establishing link with server...");
@@ -219,12 +220,12 @@ public class LinkApp {
             }
         }
 
-        Boolean shouldQuit = false;
+        var shouldQuit = false;
         String inData;
-        Scanner scan = new Scanner( System.in );
         Packet cPacket;
         while (isFalse(shouldQuit)) {
             try {
+                Scanner scan = new Scanner( System.in );
                 inData = scan.nextLine();
                 System.out.println("You entered: " + inData );
                 
@@ -232,6 +233,12 @@ public class LinkApp {
                 if (inData.equalsIgnoreCase("quit")) {
                     shouldQuit = true;
                     serverLink.teardown();
+                }
+                
+                if (inData.equals("quit")) {
+                    shouldQuit = true;
+                    serverLink.teardown();
+                    continue;
                 }
                 
                 if (! inData.isEmpty()) {
@@ -243,6 +250,7 @@ public class LinkApp {
                         log.info("Cannot send this packet, the data length of {} bytes exceeds link MDU of {} bytes", data.length, LinkConstant.MDU);
                     }
                 }
+                scan.close();
             } catch (Exception e) {
                 log.error("Error sending data over the link: {}", e);
                 shouldQuit = true;
