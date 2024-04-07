@@ -154,13 +154,15 @@ public class LinkApp {
         } catch (IOException e) {
             log.error("unable to create Reticulum network", e);
         }
-        log.info("Echo client ready, hit enter to send echo request to {} (Ctrl-C to quit)", Hex.encodeHexString(destinationHash));
 
         String inData;
         Identity serverIdentity;
         Destination serverDestination;
         Link link;
         Scanner scan = new Scanner( System.in );
+
+        log.info("Echo client ready, hit enter to establish Link to {} (Ctrl-C to quit)", Hex.encodeHexString(destinationHash));
+        inData = scan.nextLine();
 
         if (isFalse(Transport.getInstance().hasPath(destinationHash))) {
             log.info("Destination is not yet known. Requesting path and waiting for announce to arrive...");
