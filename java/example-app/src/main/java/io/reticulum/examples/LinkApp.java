@@ -83,27 +83,30 @@ public class LinkApp {
         // a new client creates a link to this destination.
         destination1.setLinkEstablishedCallback(this::clientConnected);
 
-        // create a custom announce handler instance
-        var announceHandler = new ExampleAnnounceHandler();
-
-        // register announce handler
-        transport = Transport.getInstance();
-        transport.registerAnnounceHandler(announceHandler);
-        log.debug("announce handlers: {}", transport.getAnnounceHandlers());
+        //// create a custom announce handler instance
+        //var announceHandler = new ExampleAnnounceHandler();
+        //// register announce handler
+        //transport = Transport.getInstance();
+        //transport.registerAnnounceHandler(announceHandler);
+        //log.debug("announce handlers: {}", transport.getAnnounceHandlers());
     }
 
     public void server_run() {
-        announceLoop(destination1);
+        serverLoop(destination1);
     }
 
-    public void announceLoop(Destination destination) {
-        log.info("***> Echo server * {} * running, hit enter to manually send an announce (Ctrl-C to quit)", Hex.encodeHexString(destination.getHash()));
-        String inData;
+    public void serverLoop(Destination destination) {
+        var inData = new String();
+        log.info("Link example {} running, waiting for a connection", destination.getHexHash());
+
+        log.info("Hit enter to manually send an announce (Ctrl-C to quit)");
+
         while (true) {
             Scanner scan = new Scanner( System.in );
             inData = scan.nextLine();
             destination.announce();
-            log.info("Sent announce from {} ({})", Hex.encodeHexString(destination.getHash()), destination.getName());
+            log.info("Sent announce from {} ({})", destination.getHexHash(), destination.getName());
+            scan.close();
         }
     }
 
@@ -128,24 +131,24 @@ public class LinkApp {
         reply.send();
     }
 
-    private class ExampleAnnounceHandler implements AnnounceHandler {
-        @Override
-        public String getAspectFilter() {
-            log.info("getAspectFilter called.");
-            //return APP_NAME;
-            return null;
-        }
-        
-        @Override
-        public void receivedAnnounce(byte[] destinationHash, Identity announcedIdentity, byte[] appData) {
-            log.info("Received an announce from {}", Hex.encodeHexString(destinationHash));
-            //log.info("Received an announce from (raw) {}", destinationHash);
-            
-            if (appData != null) {
-                log.info("The announce contained the following app data: {}", new String(appData));
-            }
-        }
-    }
+    //private class ExampleAnnounceHandler implements AnnounceHandler {
+    //    @Override
+    //    public String getAspectFilter() {
+    //        log.info("getAspectFilter called.");
+    //        //return APP_NAME;
+    //        return null;
+    //    }
+    //    
+    //    @Override
+    //    public void receivedAnnounce(byte[] destinationHash, Identity announcedIdentity, byte[] appData) {
+    //        log.info("Received an announce from {}", Hex.encodeHexString(destinationHash));
+    //        //log.info("Received an announce from (raw) {}", destinationHash);
+    //        
+    //        if (appData != null) {
+    //            log.info("The announce contained the following app data: {}", new String(appData));
+    //        }
+    //    }
+    //}
 
     /** Client */
     private void client_setup(byte[] destinationHash) {
