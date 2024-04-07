@@ -89,9 +89,7 @@ public class LinkApp {
         //transport = Transport.getInstance();
         //transport.registerAnnounceHandler(announceHandler);
         //log.debug("announce handlers: {}", transport.getAnnounceHandlers());
-    }
 
-    public void server_run() {
         serverLoop(destination1);
     }
 
@@ -304,7 +302,6 @@ public class LinkApp {
         var instance = new LinkApp();
         if ("s".equals(args[0])) {
             instance.server_setup();
-            instance.server_run();
         } else if ("c".equals(args[0])) {
             if (args.length <= 1) {
                 log.info("number of args entered: {}", args.length);
