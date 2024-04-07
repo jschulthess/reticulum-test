@@ -99,12 +99,15 @@ public class LinkApp {
 
         log.info("Hit enter to manually send an announce (Ctrl-C to quit)");
 
+        Scanner scan = new Scanner( System.in );
         while (true) {
-            Scanner scan = new Scanner( System.in );
-            inData = scan.nextLine();
-            destination.announce();
-            log.info("Sent announce from {} ({})", destination.getHexHash(), destination.getName());
-            scan.close();
+            try {
+                inData = scan.nextLine();
+                destination.announce();
+                log.info("Sent announce from {} ({})", destination.getHexHash(), destination.getName());
+            } catch (Exception e) {
+                scan.close();
+            }
         }
     }
 
