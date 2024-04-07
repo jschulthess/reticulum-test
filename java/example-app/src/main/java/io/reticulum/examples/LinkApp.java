@@ -68,7 +68,7 @@ public class LinkApp {
             server_identity = new Identity();
             log.info("new server identity created dynamically.");
         }
-        log.debug("Server Identity: {}", server_identity.toString());
+        //log.debug("Server Identity: {}", server_identity.toString());
 
         destination1 = new Destination(
             server_identity,
