@@ -119,10 +119,17 @@ public class EchoApp {
     public void server_callback (byte[] message, Packet packet) {
         var receptionStats = new String("");
         if (reticulum.isConnectedToSharedInstance()) {
-            log.info("shared instance - no stats");
+            log.info("shared instance - stats n/a (not implemented)");
         } else {
             var reception_rssi = packet.getRssi();
-            System.out.println("RSSI "+reception_rssi+" dBm");
+            if (!isNull(reception_rssi)) {
+                receptionStats += " [RSSI"+reception_rssi.toString()+" dbm]";
+                //System.out.println("RSSI "+reception_rssi.toString()+" dBm");
+            }
+            if (!isNull(packet.getSnr())) {
+                receptionStats += " [SNR"+packet.getSnr().toString()+" dB]";
+                //System.out.println("RSSI "+packet.getSnr().toString()+" dBm");
+            }
         }
         log.info("Received packet from echo client, proof sent, stats: {}", receptionStats);
     }
