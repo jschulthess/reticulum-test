@@ -16,6 +16,8 @@ import io.reticulum.transport.AnnounceHandler;
 import static io.reticulum.identity.IdentityKnownDestination.recall;
 import io.reticulum.utils.IdentityUtils;
 import lombok.extern.slf4j.Slf4j;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,16 +33,21 @@ import org.apache.commons.codec.binary.Hex;
 
 @Slf4j
 public class EchoApp {
-    private static final String APP_NAME = "echo_example";
+    private static final String APP_NAME = "example_utilities";
     Reticulum reticulum;
     Identity server_identity;
     Transport transport;
     public Destination destination1, destination2;
+    //static Logger log = Logger.getLogger(EchoApp.class.getName());
+    //private static final Logger log = LoggerFactory.getLogger(EchoApp.class);
 
     static final  String defaultConfigPath = new String(".reticulum"); // if empty will look in Reticulums default paths
     
-    /** Server */
+    /************/
+    /** Server **/
+    /************/
     private void server_setup() {
+
         try {
             reticulum = new Reticulum(defaultConfigPath);
         } catch (IOException e) {
@@ -56,7 +63,7 @@ public class EchoApp {
             server_identity = new Identity();
             log.info("new server identity created dynamically.");
         }
-        log.debug("Server Identity: {}", server_identity.toString());
+        //log.debug("Server Identity: {}", server_identity.toString());
 
         destination1 = new Destination(
             server_identity,
@@ -67,7 +74,16 @@ public class EchoApp {
             "request"
         );
         log.info("destination1 hash: "+destination1.getHexHash());
+
+        // We configure the destination to automatically prove all
+        // packets addressed to it. By doing this, RNS will automatically
+        // generate a proof for each incoming packet and transmit it
+        // back to the sender of that packet.
         destination1.setProofStrategy(ProofStrategy.PROVE_ALL);
+
+        // Tell the destination which function in our program to
+        // run when a packet is received. We do this so we can
+        // print a log message when the server receives a request
         destination1.setPacketCallback(this::server_callback);
 
         // create a custom announce handler instance
@@ -75,13 +91,19 @@ public class EchoApp {
 
         // register announce handler
         transport = Transport.getInstance();
-        transport.registerAnnounceHandler(announceHandler);
-        log.debug("announce handlers: {}", transport.getAnnounceHandlers());
-    }
+        
+        // announce handler not strictly necessary for this example
+        //transport.registerAnnounceHandler(announceHandler);
+        //log.debug("announce handlers: {}", transport.getAnnounceHandlers());
 
-    public void server_run() {
+        // Everything's ready!
+        // Let's Wait for client requests or user input
         announceLoop(destination1);
     }
+
+    //public void server_run() {
+    //    announceLoop(destination1);
+    //}
 
     public void announceLoop(Destination destination) {
         log.info("***> Echo server * {} * running, hit enter to manually send an announce (Ctrl-C to quit)", Hex.encodeHexString(destination.getHash()));
@@ -102,20 +124,19 @@ public class EchoApp {
             var reception_rssi = packet.getRssi();
             System.out.println("RSSI "+reception_rssi+" dBm");
         }
+        log.info("Received packet from echo client, proof sent, stats: {}", receptionStats);
     }
 
     private class ExampleAnnounceHandler implements AnnounceHandler {
         @Override
         public String getAspectFilter() {
-            log.info("getAspectFilter called.");
-            //return APP_NAME;
+            log.debug("getAspectFilter called.");
             return null;
         }
         
         @Override
         public void receivedAnnounce(byte[] destinationHash, Identity announcedIdentity, byte[] appData) {
             log.info("Received an announce from {}", Hex.encodeHexString(destinationHash));
-            log.info("Received an announce from (raw) {}", destinationHash);
             
             if (appData != null) {
                 log.info("The announce contained the following app data: {}", new String(appData));
@@ -123,8 +144,11 @@ public class EchoApp {
         }
     }
 
-    /** Client */
+    /************/
+    /** Client **/
+    /************/
     private void client_setup(byte[] destinationHash, Long timeout) {
+        
         try {
             reticulum = new Reticulum(defaultConfigPath);
         } catch (IOException e) {
@@ -142,16 +166,18 @@ public class EchoApp {
                 inData = scan.nextLine();
                 System.out.println("You entered: " + inData );
 
+                // To address the server, we need to know it's public
+                // key, so we check if Reticulum knows this destination.
+                // This is done by calling the "recall" method of the
+                // Identity module. If the destination is known, it will
+                // return an Identity instance that can be used in
+                // outgoing destinations.
                 serverIdentity = recall(destinationHash);
                 log.info("client - serverIdentity: {}", serverIdentity);
 
                 // note: Transport.java doesn't have a "hasPath" method (like Python).
-                //       We can check the recall result instead.
-                if (isNull(serverIdentity)) {
-                    log.info("Destination is not yet known. (recall returned serverIdentity {})", serverIdentity);
-                    log.info("=> Hit enter on the server side to trigger an announcement, then hit enter here again.");
-                    //Transport.requestPath(destinationHash);
-                } else {
+                //       We can check the recall result (serverIdentity) instead.
+                if (!isNull(serverIdentity)) {
                     //log.info("client - destination hash (input): {}", Hex.encodeHexString(destinationHash));
                     requestDestination = new Destination(
                         serverIdentity,
@@ -164,15 +190,35 @@ public class EchoApp {
                     
                     log.info("client - destination hash (requestDestination): {}", requestDestination.getHexHash());
                     log.info("client - sending packet to (requested) {}, (actual): {}", Hex.encodeHexString(destinationHash), requestDestination.getHexHash());
+                    
+                    // The destination is ready, so let's create a packet.
+                    // We set the destination to the request_destination
+                    // that was just created, and the only data we add
+                    // is a random hash.
                     Packet echoRequest = new Packet(requestDestination, IdentityUtils.getRandomHash(), PacketType.DATA);
-                    //Packet echoRequest = new Packet(requestDestination, IdentityUtils.getRandomHash(), PacketType.DATA, null, null, true);
-                    echoRequest.setCreateReceipt(true);
+                    
+                    // Send the packet! If the packet is successfully
+                    // sent, it will return a PacketReceipt instance.
                     PacketReceipt packetReceipt = echoRequest.send();
                     
-                    packetReceipt.setTimeout(timeout);
-                    packetReceipt.setTimeoutCallback(this::packetTimeoutCallback);
-
+                    if (!isNull(timeout) && (timeout > 0L)) {
+                        echoRequest.setCreateReceipt(true);
+                        packetReceipt.setTimeout(timeout);
+                        packetReceipt.setTimeoutCallback(this::packetTimeoutCallback);
+                    }
+                    
+                    // We can then set a delivery callback on the receipt.
+                    // This will get automatically called when a proof for
+                    // this specific packet is received from the destination.
                     packetReceipt.setDeliveryCallback(this::packetDeliveredCallback);
+
+                    // Tell the user that the echo request was sent
+                    log.info("Sent echo request to {}", destinationHash);
+                } else {
+                    log.info("Destination is not yet known. (recall returned serverIdentity {})", serverIdentity);
+                    log.info("=> Hit enter on the server side to trigger an announcement, then hit enter here again.");
+                    // commented out because of "non-static method called in static context" problem.
+                    //Transport.requestPath(destinationHash);
                 }
             }
         //} catch (Exception e) {
@@ -200,7 +246,7 @@ public class EchoApp {
         var instance = new EchoApp();
         if ("s".equals(args[0])) {
             instance.server_setup();
-            instance.server_run();
+            //instance.server_run();
         } else if ("c".equals(args[0])) {
             if (args.length <= 1) {
                 log.info("number of args entered: {}", args.length);
