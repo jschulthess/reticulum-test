@@ -39,9 +39,12 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.util.encoders.UTF8;
 
+import org.apache.commons.cli.*;
+import org.apache.commons.cli.ParseException;
+
 @Slf4j
 public class LinkApp {
-    private static final String APP_NAME = "link_example";
+    private static final String APP_NAME = "example_utilities";
     Reticulum reticulum;
     static final String defaultConfigPath = new String(".reticulum");
     Identity server_identity;
@@ -95,7 +98,7 @@ public class LinkApp {
 
     public void serverLoop(Destination destination) {
         var inData = new String();
-        log.info("Link example {} running, waiting for a connection", destination.getHexHash());
+        log.info("***> Link server * {} * running, waiting for a connection", destination.getHexHash());
 
         log.info("Hit enter to manually send an announce (Ctrl-C to quit)");
 
@@ -116,10 +119,11 @@ public class LinkApp {
         link.setLinkClosedCallback(this::clientDisconnected);
         link.setPacketCallback(this::serverPacketReceived);
         latestClientLink = link;
+        log.info("***> Client connected");
     }
 
     public void clientDisconnected(Link link) {
-        log.info("Client disconnected");
+        log.info("***> Client disconnected");
     }
 
     public void serverPacketReceived(byte[] message, Packet packet) {
@@ -302,27 +306,89 @@ public class LinkApp {
     /*********/
     public static void main(String[] args) throws IOException {
         // main to run application directly
-        var instance = new LinkApp();
-        if ("s".equals(args[0])) {
-            instance.server_setup();
-        } else if ("c".equals(args[0])) {
-            if (args.length <= 1) {
-                log.info("number of args entered: {}", args.length);
-                System.out.println("Usage: run_link.sh c <destination_hash>");
-            } else {
-                log.info("client - cli inputs: {}, {}", args[0], args[1]);
-                try {
-                    //log.info("client - decoded hex sting input[1]: {}", Hex.decodeHex(args[1]));
-                    instance.client_setup(Hex.decodeHex(args[1]));
-                } catch (DecoderException e) {
-                    log.error("DecoderException: {}", e.fillInStackTrace());
-                }
+        
+        String cmdUsage = new String("run_echo.sh [-s|-c HASH]");
+        
+        // define options
+        Options options = new Options();
+        //Option o_server = new Option("s", "server", false, "server mode - wait for incoming packets from clients");
+        Option o_server = Option.builder("s").longOpt("server")
+                            .argName("destination")
+                            .hasArg(false)
+                            .required(false)
+                            .desc("server mode - wait for incoming packets from clients")
+                            .build();
+        options.addOption(o_server);
+        Option o_client = Option.builder("c").longOpt("client")
+                            .argName("destination")
+                            .hasArg(true)
+                            .required(false)
+                            .desc("client mode (specify a destination hash)")
+                            .build();
+        options.addOption(o_client);
+        Option o_config = Option.builder("config")
+                            .argName("dir")
+                            .hasArg(true)
+                            .required(false)
+                            .desc("(optional) path to alternative Reticulum config directory "
+                                  + "(default: .reticulum)").build();
+        options.addOption(o_config);
+        // define parser
+        CommandLine cLine;
+        CommandLineParser parser = new DefaultParser();
+        HelpFormatter formatter = new HelpFormatter();
+        
+        try {
+            cLine = parser.parse(options, args);
+        
+            if (cLine.hasOption("s")) {
+                System.out.println("server mode");
             }
-        } else {
-            System.out.println("Usage (server): run_link.sh s");
-            System.out.println("Usage (client): run_link.sh c <destination_hash>");
-            System.out.println("'c': client or 's': server (listening mode)");
+            if (cLine.hasOption("c")) {
+               System.out.println("client to destionation: " + cLine.getOptionValue("c"));
+            }
+        
+            var instance = new LinkApp();
+            if (cLine.hasOption("c")) {
+                // TODO: check client value to be a proper hash
+                instance.client_setup(Hex.decodeHex(cLine.getOptionValue("c")));
+            } else if (cLine.hasOption("s")) {
+                instance.server_setup();
+            } else {
+                formatter.printHelp(cmdUsage, options);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            formatter.printHelp(cmdUsage, options);
+            System.exit(0);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
+
+        //// code without command line parser
+        //var instance = new LinkApp();
+        //if ("s".equals(args[0])) {
+        //    instance.server_setup();
+        //} else if ("c".equals(args[0])) {
+        //    if (args.length <= 1) {
+        //        log.info("number of args entered: {}", args.length);
+        //        System.out.println("Usage: run_link.sh c <destination_hash>");
+        //    } else {
+        //        log.info("client - cli inputs: {}, {}", args[0], args[1]);
+        //        try {
+        //            //log.info("client - decoded hex sting input[1]: {}", Hex.decodeHex(args[1]));
+        //            instance.client_setup(Hex.decodeHex(args[1]));
+        //        } catch (DecoderException e) {
+        //            log.error("DecoderException: {}", e.fillInStackTrace());
+        //        }
+        //    }
+        //} else {
+        //    System.out.println("Usage (server): run_link.sh s");
+        //    System.out.println("Usage (client): run_link.sh c <destination_hash>");
+        //    System.out.println("'c': client or 's': server (listening mode)");
+        //}
     }
 
 }

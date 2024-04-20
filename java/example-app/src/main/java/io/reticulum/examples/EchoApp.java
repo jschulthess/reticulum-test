@@ -31,6 +31,10 @@ import java.util.Scanner;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
+// for cli options
+import org.apache.commons.cli.*;
+import org.apache.commons.cli.ParseException;
+
 @Slf4j
 public class EchoApp {
     private static final String APP_NAME = "example_utilities";
@@ -250,28 +254,102 @@ public class EchoApp {
     /** Main */
     public static void main(String[] args) throws IOException {
         // main to run application directly
-        var instance = new EchoApp();
-        if ("s".equals(args[0])) {
-            instance.server_setup();
-            //instance.server_run();
-        } else if ("c".equals(args[0])) {
-            if (args.length <= 1) {
-                log.info("number of args entered: {}", args.length);
-                System.out.println("Usage: run_echo.sh c <destination_hash>");
-            } else {
-                log.info("client - cli inputs: {}, {}", args[0], args[1]);
-                try {
-                    //log.info("client - decoded hex sting input[1]: {}", Hex.decodeHex(args[1]));
-                    instance.client_setup(Hex.decodeHex(args[1]), 8*1000L); // timeout: 8s
-                } catch (DecoderException e) {
-                    log.error("DecoderException: {}", e.fillInStackTrace());
-                }
+
+        String cmdUsage = new String("run_echo.sh [-s|-c HASH [-t TIMEOUT]] ");
+
+        // define options
+        Options options = new Options();
+        Option o_server = new Option("s", "server", false, "server mode - wait for incoming packets from clients");
+        options.addOption(o_server);
+        Option o_client = Option.builder("c").longOpt("client")
+                            .argName("destination")
+                            .hasArg(true)
+                            .required(false)
+                            .desc("client mode (specify a destination hash)")
+                            .build();
+        options.addOption(o_client);
+        Option o_timeout = Option.builder("t").longOpt("timeout")
+                            .argName("timeout")
+                            .hasArg(true)
+                            .required(false)
+                            .desc("set a reply (client mode) timeout in seconds (default: 8s)")
+                            .type(Integer.class)
+                            .build();
+        options.addOption(o_timeout);
+        Option o_config = Option.builder("config")
+                            .argName("dir")
+                            .hasArg(true)
+                            .required(false)
+                            .desc("(optional) path to alternative Reticulum config directory "
+                                  + "(default: .reticulum)").build();
+        options.addOption(o_config);
+        // define parser
+        CommandLine cLine;
+        CommandLineParser parser = new DefaultParser();
+        HelpFormatter formatter = new HelpFormatter();
+
+        Long defaultTimeout = 8*1000L; // timeout: 8s
+        try {
+            cLine = parser.parse(options, args);
+
+            if (cLine.hasOption("s")) {
+                System.out.println("server mode");
             }
-        } else {
-            System.out.println("Usage (server): run_echo.sh s");
-            System.out.println("Usage (client): run_echo.sh c <destination_hash>");
-            System.out.println("'c': client or 's': server (listening mode)");
+            if (cLine.hasOption("c")) {
+               System.out.println("client to destionation: " + cLine.getOptionValue("c"));
+            }
+            if (cLine.hasOption("t")) {
+                Integer t = cLine.getParsedOptionValue("t");
+                System.out.println("timeout set to " + t);
+            }
+            
+            var instance = new EchoApp();
+            if (cLine.hasOption("c")) {
+                // TODO: check client value to be a proper hash
+                if (cLine.hasOption("t")) {
+                    Integer t = cLine.getParsedOptionValue("t");
+                    instance.client_setup(Hex.decodeHex(cLine.getOptionValue("c")), t*1000L);
+                } else {    
+                    instance.client_setup(Hex.decodeHex(cLine.getOptionValue("c")), defaultTimeout);
+                }
+            } else if (cLine.hasOption("s")) {
+                instance.server_setup();
+            } else {
+                formatter.printHelp(cmdUsage, options);
+            }
+        } catch (DecoderException e) {
+            System.out.println(e.getMessage());
+            System.exit(0);
+        } catch (ParseException e) {
+            //e.printStackTrace();
+            System.out.println(e.getMessage());
+            formatter.printHelp(cmdUsage, options);
+            System.exit(0);
         }
+
+        //// code without command line parser
+        //var instance = new EchoApp();
+        //if ("s".equals(args[0])) {
+        //    instance.server_setup();
+        //    //instance.server_run();
+        //} else if ("c".equals(args[0])) {
+        //    if (args.length <= 1) {
+        //        log.info("number of args entered: {}", args.length);
+        //        System.out.println("Usage: run_echo.sh c <destination_hash>");
+        //    } else {
+        //        log.info("client - cli inputs: {}, {}", args[0], args[1]);
+        //        try {
+        //            //log.info("client - decoded hex sting input[1]: {}", Hex.decodeHex(args[1]));
+        //            instance.client_setup(Hex.decodeHex(args[1]), 8*1000L); // timeout: 8s
+        //        } catch (DecoderException e) {
+        //            log.error("DecoderException: {}", e.fillInStackTrace());
+        //        }
+        //    }
+        //} else {
+        //    System.out.println("Usage (server): run_echo.sh s");
+        //    System.out.println("Usage (client): run_echo.sh c <destination_hash>");
+        //    System.out.println("'c': client or 's': server (listening mode)");
+        //}
     }
 
 }
