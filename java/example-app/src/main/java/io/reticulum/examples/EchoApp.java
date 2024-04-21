@@ -91,12 +91,10 @@ public class EchoApp {
         destination1.setPacketCallback(this::server_callback);
 
         // create a custom announce handler instance
-        var announceHandler = new ExampleAnnounceHandler();
-
+        // note: announce handler not strictly necessary for this example
+        //var announceHandler = new ExampleAnnounceHandler();
         // register announce handler
-        transport = Transport.getInstance();
-        
-        // announce handler not strictly necessary for this example
+        //transport = Transport.getInstance();
         //transport.registerAnnounceHandler(announceHandler);
         //log.debug("announce handlers: {}", transport.getAnnounceHandlers());
 
@@ -135,6 +133,7 @@ public class EchoApp {
                 //System.out.println("RSSI "+packet.getSnr().toString()+" dBm");
             }
         }
+
         log.info("Received packet from echo client, proof sent, stats: {}", receptionStats);
     }
 
