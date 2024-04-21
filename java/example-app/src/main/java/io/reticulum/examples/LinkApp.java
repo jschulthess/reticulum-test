@@ -211,6 +211,9 @@ public class LinkApp {
             APP_NAME,
             "linkexample"
         );
+
+        log.info("server identity (recalled): {} => server destination (client): * {} *", serverIdentity.getHexHash(), serverDestination.getHexHash());
+
         // and create a link
         link = new Link(serverDestination);
 
