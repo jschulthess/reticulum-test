@@ -15,6 +15,7 @@ import io.reticulum.packet.PacketReceiptStatus;
 import io.reticulum.transport.AnnounceHandler;
 import static io.reticulum.identity.IdentityKnownDestination.recall;
 import io.reticulum.utils.IdentityUtils;
+import static io.reticulum.constant.ReticulumConstant.TRUNCATED_HASHLENGTH;
 import lombok.extern.slf4j.Slf4j;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ import org.apache.commons.codec.binary.Hex;
 // for cli options
 import org.apache.commons.cli.*;
 import org.apache.commons.cli.ParseException;
+
 
 @Slf4j
 public class EchoApp {
@@ -164,6 +166,19 @@ public class EchoApp {
         } catch (IOException e) {
             log.error("unable to create Reticulum network", e);
         }
+        
+        try {
+            Integer destLen = (TRUNCATED_HASHLENGTH / 8) * 2;  // hex characsters
+            log.debug("destLen: {}, destinationHash length: {}, floorDiv: {}", destLen, destinationHash.length, Math.floorDiv(destLen,2));
+            if (Math.floorDiv(destLen, 2) != destinationHash.length) {
+                log.info("Destination length is invalid, must be {} (hex) hexadecimal characters ({} bytes)", destLen, Math.floorDiv(destLen,2));
+                throw new IllegalArgumentException("Destination length is invalid");
+            }
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid destination entered. Check your input!");
+            System.exit(0);
+        }
+
         log.info("Echo client ready, hit enter to send echo request to {} (Ctrl-C to quit)", Hex.encodeHexString(destinationHash));
 
         String inData;

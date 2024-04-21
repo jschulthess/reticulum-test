@@ -20,6 +20,7 @@ import static io.reticulum.link.TeardownSession.INITIATOR_CLOSED;
 import static io.reticulum.link.TeardownSession.TIMEOUT;
 import static io.reticulum.identity.IdentityKnownDestination.recall;
 import io.reticulum.utils.IdentityUtils;
+import static io.reticulum.constant.ReticulumConstant.TRUNCATED_HASHLENGTH;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -54,7 +55,9 @@ public class LinkApp {
     public Link serverLink;
     public Link clientLink;
     
-    /** Server */
+    /************/
+    /** Server **/
+    /************/
     private void server_setup() {
         try {
             reticulum = new Reticulum(defaultConfigPath);
@@ -73,6 +76,9 @@ public class LinkApp {
         }
         //log.debug("Server Identity: {}", server_identity.toString());
 
+        // We create a destination that clients can connect to. We
+        // want clients to create links to this destination, so we
+        // need to create a "single" destination type.
         destination1 = new Destination(
             server_identity,
             Direction.IN,
@@ -128,7 +134,7 @@ public class LinkApp {
 
     public void serverPacketReceived(byte[] message, Packet packet) {
         String text = new String(message, StandardCharsets.UTF_8);
-        log.info("Received data on th link: {}", text);
+        log.info("Received data on the link: {}", text);
         // send reply
         String replyText = "I received \""+text+"\" over the link";
         byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
@@ -155,12 +161,26 @@ public class LinkApp {
     //    }
     //}
 
-    /** Client */
+    /************/
+    /** Client **/
+    /************/
     private void client_setup(byte[] destinationHash) {
         try {
             reticulum = new Reticulum(defaultConfigPath);
         } catch (IOException e) {
             log.error("unable to create Reticulum network", e);
+        }
+
+        try {
+            Integer destLen = (TRUNCATED_HASHLENGTH / 8) * 2;  // hex characsters
+            log.debug("destLen: {}, destinationHash length: {}, floorDiv: {}", destLen, destinationHash.length, Math.floorDiv(destLen,2));
+            if (Math.floorDiv(destLen, 2) != destinationHash.length) {
+                log.info("Destination length is invalid, must be {} (hex) hexadecimal characters ({} bytes)", destLen, Math.floorDiv(destLen,2));
+                throw new IllegalArgumentException("Destination length is invalid");
+            }
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid destination entered. Check your input!");
+            System.exit(0);
         }
 
         String inData;
