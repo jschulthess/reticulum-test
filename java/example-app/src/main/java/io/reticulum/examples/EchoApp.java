@@ -193,7 +193,7 @@ public class EchoApp {
                 // return an Identity instance that can be used in
                 // outgoing destinations.
                 serverIdentity = recall(destinationHash);
-                log.info("client - serverIdentity: {}", serverIdentity);
+                log.debug("client - serverIdentity: {}", serverIdentity);
 
                 // note: Transport.java doesn't have a "hasPath" method (like Python).
                 //       We can check the recall result (serverIdentity) instead.

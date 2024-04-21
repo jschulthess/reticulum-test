@@ -201,6 +201,8 @@ public class LinkApp {
         //inData = scan.nextLine();
         // recall server identity and inform user that we'll begin connecting
         serverIdentity = recall(destinationHash);
+        log.debug("client - serverIdentity: {}", serverIdentity);
+
         log.info("Establishing link with server...");
 
         // When the server identity is known, we set up a destination
