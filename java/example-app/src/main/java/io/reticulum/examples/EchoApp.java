@@ -208,8 +208,8 @@ public class EchoApp {
                         "request"
                     );
                     
-                    log.info("client - destination hash (requestDestination): {}", requestDestination.getHexHash());
-                    log.info("client - sending packet to (requested) {}, (actual): {}", Hex.encodeHexString(destinationHash), requestDestination.getHexHash());
+                    log.info("client - client hash (requestDestination): * {} *", requestDestination.getHexHash());
+                    log.info("client - sending packet to (server) {} from (client): {} (client)", Hex.encodeHexString(destinationHash), requestDestination.getHexHash());
                     
                     // The destination is ready, so let's create a packet.
                     // We set the destination to the request_destination
