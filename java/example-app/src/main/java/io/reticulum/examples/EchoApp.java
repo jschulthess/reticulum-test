@@ -224,7 +224,7 @@ public class EchoApp {
                     packetReceipt.setDeliveryCallback(this::packetDeliveredCallback);
 
                     // Tell the user that the echo request was sent
-                    log.info("Sent echo request to {}", destinationHash);
+                    log.info("Sent echo request to {}", Hex.encodeHexString(destinationHash));
                 } else {
                     log.info("Destination is not yet known. (recall returned serverIdentity {})", serverIdentity);
                     log.info("=> Hit enter on the server side to trigger an announcement, then hit enter here again.");
