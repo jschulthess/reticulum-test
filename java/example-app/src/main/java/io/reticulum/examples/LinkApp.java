@@ -212,7 +212,7 @@ public class LinkApp {
             "linkexample"
         );
 
-        log.info("server identity (recalled): {} => server destination (client): * {} *", Hex.encodeHexString(serverIdentity.getHash()), serverDestination.getHexHash());
+        log.info("server destination (recalled on client, direction.OUT): * {} *", serverDestination.getHexHash());
 
         // and create a link
         link = new Link(serverDestination);
