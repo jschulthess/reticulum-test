@@ -123,6 +123,14 @@ public class EchoApp {
     public void server_callback (byte[] message, Packet packet) {
         var receptionStats = new String("");
         if (reticulum.isConnectedToSharedInstance()) {
+            //var receptionRssi = Reticulum.getPacketRssi(packet.getPacketHash());
+            //var receptionSnr = Reticulum.getPacketSnr(packet.getPacketHash());
+            //if (!isNull(receptionRssi)) {
+            //    receptionStats += " [RSSI "+receptionRssi.toString()+" dbm]";
+            //}
+            //if (!isNull(receptionSnr)) {
+            //    receptionStats += " [SNR "+receptionSnr.toString()+" dBm]";
+            //}
             log.info("shared instance - stats n/a (not implemented)");
         } else {
             var reception_rssi = packet.getRssi();
