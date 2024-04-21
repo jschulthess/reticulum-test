@@ -167,16 +167,11 @@ public class EchoApp {
             log.error("unable to create Reticulum network", e);
         }
 
-        try {
-            Integer destLen = (TRUNCATED_HASHLENGTH / 8) * 2;  // hex characsters
-            log.debug("destLen: {}, destinationHash length: {}, floorDiv: {}", destLen, destinationHash.length, Math.floorDiv(destLen,2));
-            if (Math.floorDiv(destLen, 2) != destinationHash.length) {
-                log.info("Destination length is invalid, must be {} (hex) hexadecimal characters ({} bytes)", destLen, Math.floorDiv(destLen,2));
-                throw new IllegalArgumentException("Destination length is invalid");
-            }
-        } catch (IllegalArgumentException e) {
-            log.error("Invalid destination entered. Check your input!");
-            System.exit(0);
+        Integer destLen = (TRUNCATED_HASHLENGTH / 8) * 2;  // hex characsters
+        log.debug("destLen: {}, destinationHash length: {}, floorDiv: {}", destLen, destinationHash.length, Math.floorDiv(destLen,2));
+        if (Math.floorDiv(destLen, 2) != destinationHash.length) {
+            log.info("Destination length ({} byte) is invalid, must be {} (hex) hexadecimal characters ({} bytes)", destinationHash.length, destLen, Math.floorDiv(destLen,2));
+            throw new IllegalArgumentException("Destination length is invalid");
         }
 
         log.info("Echo client ready, hit enter to send echo request to {} (Ctrl-C to quit)", Hex.encodeHexString(destinationHash));
@@ -319,11 +314,16 @@ public class EchoApp {
             
             var instance = new EchoApp();
             if (cLine.hasOption("c")) {
-                if (cLine.hasOption("t")) {
-                    Integer t = cLine.getParsedOptionValue("t");
-                    instance.client_setup(Hex.decodeHex(cLine.getOptionValue("c")), t*1000L);
-                } else {    
-                    instance.client_setup(Hex.decodeHex(cLine.getOptionValue("c")), defaultTimeout);
+                try {
+                    if (cLine.hasOption("t")) {
+                        Integer t = cLine.getParsedOptionValue("t");
+                        instance.client_setup(Hex.decodeHex(cLine.getOptionValue("c")), t*1000L);
+                    } else {    
+                        instance.client_setup(Hex.decodeHex(cLine.getOptionValue("c")), defaultTimeout);
+                    }
+                } catch (IllegalArgumentException e) {
+                    log.error("Invalid destination entered. Check your input!");
+                    System.exit(0);
                 }
             } else if (cLine.hasOption("s")) {
                 instance.server_setup();
