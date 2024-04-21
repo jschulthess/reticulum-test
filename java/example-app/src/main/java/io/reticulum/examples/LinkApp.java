@@ -246,28 +246,22 @@ public class LinkApp {
         }
 
         var shouldQuit = false;
-        String inData;
+        String text;
         Packet cPacket;
+        Scanner input = new Scanner( System.in );
         while (isFalse(shouldQuit)) {
             try {
-                Scanner scan = new Scanner( System.in );
-                inData = scan.nextLine();
-                System.out.println("You entered: " + inData );
+                text = input.nextLine();
+                //System.out.println("You entered: " + text );
+                log.info("You entered: {}", text);
                 
                 // check if we should quit the example
-                if (inData.equalsIgnoreCase("quit")) {
+                if (text.equalsIgnoreCase("quit") || text.equalsIgnoreCase("exit")) {
                     shouldQuit = true;
                     serverLink.teardown();
                 }
-                
-                if (inData.equals("quit")) {
-                    shouldQuit = true;
-                    serverLink.teardown();
-                    continue;
-                }
-                
-                if (! inData.isEmpty()) {
-                    var data = inData.getBytes(UTF_8);
+                if (! text.isEmpty()) {
+                    var data = text.getBytes(UTF_8);
                     if (data.length <= LinkConstant.MDU) {
                         Packet testPacket = new Packet(serverLink, data, PacketType.DATA);
                         testPacket.send();
@@ -275,13 +269,13 @@ public class LinkApp {
                         log.info("Cannot send this packet, the data length of {} bytes exceeds link MDU of {} bytes", data.length, LinkConstant.MDU);
                     }
                 }
-                scan.close();
             } catch (Exception e) {
                 log.error("Error sending data over the link: {}", e);
                 shouldQuit = true;
                 serverLink.teardown();
             }
         }
+        input.close();
     }
 
     public Runnable linkEstablished() {
