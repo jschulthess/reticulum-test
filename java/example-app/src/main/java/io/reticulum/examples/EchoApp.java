@@ -166,7 +166,7 @@ public class EchoApp {
         } catch (IOException e) {
             log.error("unable to create Reticulum network", e);
         }
-        
+
         try {
             Integer destLen = (TRUNCATED_HASHLENGTH / 8) * 2;  // hex characsters
             log.debug("destLen: {}, destinationHash length: {}, floorDiv: {}", destLen, destinationHash.length, Math.floorDiv(destLen,2));
@@ -319,7 +319,6 @@ public class EchoApp {
             
             var instance = new EchoApp();
             if (cLine.hasOption("c")) {
-                // TODO: check client value to be a proper hash
                 if (cLine.hasOption("t")) {
                     Integer t = cLine.getParsedOptionValue("t");
                     instance.client_setup(Hex.decodeHex(cLine.getOptionValue("c")), t*1000L);

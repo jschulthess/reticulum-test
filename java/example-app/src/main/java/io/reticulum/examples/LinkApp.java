@@ -370,7 +370,6 @@ public class LinkApp {
         
             var instance = new LinkApp();
             if (cLine.hasOption("c")) {
-                // TODO: check client value to be a proper hash
                 instance.client_setup(Hex.decodeHex(cLine.getOptionValue("c")));
             } else if (cLine.hasOption("s")) {
                 instance.server_setup();
