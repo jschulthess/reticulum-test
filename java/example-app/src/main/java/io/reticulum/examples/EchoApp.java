@@ -136,7 +136,7 @@ public class EchoApp {
             }
         }
 
-        log.info("Received packet from echo client, proof sent, stats: {}", receptionStats);
+        log.info("Received packet from echo client, proof sent - {}", receptionStats);
     }
 
     private class ExampleAnnounceHandler implements AnnounceHandler {
