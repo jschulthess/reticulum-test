@@ -278,19 +278,27 @@ public class LinkApp {
         input.close();
     }
 
-    public Runnable linkEstablished() {
-        // reference to link was set in client_setup
-        Runnable run = new Runnable() {
-            @Override
-            public void run() {
-                // TODO Auto-generated method stub
-            }
-        };
+    //public Runnable linkEstablished() {
+    //    // reference to link was set in client_setup
+    //    Runnable run = new Runnable() {
+    //        @Override
+    //        public void run() {
+    //            // TODO Auto-generated method stub
+    //        }
+    //    };
+    //
+    //    // inform the user that the server is connected
+    //    log.info("Link established with server, enter some text to send, or \"quit\" to quit");
+    //
+    //    return run;
+    //}
 
-        // inform the user that the server is connected
+    public void linkEstablished(Link link) {
+        // We store a reference to the link instance for later use
+        serverLink = link;
+
+        // INform the user that the server is connected
         log.info("Link established with server, enter some text to send, or \"quit\" to quit");
-
-        return run;
     }
 
     public void linkClosed(Link link) {
