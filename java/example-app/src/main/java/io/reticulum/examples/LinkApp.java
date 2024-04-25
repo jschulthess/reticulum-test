@@ -251,6 +251,7 @@ public class LinkApp {
         Scanner input = new Scanner( System.in );
         while (isFalse(shouldQuit)) {
             try {
+                System.out.print("> ");
                 text = input.nextLine();
                 //System.out.println("You entered: " + text );
                 log.info("You entered: {}", text);
