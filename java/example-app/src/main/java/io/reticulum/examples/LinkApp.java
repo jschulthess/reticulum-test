@@ -322,6 +322,7 @@ public class LinkApp {
     public void clientPacketReceived(byte[] message, Packet packet) {
         String text = new String(message, StandardCharsets.UTF_8);
         log.info("Received data on the link: {}", text);
+        System.out.print("> ");
     }
 
     /*********/
