@@ -268,7 +268,10 @@ public class EchoApp {
         }
     }
 
+
+    /*********/
     /** Main */
+    /*********/
     public static void main(String[] args) throws IOException {
         // main to run application directly
 
