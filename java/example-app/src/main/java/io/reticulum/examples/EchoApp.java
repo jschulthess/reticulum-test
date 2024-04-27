@@ -223,7 +223,8 @@ public class EchoApp {
                     // We set the destination to the request_destination
                     // that was just created, and the only data we add
                     // is a random hash.
-                    Packet echoRequest = new Packet(requestDestination, IdentityUtils.getRandomHash(), PacketType.DATA);
+                    //Packet echoRequest = new Packet(requestDestination, IdentityUtils.getRandomHash(), PacketType.DATA);
+                    Packet echoRequest = new Packet(requestDestination, IdentityUtils.getRandomHash());
                     
                     // Send the packet! If the packet is successfully
                     // sent, it will return a PacketReceipt instance.
