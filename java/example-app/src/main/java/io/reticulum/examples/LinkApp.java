@@ -121,7 +121,7 @@ public class LinkApp {
     }
 
     public void clientConnected(Link link) {
-        log.info("Client connected");
+        //log.info("Client connected");
         link.setLinkClosedCallback(this::clientDisconnected);
         link.setPacketCallback(this::serverPacketReceived);
         latestClientLink = link;
@@ -134,11 +134,11 @@ public class LinkApp {
 
     public void serverPacketReceived(byte[] message, Packet packet) {
         String text = new String(message, StandardCharsets.UTF_8);
-        log.info("Received data on the link: {}", text);
+        log.info("Received data on the link: \"{}\"", text);
         // send reply
         String replyText = "I received \""+text+"\" over the link";
         byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
-        Packet reply = new Packet(latestClientLink, replyData, PacketType.DATA);
+        Packet reply = new Packet(latestClientLink, replyData);
         reply.send();
     }
 
@@ -264,7 +264,7 @@ public class LinkApp {
                 if (! text.isEmpty()) {
                     var data = text.getBytes(UTF_8);
                     if (data.length <= LinkConstant.MDU) {
-                        Packet testPacket = new Packet(serverLink, data, PacketType.DATA);
+                        Packet testPacket = new Packet(serverLink, data);
                         testPacket.send();
                     } else {
                         log.info("Cannot send this packet, the data length of {} bytes exceeds link MDU of {} bytes", data.length, LinkConstant.MDU);
