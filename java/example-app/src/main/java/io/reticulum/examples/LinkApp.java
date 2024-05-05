@@ -48,7 +48,7 @@ public class LinkApp {
     private static final String APP_NAME = "example_utilities";
     Reticulum reticulum;
     static final String defaultConfigPath = new String(".reticulum");
-    Identity server_identity;
+    Identity serverIdentity;
     Transport transport;
     public Destination destination1, destination2;
     public Link latestClientLink;
@@ -68,19 +68,18 @@ public class LinkApp {
         // create identity either from file or new (creating new keys)
         var serverIdentityPath = reticulum.getStoragePath().resolve("identities/"+APP_NAME);
         if (Files.isReadable(serverIdentityPath)) {
-            server_identity = Identity.fromFile(serverIdentityPath);
+            serverIdentity = Identity.fromFile(serverIdentityPath);
             log.info("server identity loaded from file {}", serverIdentityPath.toString());
         } else {
-            server_identity = new Identity();
+            serverIdentity = new Identity();
             log.info("new server identity created dynamically.");
         }
-        //log.debug("Server Identity: {}", server_identity.toString());
 
         // We create a destination that clients can connect to. We
         // want clients to create links to this destination, so we
         // need to create a "single" destination type.
         destination1 = new Destination(
-            server_identity,
+            serverIdentity,
             Direction.IN,
             DestinationType.SINGLE,
             APP_NAME,
@@ -91,13 +90,6 @@ public class LinkApp {
         // We configure a function that will get called every time
         // a new client creates a link to this destination.
         destination1.setLinkEstablishedCallback(this::clientConnected);
-
-        //// create a custom announce handler instance
-        //var announceHandler = new ExampleAnnounceHandler();
-        //// register announce handler
-        //transport = Transport.getInstance();
-        //transport.registerAnnounceHandler(announceHandler);
-        //log.debug("announce handlers: {}", transport.getAnnounceHandlers());
 
         serverLoop(destination1);
     }
@@ -142,35 +134,11 @@ public class LinkApp {
         reply.send();
     }
 
-    //private class ExampleAnnounceHandler implements AnnounceHandler {
-    //    @Override
-    //    public String getAspectFilter() {
-    //        log.info("getAspectFilter called.");
-    //        //return APP_NAME;
-    //        return null;
-    //    }
-    //    
-    //    @Override
-    //    public void receivedAnnounce(byte[] destinationHash, Identity announcedIdentity, byte[] appData) {
-    //        log.info("Received an announce from {}", Hex.encodeHexString(destinationHash));
-    //        //log.info("Received an announce from (raw) {}", destinationHash);
-    //        
-    //        if (appData != null) {
-    //            log.info("The announce contained the following app data: {}", new String(appData));
-    //        }
-    //    }
-    //}
-
     /************/
     /** Client **/
     /************/
     private void client_setup(byte[] destinationHash) {
-        try {
-            reticulum = new Reticulum(defaultConfigPath);
-        } catch (IOException e) {
-            log.error("unable to create Reticulum network", e);
-        }
-
+        // This initialisation is executed when the user chooses to run as a client
         Integer destLen = (TRUNCATED_HASHLENGTH / 8) * 2;  // hex characsters
         log.debug("destLen: {}, destinationHash length: {}, floorDiv: {}", destLen, destinationHash.length, Math.floorDiv(destLen,2));
         if (Math.floorDiv(destLen, 2) != destinationHash.length) {
@@ -178,13 +146,18 @@ public class LinkApp {
             throw new IllegalArgumentException("Destination length is invalid");
         }
 
+        // We must first initialise Reticulum
+        try {
+            reticulum = new Reticulum(defaultConfigPath);
+        } catch (IOException e) {
+            log.error("unable to create Reticulum network", e);
+        }
+
         String inData;
-        Identity serverIdentity;
         Destination serverDestination;
         Link link;
-        //Scanner scan = new Scanner( System.in );
 
-        // check if we know the destination
+        // Check if we know the destination
         if (isFalse(Transport.getInstance().hasPath(destinationHash))) {
             log.info("Destination is not yet known. Requesting path and waiting for announce to arrive...");
             Transport.getInstance().requestPath(destinationHash);
@@ -199,7 +172,8 @@ public class LinkApp {
 
         //log.info("Echo client ready, hit enter to establish Link to {} (Ctrl-C to quit)", Hex.encodeHexString(destinationHash));
         //inData = scan.nextLine();
-        // recall server identity and inform user that we'll begin connecting
+
+        // Recall server identity and inform user that we'll begin connecting
         serverIdentity = recall(destinationHash);
         log.debug("client - serverIdentity: {}", serverIdentity);
 
@@ -214,12 +188,13 @@ public class LinkApp {
             "linkexample"
         );
 
-        log.info("server destination (recalled on client, direction.OUT): * {} *", serverDestination.getHexHash());
+        log.info("client-side server destination created (direction.OUT): * {} *", serverDestination.getHexHash());
 
-        // and create a link
+        // And create a link
         link = new Link(serverDestination);
+        log.info("ccc - serverDestination type: {}, direction: {}", serverDestination.getType(), serverDestination.getDirection());
 
-        // we set a callback that will be executed
+        // We set a callback that will be executed
         // every time a packet is received over the link
         link.setPacketCallback(this::clientPacketReceived);
 
@@ -261,7 +236,7 @@ public class LinkApp {
                     shouldQuit = true;
                     serverLink.teardown();
                 }
-                if (! text.isEmpty()) {
+                if (isFalse(text.isEmpty())) {
                     var data = text.getBytes(UTF_8);
                     if (data.length <= LinkConstant.MDU) {
                         Packet testPacket = new Packet(serverLink, data);
@@ -278,21 +253,6 @@ public class LinkApp {
         }
         input.close();
     }
-
-    //public Runnable linkEstablished() {
-    //    // reference to link was set in client_setup
-    //    Runnable run = new Runnable() {
-    //        @Override
-    //        public void run() {
-    //            // TODO Auto-generated method stub
-    //        }
-    //    };
-    //
-    //    // inform the user that the server is connected
-    //    log.info("Link established with server, enter some text to send, or \"quit\" to quit");
-    //
-    //    return run;
-    //}
 
     public void linkEstablished(Link link) {
         // We store a reference to the link instance for later use
@@ -330,7 +290,7 @@ public class LinkApp {
     /*********/
     public static void main(String[] args) throws IOException {
         // main to run application directly
-        
+
         String cmdUsage = new String("run_echo.sh [-s|-c HASH]");
         
         // define options
@@ -393,8 +353,6 @@ public class LinkApp {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
         //// code without command line parser
         //var instance = new LinkApp();
         //if ("s".equals(args[0])) {
