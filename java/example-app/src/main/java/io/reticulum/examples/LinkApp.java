@@ -85,7 +85,7 @@ public class LinkApp {
             APP_NAME,
             "linkexample"
         );
-        log.info("destination1 hash: "+destination1.getHexHash());
+        //log.info("destination1 hash: "+destination1.getHexHash());
 
         // We configure a function that will get called every time
         // a new client creates a link to this destination.
@@ -140,7 +140,7 @@ public class LinkApp {
     private void client_setup(byte[] destinationHash) {
         // This initialisation is executed when the user chooses to run as a client
         Integer destLen = (TRUNCATED_HASHLENGTH / 8) * 2;  // hex characsters
-        log.debug("destLen: {}, destinationHash length: {}, floorDiv: {}", destLen, destinationHash.length, Math.floorDiv(destLen,2));
+        //log.debug("destLen: {}, destinationHash length: {}, floorDiv: {}", destLen, destinationHash.length, Math.floorDiv(destLen,2));
         if (Math.floorDiv(destLen, 2) != destinationHash.length) {
             log.info("Destination length ({} byte) is invalid, must be {} (hex) hexadecimal characters ({} bytes)", destinationHash.length, destLen, Math.floorDiv(destLen,2));
             throw new IllegalArgumentException("Destination length is invalid");
@@ -153,7 +153,7 @@ public class LinkApp {
             log.error("unable to create Reticulum network", e);
         }
 
-        String inData;
+        //var inData = new String();
         Destination serverDestination;
         Link link;
 
@@ -170,9 +170,6 @@ public class LinkApp {
             }
         }
 
-        //log.info("Echo client ready, hit enter to establish Link to {} (Ctrl-C to quit)", Hex.encodeHexString(destinationHash));
-        //inData = scan.nextLine();
-
         // Recall server identity and inform user that we'll begin connecting
         serverIdentity = recall(destinationHash);
         log.debug("client - serverIdentity: {}", serverIdentity);
@@ -188,11 +185,11 @@ public class LinkApp {
             "linkexample"
         );
 
-        log.info("client-side server destination created (direction.OUT): * {} *", serverDestination.getHexHash());
+        //log.info("client-side server destination created (direction.OUT): * {} *", serverDestination.getHexHash());
 
         // And create a link
         link = new Link(serverDestination);
-        log.info("ccc - serverDestination type: {}, direction: {}", serverDestination.getType(), serverDestination.getDirection());
+        //log.info("ccc - serverDestination: {}, destination type: {}, direction: {}", serverDestination.getHexHash(), serverDestination.getType(), serverDestination.getDirection());
 
         // We set a callback that will be executed
         // every time a packet is received over the link
@@ -207,12 +204,15 @@ public class LinkApp {
         // for the user to interact with the example
         clientLoop();
 
+        // Once the client loop is done, exit gracefully
+        System.exit(0);
+
     }
 
     public void clientLoop() {
 
         // wait for link to become active (maybe give some feedback)
-        while (isNull(serverLink)) {
+        while (isNull(this.serverLink)) {
             try {
                 TimeUnit.MILLISECONDS.sleep(500);
             } catch (InterruptedException e) {
@@ -220,9 +220,9 @@ public class LinkApp {
             }
         }
 
-        var shouldQuit = false;
+        Boolean shouldQuit = false;
         String text;
-        Packet cPacket;
+        //Packet cPacket;
         Scanner input = new Scanner( System.in );
         while (isFalse(shouldQuit)) {
             try {
@@ -235,8 +235,9 @@ public class LinkApp {
                 if (text.equalsIgnoreCase("quit") || text.equalsIgnoreCase("exit")) {
                     shouldQuit = true;
                     serverLink.teardown();
+                    log.info("Link tear down complete");
                 }
-                if (isFalse(text.isEmpty())) {
+                else if (isFalse(text.isEmpty())) {
                     var data = text.getBytes(UTF_8);
                     if (data.length <= LinkConstant.MDU) {
                         Packet testPacket = new Packet(serverLink, data);
@@ -256,7 +257,7 @@ public class LinkApp {
 
     public void linkEstablished(Link link) {
         // We store a reference to the link instance for later use
-        serverLink = link;
+        this.serverLink = link;
 
         // INform the user that the server is connected
         log.info("Link established with server, enter some text to send, or \"quit\" to quit");
@@ -266,9 +267,9 @@ public class LinkApp {
         if (link.getTeardownReason() == TIMEOUT) {
             log.info("The link timed out, exiting now");
         } else if (link.getTeardownReason() == DESTINATION_CLOSED) {
-            log.info("The link was closed by the server, exiting now");
+            log.info("Link closed callback: The link was closed by the server.");
         } else {
-            log.info("Link closed, exiting now");
+            log.info("Link closed callback.");
         }
 
         reticulum.exitHandler();
