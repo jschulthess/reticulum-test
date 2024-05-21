@@ -275,12 +275,20 @@ public class EchoApp {
     }
 
     public void packetDelivered(PacketReceipt receipt) {
+        var rttString = new String("");
         if (receipt.getStatus() == PacketReceiptStatus.DELIVERED) {
-            // TODO: implement rtt from receipt
-            log.info("Valid reply received from {}", receipt.getDestination().getHash());
-        } else {
-            // TODO: implement rtt from receipt
-            log.info("NO valid reply, receipt status: {}", receipt.getStatus());
+            var rtt = receipt.getRtt();
+            if (rtt >= 1) {
+                rtt = Math.round(rtt);
+                rttString = String.format("%3f seconds", rtt);
+            } else {
+                rtt = Math.round(rtt*1000);
+                rttString = String.format("%3f miliseconds", rtt);
+            }
+            log.info("Valid reply received from {}, round-trip time is {}",
+              receipt.getDestination().getHash(), rttString);
+        //} else {
+        //    log.info("NO valid reply, receipt status: {}", receipt.getStatus());
         }
     }
 
