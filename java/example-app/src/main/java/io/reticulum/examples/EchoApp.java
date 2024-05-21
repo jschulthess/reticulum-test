@@ -25,6 +25,7 @@ import java.nio.file.Files;
 
 //import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.Scanner;
@@ -34,7 +35,6 @@ import org.apache.commons.codec.binary.Hex;
 
 // for cli options
 import org.apache.commons.cli.*;
-import org.apache.commons.cli.ParseException;
 
 
 @Slf4j
@@ -43,7 +43,7 @@ public class EchoApp {
     Reticulum reticulum;
     Identity server_identity;
     Transport transport;
-    public Destination destination1, destination2;
+    public Destination echoDestination;
     //static Logger log = Logger.getLogger(EchoApp.class.getName());
     //private static final Logger log = LoggerFactory.getLogger(EchoApp.class);
 
@@ -52,7 +52,7 @@ public class EchoApp {
     /************/
     /** Server **/
     /************/
-    private void server_setup() {
+    private void server() {
 
         try {
             reticulum = new Reticulum(defaultConfigPath);
@@ -71,7 +71,7 @@ public class EchoApp {
         }
         //log.debug("Server Identity: {}", server_identity.toString());
 
-        destination1 = new Destination(
+        echoDestination = new Destination(
             server_identity,
             Direction.IN,
             DestinationType.SINGLE,
@@ -79,18 +79,18 @@ public class EchoApp {
             "echo",
             "request"
         );
-        log.info("destination1 hash: "+destination1.getHexHash());
+        log.info("echoDestination hash: "+echoDestination.getHexHash());
 
         // We configure the destination to automatically prove all
         // packets addressed to it. By doing this, RNS will automatically
         // generate a proof for each incoming packet and transmit it
         // back to the sender of that packet.
-        destination1.setProofStrategy(ProofStrategy.PROVE_ALL);
+        echoDestination.setProofStrategy(ProofStrategy.PROVE_ALL);
 
         // Tell the destination which function in our program to
         // run when a packet is received. We do this so we can
         // print a log message when the server receives a request
-        destination1.setPacketCallback(this::server_callback);
+        echoDestination.setPacketCallback(this::serverCallback);
 
         // create a custom announce handler instance
         // note: announce handler not strictly necessary for this example
@@ -102,16 +102,17 @@ public class EchoApp {
 
         // Everything's ready!
         // Let's Wait for client requests or user input
-        announceLoop(destination1);
+        announceLoop(echoDestination);
     }
-
-    //public void server_run() {
-    //    announceLoop(destination1);
-    //}
 
     public void announceLoop(Destination destination) {
         log.info("***> Echo server * {} * running, hit enter to manually send an announce (Ctrl-C to quit)", Hex.encodeHexString(destination.getHash()));
         String inData;
+
+        // We enter a loop that returns until the user exits.
+        // If the user hits enter, we will announce our server
+        // destination on the network, which will let clients
+        // know how to create messages directed towards it.
         while (true) {
             Scanner scan = new Scanner( System.in );
             inData = scan.nextLine();
@@ -120,25 +121,31 @@ public class EchoApp {
         }
     }
 
-    public void server_callback (byte[] message, Packet packet) {
+    public void serverCallback (byte[] message, Packet packet) {
+
+        // Tell the user that we received an echo request, and
+        // that we are going to send a reply to the requester.
+        // Sending the proof is handled automatically, since we
+        // set up the destination to prove all incoming packets.
+
         var receptionStats = new String("");
         if (reticulum.isConnectedToSharedInstance()) {
             //var receptionRssi = Reticulum.getPacketRssi(packet.getPacketHash());
             //var receptionSnr = Reticulum.getPacketSnr(packet.getPacketHash());
-            //if (!isNull(receptionRssi)) {
+            //if (nonNull(receptionRssi)) {
             //    receptionStats += " [RSSI "+receptionRssi.toString()+" dbm]";
             //}
-            //if (!isNull(receptionSnr)) {
+            //if (nonNull(receptionSnr)) {
             //    receptionStats += " [SNR "+receptionSnr.toString()+" dBm]";
             //}
             log.info("shared instance - stats n/a (not implemented)");
         } else {
             var reception_rssi = packet.getRssi();
-            if (!isNull(reception_rssi)) {
+            if (nonNull(reception_rssi)) {
                 receptionStats += " [RSSI"+reception_rssi.toString()+" dbm]";
                 //System.out.println("RSSI "+reception_rssi.toString()+" dBm");
             }
-            if (!isNull(packet.getSnr())) {
+            if (nonNull(packet.getSnr())) {
                 receptionStats += " [SNR"+packet.getSnr().toString()+" dB]";
                 //System.out.println("RSSI "+packet.getSnr().toString()+" dBm");
             }
@@ -147,65 +154,76 @@ public class EchoApp {
         log.info("Received packet from echo client, proof sent - {}", receptionStats);
     }
 
-    private class ExampleAnnounceHandler implements AnnounceHandler {
-        @Override
-        public String getAspectFilter() {
-            log.debug("getAspectFilter called.");
-            return null;
-        }
-        
-        @Override
-        public void receivedAnnounce(byte[] destinationHash, Identity announcedIdentity, byte[] appData) {
-            log.info("Received an announce from {}", Hex.encodeHexString(destinationHash));
-            
-            if (appData != null) {
-                log.info("The announce contained the following app data: {}", new String(appData));
-            }
-        }
-    }
+    //private class ExampleAnnounceHandler implements AnnounceHandler {
+    //    @Override
+    //    public String getAspectFilter() {
+    //        log.debug("getAspectFilter called.");
+    //        return null;
+    //    }
+    //    
+    //    @Override
+    //    public void receivedAnnounce(byte[] destinationHash, Identity announcedIdentity, byte[] appData) {
+    //        log.info("Received an announce from {}", Hex.encodeHexString(destinationHash));
+    //        
+    //        if (appData != null) {
+    //            log.info("The announce contained the following app data: {}", new String(appData));
+    //        }
+    //    }
+    //}
 
     /************/
     /** Client **/
     /************/
-    private void client_setup(byte[] destinationHash, Long timeout) {
+    private void client(byte[] destinationHash, Long timeout) {
         
+        // We need a binary representation of the destination hash
+        // that was entered on the command line
+        Integer destLen = (TRUNCATED_HASHLENGTH / 8) * 2;  // hex characsters
+        //log.debug("destLen: {}, destinationHash length: {}, floorDiv: {}", destLen, destinationHash.length, Math.floorDiv(destLen,2));
+        if (Math.floorDiv(destLen, 2) != destinationHash.length) {
+            log.info("Destination length ({} byte) is invalid, must be {} (hex) hexadecimal characters ({} bytes)", destinationHash.length, destLen, Math.floorDiv(destLen,2));
+            throw new IllegalArgumentException("Destination length is invalid");
+        }
+
+        // We must initialise Reticulum
         try {
             reticulum = new Reticulum(defaultConfigPath);
         } catch (IOException e) {
             log.error("unable to create Reticulum network", e);
         }
 
-        Integer destLen = (TRUNCATED_HASHLENGTH / 8) * 2;  // hex characsters
-        log.debug("destLen: {}, destinationHash length: {}, floorDiv: {}", destLen, destinationHash.length, Math.floorDiv(destLen,2));
-        if (Math.floorDiv(destLen, 2) != destinationHash.length) {
-            log.info("Destination length ({} byte) is invalid, must be {} (hex) hexadecimal characters ({} bytes)", destinationHash.length, destLen, Math.floorDiv(destLen,2));
-            throw new IllegalArgumentException("Destination length is invalid");
-        }
-
-        log.info("Echo client ready, hit enter to send echo request to {} (Ctrl-C to quit)", Hex.encodeHexString(destinationHash));
+        log.info("Echo client ready, hit enter to send echo request to {} (Ctrl-C to quit)",
+                 Hex.encodeHexString(destinationHash));
 
         String inData;
         Identity serverIdentity;
         Destination requestDestination;
         Scanner scan = new Scanner( System.in );
 
-        //try {
+        try {
             while (true) {
                 inData = scan.nextLine();
                 System.out.println("You entered: " + inData );
 
-                // To address the server, we need to know it's public
-                // key, so we check if Reticulum knows this destination.
-                // This is done by calling the "recall" method of the
-                // Identity module. If the destination is known, it will
-                // return an Identity instance that can be used in
-                // outgoing destinations.
-                serverIdentity = recall(destinationHash);
-                log.debug("client - serverIdentity: {}", serverIdentity);
+                // Let's first check if RNS knows a path to the destination.
+                // If it does, we'll load the server identity and create a packet
+                if (Transport.getInstance().hasPath(destinationHash)) {
 
-                // note: Transport.java doesn't have a "hasPath" method (like Python).
-                //       We can check the recall result (serverIdentity) instead.
-                if (!isNull(serverIdentity)) {
+                    // To address the server, we need to know it's public
+                    // key, so we check if Reticulum knows this destination.
+                    // This is done by calling the "recall" method of the
+                    // Identity module. If the destination is known, it will
+                    // return an Identity instance that can be used in
+                    // outgoing destinations.
+                    serverIdentity = recall(destinationHash);
+                    //log.debug("client - serverIdentity: {}", serverIdentity);
+
+                    // We got the correct identity instance from the
+                    // recall method, so let's create an outgoing
+                    // destination. We use the naming convention:
+                    // example_utilities.echo.request
+                    // This matches the naming we specified in the
+                    // server part of the code.
                     //log.info("client - destination hash (input): {}", Hex.encodeHexString(destinationHash));
                     requestDestination = new Destination(
                         serverIdentity,
@@ -216,8 +234,8 @@ public class EchoApp {
                         "request"
                     );
                     
-                    log.info("server destination (recalled on client, direction.OUT): * {} *", requestDestination.getHexHash());
-                    log.info("client - sending packet to (server, IN) {} from (client, OUT): {}", Hex.encodeHexString(destinationHash), requestDestination.getHexHash());
+                    //log.info("server destination (recalled on client, direction.OUT): * {} *", requestDestination.getHexHash());
+                    //log.info("client - sending packet to (server, IN) {} from (client, OUT): {}", Hex.encodeHexString(destinationHash), requestDestination.getHexHash());
                     
                     // The destination is ready, so let's create a packet.
                     // We set the destination to the request_destination
@@ -230,40 +248,43 @@ public class EchoApp {
                     // sent, it will return a PacketReceipt instance.
                     PacketReceipt packetReceipt = echoRequest.send();
                     
-                    if (!isNull(timeout) && (timeout > 0L)) {
-                        echoRequest.setCreateReceipt(true);
+                    if (nonNull(timeout) && (timeout > 0L)) {
                         packetReceipt.setTimeout(timeout);
-                        packetReceipt.setTimeoutCallback(this::packetTimeoutCallback);
+                        packetReceipt.setTimeoutCallback(this::packetTimedOut);
                     }
                     
                     // We can then set a delivery callback on the receipt.
                     // This will get automatically called when a proof for
                     // this specific packet is received from the destination.
-                    packetReceipt.setDeliveryCallback(this::packetDeliveredCallback);
+                    packetReceipt.setDeliveryCallback(this::packetDelivered);
 
                     // Tell the user that the echo request was sent
                     log.info("Sent echo request to {}", Hex.encodeHexString(destinationHash));
                 } else {
-                    log.info("Destination is not yet known. (recall returned serverIdentity {})", serverIdentity);
+                    // If we do not know this destination, tell the
+                    // user to wait for an announce to arrive.
+                    log.info("Destination is not yet known.");
                     log.info("=> Hit enter on the server side to trigger an announcement, then hit enter here again.");
-                    // commented out because of "non-static method called in static context" problem.
-                    //Transport.requestPath(destinationHash);
+                    Transport.getInstance().requestPath(destinationHash);
                 }
             }
-        //} catch (Exception e) {
-        //    scan.close();
-        //}
+        } catch (Exception e) {
+            log.info("Exception caught: {}", e);
+            scan.close();
+        }
     }
 
-    public void packetDeliveredCallback(PacketReceipt receipt) {
+    public void packetDelivered(PacketReceipt receipt) {
         if (receipt.getStatus() == PacketReceiptStatus.DELIVERED) {
+            // TODO: implement rtt from receipt
             log.info("Valid reply received from {}", receipt.getDestination().getHash());
         } else {
+            // TODO: implement rtt from receipt
             log.info("NO valid reply, receipt status: {}", receipt.getStatus());
         }
     }
 
-    public void packetTimeoutCallback(PacketReceipt receipt) {
+    public void packetTimedOut(PacketReceipt receipt) {
         if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
             log.info("packet {} timed out", Hex.encodeHexString(receipt.getHash()));
         }
@@ -329,16 +350,16 @@ public class EchoApp {
                 try {
                     if (cLine.hasOption("t")) {
                         Integer t = cLine.getParsedOptionValue("t");
-                        instance.client_setup(Hex.decodeHex(cLine.getOptionValue("c")), t*1000L);
+                        instance.client(Hex.decodeHex(cLine.getOptionValue("c")), t*1000L);
                     } else {    
-                        instance.client_setup(Hex.decodeHex(cLine.getOptionValue("c")), defaultTimeout);
+                        instance.client(Hex.decodeHex(cLine.getOptionValue("c")), defaultTimeout);
                     }
                 } catch (IllegalArgumentException e) {
                     log.error("Invalid destination entered. Check your input!");
                     System.exit(0);
                 }
             } else if (cLine.hasOption("s")) {
-                instance.server_setup();
+                instance.server();
             } else {
                 formatter.printHelp(cmdUsage, options);
             }
@@ -355,7 +376,7 @@ public class EchoApp {
         //// code without command line parser
         //var instance = new EchoApp();
         //if ("s".equals(args[0])) {
-        //    instance.server_setup();
+        //    instance.server();
         //    //instance.server_run();
         //} else if ("c".equals(args[0])) {
         //    if (args.length <= 1) {
@@ -365,7 +386,7 @@ public class EchoApp {
         //        log.info("client - cli inputs: {}, {}", args[0], args[1]);
         //        try {
         //            //log.info("client - decoded hex sting input[1]: {}", Hex.decodeHex(args[1]));
-        //            instance.client_setup(Hex.decodeHex(args[1]), 8*1000L); // timeout: 8s
+        //            instance.client(Hex.decodeHex(args[1]), 8*1000L); // timeout: 8s
         //        } catch (DecoderException e) {
         //            log.error("DecoderException: {}", e.fillInStackTrace());
         //        }
