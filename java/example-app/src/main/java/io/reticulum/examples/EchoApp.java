@@ -149,9 +149,10 @@ public class EchoApp {
                 receptionStats += " [SNR"+packet.getSnr().toString()+" dB]";
                 //System.out.println("RSSI "+packet.getSnr().toString()+" dBm");
             }
+            log.info("non-shared instance - reception_rssi: {}", reception_rssi);
         }
 
-        log.info("Received packet from echo client, proof sent - {}", receptionStats);
+        log.info("Received packet from echo client, proof sent {}", receptionStats);
     }
 
     //private class ExampleAnnounceHandler implements AnnounceHandler {
@@ -247,6 +248,7 @@ public class EchoApp {
                     // Send the packet! If the packet is successfully
                     // sent, it will return a PacketReceipt instance.
                     PacketReceipt packetReceipt = echoRequest.send();
+                    log.info("aaa - packetReceipt: {}", packetReceipt);
                     
                     if (nonNull(timeout) && (timeout > 0L)) {
                         packetReceipt.setTimeout(timeout);
@@ -276,20 +278,22 @@ public class EchoApp {
 
     public void packetDelivered(PacketReceipt receipt) {
         var rttString = new String("");
+        //log.info("packet delivered callback, receipt: {}", receipt);
         if (receipt.getStatus() == PacketReceiptStatus.DELIVERED) {
-            var rtt = receipt.getRtt();
-            if (rtt >= 1) {
-                rtt = Math.round(rtt);
-                rttString = String.format("%3f seconds", rtt);
+            var rtt = receipt.getRtt();    // rtt (Java) is in miliseconds
+            //log.info("qqp - packetDelivered - rtt: {}", rtt);
+            if (rtt >= 1000) {
+                rtt = Math.round(rtt / 1000);
+                rttString = String.format("%d seconds", rtt);
             } else {
-                rtt = Math.round(rtt*1000);
-                rttString = String.format("%3f miliseconds", rtt);
+                rttString = String.format("%d miliseconds", rtt);
             }
             log.info("Valid reply received from {}, round-trip time is {}",
-              receipt.getDestination().getHash(), rttString);
-        //} else {
-        //    log.info("NO valid reply, receipt status: {}", receipt.getStatus());
+                    Hex.encodeHexString(receipt.getDestination().getHash()), rttString);
         }
+        //else {
+        //    log.info("NO valid reply, receipt status: {}", receipt.getStatus());
+        //}
     }
 
     public void packetTimedOut(PacketReceipt receipt) {
