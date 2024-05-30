@@ -8,11 +8,11 @@ import io.reticulum.destination.Direction;
 import io.reticulum.destination.ProofStrategy;
 import io.reticulum.identity.Identity;
 import io.reticulum.packet.Packet;
-import io.reticulum.packet.PacketContextType;
-import io.reticulum.packet.PacketType;
+//import io.reticulum.packet.PacketContextType;
+//import io.reticulum.packet.PacketType;
 import io.reticulum.packet.PacketReceipt;
 import io.reticulum.packet.PacketReceiptStatus;
-import io.reticulum.transport.AnnounceHandler;
+//import io.reticulum.transport.AnnounceHandler;
 import static io.reticulum.identity.IdentityKnownDestination.recall;
 import io.reticulum.utils.IdentityUtils;
 import static io.reticulum.constant.ReticulumConstant.TRUNCATED_HASHLENGTH;
@@ -24,9 +24,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 //import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Objects.isNull;
+//import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.StringUtils.isBlank;
+//import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.Scanner;
 

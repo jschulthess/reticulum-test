@@ -5,21 +5,21 @@ import io.reticulum.Transport;
 import io.reticulum.destination.Destination;
 import io.reticulum.destination.DestinationType;
 import io.reticulum.destination.Direction;
-import io.reticulum.destination.ProofStrategy;
+//import io.reticulum.destination.ProofStrategy;
 import io.reticulum.identity.Identity;
 import io.reticulum.link.Link;
 import io.reticulum.constant.LinkConstant;
 import io.reticulum.packet.Packet;
-import io.reticulum.packet.PacketContextType;
-import io.reticulum.packet.PacketType;
-import io.reticulum.packet.PacketReceipt;
-import io.reticulum.packet.PacketReceiptStatus;
-import io.reticulum.transport.AnnounceHandler;
+//import io.reticulum.packet.PacketContextType;
+//import io.reticulum.packet.PacketType;
+//import io.reticulum.packet.PacketReceipt;
+//import io.reticulum.packet.PacketReceiptStatus;
+//import io.reticulum.transport.AnnounceHandler;
 import static io.reticulum.link.TeardownSession.DESTINATION_CLOSED;
-import static io.reticulum.link.TeardownSession.INITIATOR_CLOSED;
+//import static io.reticulum.link.TeardownSession.INITIATOR_CLOSED;
 import static io.reticulum.link.TeardownSession.TIMEOUT;
 import static io.reticulum.identity.IdentityKnownDestination.recall;
-import io.reticulum.utils.IdentityUtils;
+//import io.reticulum.utils.IdentityUtils;
 import static io.reticulum.constant.ReticulumConstant.TRUNCATED_HASHLENGTH;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,16 +29,16 @@ import java.nio.file.Files;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.isNull;
-import static org.apache.commons.lang3.BooleanUtils.FALSE;
+//import static org.apache.commons.lang3.BooleanUtils.FALSE;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
-import static org.apache.commons.lang3.StringUtils.isBlank;
+//import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.codec.DecoderException;
+//import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.bouncycastle.util.encoders.UTF8;
+//import org.bouncycastle.util.encoders.UTF8;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.cli.ParseException;
@@ -184,8 +184,6 @@ public class LinkApp {
             APP_NAME,
             "linkexample"
         );
-
-        //log.info("client-side server destination created (direction.OUT): * {} *", serverDestination.getHexHash());
 
         // And create a link
         link = new Link(serverDestination);
