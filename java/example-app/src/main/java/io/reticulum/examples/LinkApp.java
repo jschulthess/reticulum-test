@@ -29,6 +29,7 @@ import java.nio.file.Files;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 //import static org.apache.commons.lang3.BooleanUtils.FALSE;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 //import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -98,7 +99,7 @@ public class LinkApp {
         var inData = new String();
         log.info("***> Link server * {} * running, waiting for a connection", destination.getHexHash());
 
-        log.info("Hit enter to manually send an announce (Ctrl-C to quit)");
+        log.info("Hit enter to manually send an announce (Ctrl-C or 'quit' to quit)");
 
         Scanner scan = new Scanner( System.in );
         while (true) {
@@ -106,10 +107,18 @@ public class LinkApp {
                 inData = scan.nextLine();
                 destination.announce();
                 log.info("Sent announce from {} ({})", destination.getHexHash(), destination.getName());
+                if (inData.equals("quit")) {
+                    if (nonNull(latestClientLink)) {
+                        latestClientLink.teardown();
+                    }
+                    scan.close();
+                    break;
+                }
             } catch (Exception e) {
                 scan.close();
             }
         }
+        System.exit(0);
     }
 
     public void clientConnected(Link link) {
