@@ -51,7 +51,7 @@ public class LinkApp {
     static final String defaultConfigPath = new String(".reticulum");
     Identity serverIdentity;
     Transport transport;
-    public Destination destination1, destination2;
+    public Destination destination1;
     public Link latestClientLink;
     public Link serverLink;
     public Link clientLink;
@@ -299,7 +299,7 @@ public class LinkApp {
     public static void main(String[] args) throws IOException {
         // main to run application directly
 
-        String cmdUsage = new String("run_echo.sh [-s|-c HASH]");
+        String cmdUsage = new String("run_link.sh [-s|-c HASH]");
         
         // define options
         Options options = new Options();
