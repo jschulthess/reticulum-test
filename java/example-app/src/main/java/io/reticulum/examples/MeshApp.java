@@ -115,12 +115,15 @@ public class MeshApp {
         while (true) {
             try {
                 inData = scan.nextLine();
-                destination.announce();
                 log.info("Sent announce from {} ({})", destination.getHexHash(), destination.getName());
-                if (inData.equals("quit")) {
+                if (inData.equalsIgnoreCase("quit")) {
                     shutdown();
                     scan.close();
                     break;
+                } else if (inData.isEmpty()) {
+                    destination.announce("mesh node".getBytes());
+                } else {
+                    log.info("sending text \"{}\" to peers (TODO: implement)", inData);
                 }
             } catch (Exception e) {
                 scan.close();
@@ -198,7 +201,10 @@ public class MeshApp {
             for (RNSPeer p : lps) {
                 // TODO: which parts of the peer need to be checked for equality ?
                 if (Arrays.equals(p.getDestinationHash(), destinationHash)) {
-                    log.info("found peer matching destinationHash");
+                    log.info("peer exists - found peer matching destinationHash");
+                    if (nonNull(p.getPeerLink())) {
+                        log.info("peer link: {}, status: {}", p.getPeerLink().getStatus());
+                    }
                     peerExists = true;
                     break;
                 }
