@@ -195,18 +195,17 @@ public class MeshApp {
             }
 
             List<RNSPeer> lps =  getLinkedPeers();
-            RNSPeer peer = null;
             for (RNSPeer p : lps) {
-                // TODO: which parts of the peer need to be checked for equality ???
+                // TODO: which parts of the peer need to be checked for equality ?
                 if (Arrays.equals(p.getDestinationHash(), destinationHash)) {
                     log.info("found peer matching destinationHash");
-                    peer = p;
+                    peerExists = true;
                     break;
                 }
             }
-            if (peer == null) {
+            //if (peer == null) {
+            if (!peerExists) {
                 RNSPeer newPeer = new RNSPeer(destinationHash);
-                //newPeer.init(destinationHash);
                 newPeer.setDestinationIdentity(announcedIdentity);
                 newPeer.setIsInitiator(true);
                 lps.add(newPeer);
@@ -246,7 +245,7 @@ public class MeshApp {
             lastAccessTimestamp = null;
             isInitiator = true;
 
-            peerLink = new Link(peerDestination);
+            this.peerLink = new Link(peerDestination);
 
             this.peerLink.setLinkEstablishedCallback(this::linkEstablished);
             this.peerLink.setLinkClosedCallback(this::linkClosed);
@@ -265,8 +264,7 @@ public class MeshApp {
         }
 
         public void linkEstablished(Link link) {
-            peerLink = link;
-            peerLink.setLinkClosedCallback(this::linkClosed);
+            link.setLinkClosedCallback(this::linkClosed);
             log.info("Link {} established with peer: hash - {}, identity: {}", peerLink, destinationHash, destinationIdentity);
         }
 
