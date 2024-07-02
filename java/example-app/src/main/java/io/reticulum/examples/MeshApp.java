@@ -133,6 +133,7 @@ public class MeshApp {
         isShuttingDown = true;
         log.info("shutting down Reticulum");
         for (RNSPeer p: linkedPeers) {
+            log.info("shutting down peer: {}", p);
             p.shutdown();
         }
         reticulum.exitHandler();
@@ -219,7 +220,7 @@ public class MeshApp {
     /** Peer   **/
     /************/
     @Data
-    private static class RNSPeer {
+    private class RNSPeer {
         byte[] destinationHash;
         Destination peerDestination;
         Identity destinationIdentity;
@@ -254,6 +255,7 @@ public class MeshApp {
 
         public void shutdown() {
             if (nonNull(peerLink)) {
+                log.info("shutdown - peerLink: {}, status: {}", peerLink, peerLink.getStatus());
                 if (peerLink.getStatus() == ACTIVE) {
                     peerLink.teardown();
                 } else {
