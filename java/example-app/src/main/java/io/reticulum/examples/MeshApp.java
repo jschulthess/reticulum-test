@@ -158,7 +158,7 @@ public class MeshApp {
         link.setPacketCallback(this::serverPacketReceived);
         var peer = findPeerByLink(link);
         log.info("peer {} closed (link: {}), link destination hash: {}",
-            peer, link, link.getDestination().getHash());
+            peer, link, Hex.encodeHexString(link.getDestination().getHash()));
         //latestClientLink = link;
         log.info("***> Client connected, link: {}", link);
     }
@@ -168,7 +168,7 @@ public class MeshApp {
         //prunePeers(link);
         var peer = findPeerByLink(link);
         log.info("peer {} closed (link: {}), link destination hash: {}",
-            peer, link, link.getDestination().getHash());
+            peer, link, Hex.encodeHexString(link.getDestination().getHash()));
         //if (nonNull(peer)) {
         //    linkedPeers.remove(peer);
         //}
@@ -328,11 +328,11 @@ public class MeshApp {
             } else if (link.getTeardownReason() == INITIATOR_CLOSED) {
                 log.info("Link closed callback: The initiator closed the link");
                 log.info("peerLink {} closed (link: {}), link destination hash: {}",
-                    peerLink, link, link.getDestination().getHash());
+                    peerLink, link, Hex.encodeHexString(link.getDestination().getHash()));
             } else if (link.getTeardownReason() == DESTINATION_CLOSED) {
                 log.info("Link closed callback: The link was closed by the peer, removing peer");
                 log.info("peerLink {} closed (link: {}), link destination hash: {}",
-                    peerLink, link, link.getDestination().getHash());
+                    peerLink, link, Hex.encodeHexString(link.getDestination().getHash()));
             } else {
                 log.info("Link closed callback");
             }
