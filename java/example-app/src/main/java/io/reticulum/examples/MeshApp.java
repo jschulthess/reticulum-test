@@ -238,6 +238,7 @@ public class MeshApp {
         Long lastAccessTimestamp;
         Boolean isInitiator;
         Link peerLink;
+        Reticulum rns = reticulum;
 
         public RNSPeer(byte[] dhash) {
             this.destinationHash = dhash;
@@ -248,7 +249,7 @@ public class MeshApp {
                 Direction.OUT, 
                 DestinationType.SINGLE,
                 APP_NAME,
-                "peerexample"
+                "meshexample"
             );
             peerDestination.setProofStrategy(ProofStrategy.PROVE_ALL);
 
