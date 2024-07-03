@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.isNull;
 //import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 //import static org.apache.commons.lang3.BooleanUtils.isFalse;
@@ -160,11 +161,12 @@ public class MeshApp {
 
     public void clientDisconnected(Link link) {
         log.info("***> Client disconnected");
-        var peer = findPeerByLink(link);
-        if (nonNull(peer)) {
-            linkedPeers.remove(peer);
-        }
-        log.info("removed peer, remaining peers: {}", linkedPeers.size());
+        prunePeers(link);
+        //var peer = findPeerByLink(link);
+        //if (nonNull(peer)) {
+        //    linkedPeers.remove(peer);
+        //}
+        //log.info("removed peer, remaining peers: {}", linkedPeers.size());
     }
 
     public void serverPacketReceived(byte[] message, Packet packet) {
@@ -177,7 +179,20 @@ public class MeshApp {
     //    reply.send();
     }
 
+    public void prunePeers(Link link) {
+        List<RNSPeer> lps =  getLinkedPeers();
+        log.info("number of peers before pruning: {}", lps.size());
+        for (RNSPeer p: lps) {
+            if (isNull(p.getPeerLink())) {
+                lps.remove(p);
+                continue;
+            }
+        }
+        log.info("number of peers after pruning: {}", lps.size());
+    }
+
     public RNSPeer findPeerByLink(Link link) {
+        // find peer given a link. At the same time remove peers with no peerLink.
         List<RNSPeer> lps =  getLinkedPeers();
         RNSPeer peer = null;
         for (RNSPeer p : lps) {
@@ -213,6 +228,12 @@ public class MeshApp {
 
             List<RNSPeer> lps =  getLinkedPeers();
             for (RNSPeer p : lps) {
+                if (isNull(p.getPeerLink())) {
+                    //log.info("peer link no longer availabe, removing peer") {
+                    //    linkedPeers.remove(p);
+                    //    continue;
+                    //}
+                }
                 // TODO: which parts of the peer need to be checked for equality ?
                 if (Arrays.equals(p.getDestinationHash(), destinationHash)) {
                     log.info("peer exists - found peer matching destinationHash");
@@ -278,9 +299,11 @@ public class MeshApp {
                 log.info("shutdown - peerLink: {}, status: {}", peerLink, peerLink.getStatus());
                 if (peerLink.getStatus() == ACTIVE) {
                     peerLink.teardown();
-                } else {
-                    peerLink = null;
                 }
+                // else {
+                //    peerLink = null;
+                //}
+                this.peerLink = null;
             }
         }
 
@@ -294,6 +317,7 @@ public class MeshApp {
                 log.info("The link timed out");
             } else if (link.getTeardownReason() == INITIATOR_CLOSED) {
                 log.info("Link closed callback: The initiator closed the link");
+                this.peerLink = null;
             } else if (link.getTeardownReason() == DESTINATION_CLOSED) {
                 log.info("Link closed callback: The link was closed by the peer, removing peer");
             } else {
