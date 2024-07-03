@@ -156,8 +156,9 @@ public class MeshApp {
     public void clientConnected(Link link) {
         link.setLinkClosedCallback(this::clientDisconnected);
         link.setPacketCallback(this::serverPacketReceived);
+        var peer = findPeerByLink(link);
         //latestClientLink = link;
-        log.info("***> Client connected");
+        log.info("***> Client connected, link: {}", link);
     }
 
     public void clientDisconnected(Link link) {
