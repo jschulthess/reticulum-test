@@ -328,8 +328,8 @@ public class MeshApp {
 
         public void linkEstablished(Link link) {
             link.setLinkClosedCallback(this::linkClosed);
-            log.info("peerLink {} established (link: {}) with peer: hash - {}, identity: {}", 
-                peerLink, link, Hex.encodeHexString(destinationHash), serverIdentity);
+            log.info("peerLink {} established (link: {}) with peer: hash - {}, link destination hash: {}", 
+                peerLink, link, Hex.encodeHexString(destinationHash), Hex.encodeHexString(link.getDestination().getHash()));
         }
 
         public void linkClosed(Link link) {
