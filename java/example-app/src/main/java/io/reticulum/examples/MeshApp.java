@@ -256,11 +256,11 @@ public class MeshApp {
             lastAccessTimestamp = null;
             isInitiator = true;
 
-            this.peerLink = new Link(peerDestination);
+            peerLink = new Link(peerDestination);
 
-            this.peerLink.setLinkEstablishedCallback(this::linkEstablished);
-            this.peerLink.setLinkClosedCallback(this::linkClosed);
-            this.peerLink.setPacketCallback(this::linkPacketReceived);
+            peerLink.setLinkEstablishedCallback(this::linkEstablished);
+            peerLink.setLinkClosedCallback(this::linkClosed);
+            peerLink.setPacketCallback(this::linkPacketReceived);
         }
 
         public void shutdown() {
