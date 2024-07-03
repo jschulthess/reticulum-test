@@ -185,6 +185,7 @@ public class MeshApp {
         List<RNSPeer> lps =  getLinkedPeers();
         log.info("number of peers before pruning: {}", lps.size());
         for (RNSPeer p: lps) {
+            log.info("peerLink: {}", p.getPeerLink());
             if (p.getPeerLink() == null) {
                 log.info("link is null, removing peer");
                 lps.remove(p);
