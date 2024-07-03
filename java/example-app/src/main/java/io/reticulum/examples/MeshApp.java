@@ -128,7 +128,11 @@ public class MeshApp {
                     var rand = new Random();
                     var randomPeer = linkedPeers.get(rand.nextInt(linkedPeers.size()));
                     var rpl = randomPeer.getPeerLink();
-                    log.info("sending text \"{}\" to peers (TODO: implement), link status: {}", inData, rpl.getStatus());
+                    var data = inData.getBytes(UTF_8);
+                    log.info("sending text \"{}\" to rndom peer", inData);
+                    var testPacket = new Packet(rpl, data);
+                    testPacket.send();
+                    
                 }
             } catch (Exception e) {
                 scan.close();
