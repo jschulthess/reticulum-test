@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.Data;
 //import lombok.Setter;
 //import lombok.Getter;
+import lombok.Synchronized;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -179,11 +180,13 @@ public class MeshApp {
     //    reply.send();
     }
 
+    @Synchronized
     public void prunePeers(Link link) {
         List<RNSPeer> lps =  getLinkedPeers();
         log.info("number of peers before pruning: {}", lps.size());
         for (RNSPeer p: lps) {
             if (p.getPeerLink() == null) {
+                log.info("link is null, removing peer");
                 lps.remove(p);
                 continue;
             }
