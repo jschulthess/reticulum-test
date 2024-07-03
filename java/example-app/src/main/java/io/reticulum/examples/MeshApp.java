@@ -132,8 +132,9 @@ public class MeshApp {
                     var randomPeer = linkedPeers.get(rand.nextInt(linkedPeers.size()));
                     var rpl = randomPeer.getPeerLink();
                     if (inData.equalsIgnoreCase("teardown")) {
-                        var teardownPacket = new Packet(rpl, rpl.getLinkId(), LINKCLOSE);
-                        teardownPacket.send();
+                        rpl.teardown();
+                        //var teardownPacket = new Packet(rpl, rpl.getLinkId(), LINKCLOSE);
+                        //teardownPacket.send();
                     } else {
                         var data = inData.getBytes(UTF_8);
                         log.info("sending text \"{}\" to random peer", inData);
