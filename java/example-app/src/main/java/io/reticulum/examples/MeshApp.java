@@ -115,6 +115,7 @@ public class MeshApp {
         Scanner scan = new Scanner( System.in );
         while (true) {
             try {
+                System.out.print("> ");
                 inData = scan.nextLine();
                 log.info("Sent announce from {} ({})", destination.getHexHash(), destination.getName());
                 if (inData.equalsIgnoreCase("quit")) {
@@ -216,7 +217,7 @@ public class MeshApp {
             //if (peer == null) {
             if (!peerExists) {
                 RNSPeer newPeer = new RNSPeer(destinationHash);
-                newPeer.setDestinationIdentity(announcedIdentity);
+                newPeer.setServerIdentity(announcedIdentity);
                 newPeer.setIsInitiator(true);
                 lps.add(newPeer);
                 log.info("added new RNSPeer, destinationHash: {}", Hex.encodeHexString(destinationHash));
@@ -232,18 +233,18 @@ public class MeshApp {
     private class RNSPeer {
         byte[] destinationHash;
         Destination peerDestination;
-        Identity destinationIdentity;
+        Identity serverIdentity;
         Long creationTimestamp;
         Long lastAccessTimestamp;
         Boolean isInitiator;
         Link peerLink;
 
         public RNSPeer(byte[] dhash) {
-            destinationHash = dhash;
-            destinationIdentity = recall(dhash);
+            this.destinationHash = dhash;
+            this.serverIdentity = recall(dhash);
 
             peerDestination = new Destination(
-                destinationIdentity,
+                serverIdentity,
                 Direction.OUT, 
                 DestinationType.SINGLE,
                 APP_NAME,
@@ -275,7 +276,7 @@ public class MeshApp {
 
         public void linkEstablished(Link link) {
             link.setLinkClosedCallback(this::linkClosed);
-            log.info("Link {} established with peer: hash - {}, identity: {}", peerLink, destinationHash, destinationIdentity);
+            log.info("Link {} established with peer: hash - {}, identity: {}", peerLink, destinationHash, serverIdentity);
         }
 
         public void linkClosed(Link link) {
