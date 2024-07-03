@@ -160,6 +160,11 @@ public class MeshApp {
 
     public void clientDisconnected(Link link) {
         log.info("***> Client disconnected");
+        var peer = findPeerByLink(link);
+        if (nonNull(peer)) {
+            linkedPeers.remove(peer);
+        }
+        log.info("removed peer, remaining peers: {}", linkedPeers.size());
     }
 
     public void serverPacketReceived(byte[] message, Packet packet) {
