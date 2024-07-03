@@ -119,13 +119,13 @@ public class MeshApp {
             try {
                 System.out.print("> ");
                 inData = scan.nextLine();
-                log.info("Sent announce from {} ({})", destination.getHexHash(), destination.getName());
                 if (inData.equalsIgnoreCase("quit")) {
                     shutdown();
                     scan.close();
                     break;
                 } else if (inData.isEmpty()) {
-                    destination.announce("mesh node".getBytes());
+                    destination.announce("mesh-node".getBytes());
+                    log.info("Sent announce from {} ({})", destination.getHexHash(), destination.getName());
                 } else {
                     var rand = new Random();
                     var randomPeer = linkedPeers.get(rand.nextInt(linkedPeers.size()));
@@ -314,7 +314,8 @@ public class MeshApp {
 
         public void linkEstablished(Link link) {
             link.setLinkClosedCallback(this::linkClosed);
-            log.info("Link {} established with peer: hash - {}, identity: {}", peerLink, destinationHash, serverIdentity);
+            log.info("peerLink {} established (link: {}) with peer: hash - {}, identity: {}", 
+                peerLink, link, Hex.encodeHexString(destinationHash), serverIdentity);
         }
 
         public void linkClosed(Link link) {
@@ -322,8 +323,12 @@ public class MeshApp {
                 log.info("The link timed out");
             } else if (link.getTeardownReason() == INITIATOR_CLOSED) {
                 log.info("Link closed callback: The initiator closed the link");
+                log.info("peerLink {} closed (link: {})",
+                    peerLink, link);
             } else if (link.getTeardownReason() == DESTINATION_CLOSED) {
                 log.info("Link closed callback: The link was closed by the peer, removing peer");
+                log.info("peerLink {} closed (link: {})",
+                    peerLink, link);
             } else {
                 log.info("Link closed callback");
             }
@@ -333,6 +338,8 @@ public class MeshApp {
             var msgText = new String(message, StandardCharsets.UTF_8);
             if (msgText.equals("ping")) {
                 log.info("received ping on link");
+            } else {
+                log.info("message received: {}", msgText);
             }
         }
     }
