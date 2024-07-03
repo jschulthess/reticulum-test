@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 //import java.util.concurrent.TimeUnit;
 
@@ -123,7 +124,10 @@ public class MeshApp {
                 } else if (inData.isEmpty()) {
                     destination.announce("mesh node".getBytes());
                 } else {
-                    log.info("sending text \"{}\" to peers (TODO: implement)", inData);
+                    var rand = new Random();
+                    var randomPeer = linkedPeers.get(rand.nextInt(linkedPeers.size()));
+                    var rpl = randomPeer.getPeerLink();
+                    log.info("sending text \"{}\" to peers (TODO: implement), link status: {}", inData, rpl.getStatus());
                 }
             } catch (Exception e) {
                 scan.close();
