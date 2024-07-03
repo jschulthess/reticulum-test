@@ -41,7 +41,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
-//import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.codec.binary.Hex;
 
@@ -154,6 +154,11 @@ public class MeshApp {
         for (RNSPeer p: linkedPeers) {
             log.info("shutting down peer: {}", p);
             p.shutdown();
+            try {
+                TimeUnit.SECONDS.sleep(1); // allow for peers to disconnect gracefully
+            } catch (InterruptedException e) {
+                log.error("exception: {}", e);
+            }
         }
         reticulum.exitHandler();
     }
