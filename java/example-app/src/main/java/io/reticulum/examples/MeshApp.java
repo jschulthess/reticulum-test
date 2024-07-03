@@ -129,7 +129,7 @@ public class MeshApp {
                     var randomPeer = linkedPeers.get(rand.nextInt(linkedPeers.size()));
                     var rpl = randomPeer.getPeerLink();
                     var data = inData.getBytes(UTF_8);
-                    log.info("sending text \"{}\" to rndom peer", inData);
+                    log.info("sending text \"{}\" to random peer", inData);
                     var testPacket = new Packet(rpl, data);
                     testPacket.send();
                     
@@ -153,7 +153,7 @@ public class MeshApp {
 
     public void clientConnected(Link link) {
         link.setLinkClosedCallback(this::clientDisconnected);
-        //link.setPacketCallback(this::serverPacketReceived);
+        link.setPacketCallback(this::serverPacketReceived);
         //latestClientLink = link;
         log.info("***> Client connected");
     }
