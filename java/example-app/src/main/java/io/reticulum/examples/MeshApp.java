@@ -164,7 +164,7 @@ public class MeshApp {
     public void clientDisconnected(Link link) {
         log.info("***> Client disconnected");
         //prunePeers(link);
-        //var peer = findPeerByLink(link);
+        var peer = findPeerByLink(link);
         //if (nonNull(peer)) {
         //    linkedPeers.remove(peer);
         //}
