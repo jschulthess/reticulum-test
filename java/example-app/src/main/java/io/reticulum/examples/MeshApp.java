@@ -162,7 +162,7 @@ public class MeshApp {
 
     public void clientDisconnected(Link link) {
         log.info("***> Client disconnected");
-        prunePeers(link);
+        //prunePeers(link);
         //var peer = findPeerByLink(link);
         //if (nonNull(peer)) {
         //    linkedPeers.remove(peer);
@@ -232,12 +232,12 @@ public class MeshApp {
 
             List<RNSPeer> lps =  getLinkedPeers();
             for (RNSPeer p : lps) {
-                if (isNull(p.getPeerLink())) {
-                    //log.info("peer link no longer availabe, removing peer") {
-                    //    linkedPeers.remove(p);
-                    //    continue;
-                    //}
-                }
+                //if (isNull(p.getPeerLink())) {
+                //    log.info("peer link no longer availabe, removing peer") {
+                //        linkedPeers.remove(p);
+                //        continue;
+                //    }
+                //}
                 // TODO: which parts of the peer need to be checked for equality ?
                 if (Arrays.equals(p.getDestinationHash(), destinationHash)) {
                     log.info("peer exists - found peer matching destinationHash");
@@ -321,7 +321,6 @@ public class MeshApp {
                 log.info("The link timed out");
             } else if (link.getTeardownReason() == INITIATOR_CLOSED) {
                 log.info("Link closed callback: The initiator closed the link");
-                this.peerLink = null;
             } else if (link.getTeardownReason() == DESTINATION_CLOSED) {
                 log.info("Link closed callback: The link was closed by the peer, removing peer");
             } else {
