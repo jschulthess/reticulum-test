@@ -217,7 +217,7 @@ public class MeshApp {
                 if (Arrays.equals(p.getDestinationHash(), destinationHash)) {
                     log.info("peer exists - found peer matching destinationHash");
                     if (nonNull(p.getPeerLink())) {
-                        log.info("peer link: {}, status: {}", p.getPeerLink().getStatus());
+                        log.info("peer link: {}, status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
                     }
                     peerExists = true;
                     break;
