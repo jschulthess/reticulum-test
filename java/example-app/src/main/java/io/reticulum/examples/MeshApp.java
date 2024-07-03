@@ -183,12 +183,12 @@ public class MeshApp {
         List<RNSPeer> lps =  getLinkedPeers();
         log.info("number of peers before pruning: {}", lps.size());
         for (RNSPeer p: lps) {
-            if (isNull(p.getPeerLink())) {
+            if (p.getPeerLink() == null) {
                 lps.remove(p);
                 continue;
             }
         }
-        log.info("number of peers after pruning: {}", lps.size());
+        log.info("number of peers after pruning: {}, {}", lps.size(), getLinkedPeers().size());
     }
 
     public RNSPeer findPeerByLink(Link link) {
