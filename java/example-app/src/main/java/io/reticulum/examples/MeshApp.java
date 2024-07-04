@@ -16,7 +16,7 @@ import static io.reticulum.link.TeardownSession.DESTINATION_CLOSED;
 import static io.reticulum.link.TeardownSession.INITIATOR_CLOSED;
 import static io.reticulum.link.TeardownSession.TIMEOUT;
 import static io.reticulum.link.LinkStatus.ACTIVE;
-import static io.reticulum.packet.PacketContextType.LINKCLOSE;
+//import static io.reticulum.packet.PacketContextType.LINKCLOSE;
 import static io.reticulum.identity.IdentityKnownDestination.recall;
 //import static io.reticulum.constant.ReticulumConstant.TRUNCATED_HASHLENGTH;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Objects.isNull;
+//import static java.util.Objects.isNull;
 //import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 //import static org.apache.commons.lang3.BooleanUtils.isFalse;
@@ -39,7 +39,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
+//import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -156,9 +156,8 @@ public class MeshApp {
                                 p.shutdown();
                                 linkedPeers.remove(p);
                             } else if (inData.equalsIgnoreCase("status")) {
-                                log.info("peer destinationHash: {}, peer remoteDestinationHash: {}, peerLink: {} <=> status: {}",
+                                log.info("peer destinationHash: {}, peerLink: {} <=> status: {}",
                                     Hex.encodeHexString(p.getDestinationHash()),
-                                    Hex.encodeHexString(p.getRemoteDestinationHash()),
                                     p.getPeerLink(), p.getPeerLink().getStatus());
                                     continue;
                             } else {
@@ -323,7 +322,6 @@ public class MeshApp {
     @Data
     private class RNSPeer {
         byte[] destinationHash;
-        byte[] remoteDestinationHash;
         Destination peerDestination;
         Identity serverIdentity;
         Long creationTimestamp;
@@ -353,7 +351,6 @@ public class MeshApp {
             isInitiator = true;
 
             peerLink = new Link(peerDestination);
-            remoteDestinationHash = peerLink.getDestination().getHash();
 
             peerLink.setLinkEstablishedCallback(this::linkEstablished);
             peerLink.setLinkClosedCallback(this::linkClosed);
@@ -384,9 +381,8 @@ public class MeshApp {
 
         public void linkEstablished(Link link) {
             link.setLinkClosedCallback(this::linkClosed);
-            log.info("peerLink {} established (link: {}) with peer: hash - {}, remoteDestinationHash: {}, link destination hash: {}", 
+            log.info("peerLink {} established (link: {}) with peer: hash - {}, link destination hash: {}", 
                 peerLink, link, Hex.encodeHexString(destinationHash),
-                Hex.encodeHexString(remoteDestinationHash),
                 Hex.encodeHexString(link.getDestination().getHash()));
         }
 
