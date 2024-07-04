@@ -141,6 +141,8 @@ public class MeshApp {
                         } else if (inData.equalsIgnoreCase("open")) {
                             p.getOrInitPeerLink();
                             log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
+                        } else if (inData.equalsIgnoreCase("status")) {
+                            log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
                         } else {
                             var data = inData.getBytes(UTF_8);
                             log.info("sending text \"{}\" to random peer", inData);
