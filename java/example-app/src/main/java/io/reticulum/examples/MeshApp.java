@@ -162,7 +162,7 @@ public class MeshApp {
                                     continue;
                             } else {
                                 var data = inData.getBytes(UTF_8);
-                                log.info("sending text \"{}\" to random peer", inData);
+                                log.info("sending text \"{}\" to peer: {}", inData, Hex.encodeHexString(p.getDestinationHash()));
                                 var testPacket = new Packet(rpl, data);
                                 testPacket.send();
                             }
