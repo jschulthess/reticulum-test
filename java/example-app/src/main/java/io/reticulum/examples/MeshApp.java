@@ -116,9 +116,9 @@ public class MeshApp {
         log.info("Hit enter to manually send an announce (Ctrl-C or 'quit' to quit)");
 
         Scanner scan = new Scanner( System.in );
+        System.out.print("> ");
         while (true) {
             try {
-                System.out.print("> ");
                 inData = scan.nextLine();
                 if (inData.equalsIgnoreCase("quit")) {
                     shutdown();
@@ -127,12 +127,13 @@ public class MeshApp {
                 } else if (inData.isEmpty()) {
                     destination.announce("mesh-node".getBytes());
                     log.info("Sent announce from {} ({})", destination.getHexHash(), destination.getName());
+                    System.out.println("> ");
                 } else {
                     //var rand = new Random();
                     //var randomPeer = linkedPeers.get(rand.nextInt(linkedPeers.size()));
                     for (RNSPeer p: linkedPeers) {
                         var rpl = p.getPeerLink();
-                        if (inData.equalsIgnoreCase("teardown")) {
+                        if (inData.equalsIgnoreCase("close")) {
                                 rpl.teardown();
                                 //var teardownPacket = new Packet(rpl, rpl.getLinkId(), LINKCLOSE);
                                 //teardownPacket.send();
