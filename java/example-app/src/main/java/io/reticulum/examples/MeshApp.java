@@ -128,22 +128,24 @@ public class MeshApp {
                     destination.announce("mesh-node".getBytes());
                     log.info("Sent announce from {} ({})", destination.getHexHash(), destination.getName());
                 } else {
-                    var rand = new Random();
-                    var randomPeer = linkedPeers.get(rand.nextInt(linkedPeers.size()));
-                    var rpl = randomPeer.getPeerLink();
-                    if (inData.equalsIgnoreCase("teardown")) {
-                        rpl.teardown();
-                        //var teardownPacket = new Packet(rpl, rpl.getLinkId(), LINKCLOSE);
-                        //teardownPacket.send();
-                        log.info("peerLink: {} - status: {}", rpl, rpl.getStatus());
-                    } else if (inData.equalsIgnoreCase("open")) {
-                        randomPeer.getOrInitPeerLink();
-                        log.info("peerLink: {} - status: {}", randomPeer.getPeerLink(), randomPeer.getPeerLink().getStatus());
-                    } else {
-                        var data = inData.getBytes(UTF_8);
-                        log.info("sending text \"{}\" to random peer", inData);
-                        var testPacket = new Packet(rpl, data);
-                        testPacket.send();
+                    //var rand = new Random();
+                    //var randomPeer = linkedPeers.get(rand.nextInt(linkedPeers.size()));
+                    for (RNSPeer p: linkedPeers) {
+                        var rpl = p.getPeerLink();
+                        if (inData.equalsIgnoreCase("teardown")) {
+                                rpl.teardown();
+                                //var teardownPacket = new Packet(rpl, rpl.getLinkId(), LINKCLOSE);
+                                //teardownPacket.send();
+                                log.info("peerLink: {} - status: {}", rpl, rpl.getStatus());
+                        } else if (inData.equalsIgnoreCase("open")) {
+                            p.getOrInitPeerLink();
+                            log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
+                        } else {
+                            var data = inData.getBytes(UTF_8);
+                            log.info("sending text \"{}\" to random peer", inData);
+                            var testPacket = new Packet(rpl, data);
+                            testPacket.send();
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -221,8 +223,9 @@ public class MeshApp {
         RNSPeer peer = null;
         for (RNSPeer p : lps) {
             var pLink = p.getPeerLink();
-            log.info("* find - peerLink hash: {}, link destination hash: {}",
-                    pLink.getDestination().getHash(), link.getDestination().getHash());
+            log.info("* findPeerByLink - peerLink hash: {}, link destination hash: {}",
+                    Hex.encodeHexString(pLink.getDestination().getHash()),
+                    Hex.encodeHexString(link.getDestination().getHash()));
             if (Arrays.equals(pLink.getDestination().getHash(),link.getDestination().getHash())) {
                 log.info("found peer matching destinationHash");
                 peer = p;
