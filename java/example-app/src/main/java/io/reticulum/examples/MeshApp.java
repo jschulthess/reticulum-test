@@ -145,8 +145,10 @@ public class MeshApp {
                                 p.getOrInitPeerLink();
                                 log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
                             } else if (inData.equalsIgnoreCase("status")) {
-                                log.info("peer: {}, peerLink: {} <=> status: {}",
-                                    Hex.encodeHexString(p.getDestinationHash()), p.getPeerLink(), p.getPeerLink().getStatus());
+                                log.info("peer destinationHash: {}, peer remoteDestinationHash: {}, peerLink: {} <=> status: {}",
+                                    Hex.encodeHexString(p.getDestinationHash()),
+                                    Hex.encodeHexString(p.getRemoteDestinationHash()),
+                                    p.getPeerLink(), p.getPeerLink().getStatus());
                                     continue;
                             } else {
                                 var data = inData.getBytes(UTF_8);
@@ -310,6 +312,7 @@ public class MeshApp {
     @Data
     private class RNSPeer {
         byte[] destinationHash;
+        byte[] remoteDestinationHash;
         Destination peerDestination;
         Identity serverIdentity;
         Long creationTimestamp;
@@ -339,6 +342,7 @@ public class MeshApp {
             isInitiator = true;
 
             peerLink = new Link(peerDestination);
+            remoteDestinationHash = peerLink.getDestination().getHash();
 
             peerLink.setLinkEstablishedCallback(this::linkEstablished);
             peerLink.setLinkClosedCallback(this::linkClosed);
@@ -369,8 +373,10 @@ public class MeshApp {
 
         public void linkEstablished(Link link) {
             link.setLinkClosedCallback(this::linkClosed);
-            log.info("peerLink {} established (link: {}) with peer: hash - {}, link destination hash: {}", 
-                peerLink, link, Hex.encodeHexString(destinationHash), Hex.encodeHexString(link.getDestination().getHash()));
+            log.info("peerLink {} established (link: {}) with peer: hash - {}, remoteDestinationHash: {}, link destination hash: {}", 
+                peerLink, link, Hex.encodeHexString(destinationHash),
+                Hex.encodeHexString(remoteDestinationHash),
+                Hex.encodeHexString(link.getDestination().getHash()));
         }
 
         public void linkClosed(Link link) {
