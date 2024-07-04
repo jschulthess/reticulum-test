@@ -140,7 +140,7 @@ public class MeshApp {
                     //var rand = new Random();
                     //var randomPeer = linkedPeers.get(rand.nextInt(linkedPeers.size()));
                     if (linkedPeers.isEmpty()) {
-                        log.info("no peers (yet)");
+                        log.info("no local peer objects (yet). We'll create on for every announce we receive.");
                     } else {
                         for (RNSPeer p: linkedPeers) {
                             var rpl = p.getPeerLink();
