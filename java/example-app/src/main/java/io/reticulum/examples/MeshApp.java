@@ -271,6 +271,9 @@ public class MeshApp {
                         log.info("peer link: {}, status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
                     }
                     peerExists = true;
+                    if (p.getPeerLink().getStatus() != ACTIVE) {
+                        p.getOrInitPeerLink();
+                    }
                     break;
                 } else {
                     log.info("MeshAnnounceHandler - no matching peer,  peerLink hash: {}, link destination hash: {}",
