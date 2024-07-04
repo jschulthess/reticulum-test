@@ -113,7 +113,7 @@ public class MeshApp {
         var inData = new String();
         log.info("***> mesh instance * {} * running, waiting for a connection", destination.getHexHash());
 
-        log.info("Hit enter to manually send an announce (Ctrl-C or 'quit' to quit)");
+        log.info("Hit enter to manually send an announce (Ctrl-C or 'quit' to quit, 'help' or '?' for keyword usage)");
 
         Scanner scan = new Scanner( System.in );
         System.out.print("> ");
@@ -128,6 +128,14 @@ public class MeshApp {
                     destination.announce("mesh-node".getBytes());
                     log.info("Sent announce from {} ({})", destination.getHexHash(), destination.getName());
                     System.out.println("> ");
+                } else if (inData.equalsIgnoreCase("help") || inData.equals("?")) {
+                    log.info("=> press Enter    to do a Reticulum announce (and initiate peers to connect)");
+                    log.info("=> enter 'status' to see status of peer links");
+                    log.info("=> enter some text (other than keywords) to send message to peers");
+                    log.info("=> enter 'close'/'open' to teardown/re-open existing peer links");
+                    log.info("=> enter 'clean' to remove all local peer objects");
+                    log.info("=> enter 'quit' to exit");
+                    log.info("=> enter '?' or 'help' to see this message");
                 } else {
                     //var rand = new Random();
                     //var randomPeer = linkedPeers.get(rand.nextInt(linkedPeers.size()));
@@ -144,6 +152,9 @@ public class MeshApp {
                             } else if (inData.equalsIgnoreCase("open")) {
                                 p.getOrInitPeerLink();
                                 log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
+                            } else if (inData.equalsIgnoreCase("clean")) {
+                                p.shutdown();
+                                linkedPeers.remove(p);
                             } else if (inData.equalsIgnoreCase("status")) {
                                 log.info("peer destinationHash: {}, peer remoteDestinationHash: {}, peerLink: {} <=> status: {}",
                                     Hex.encodeHexString(p.getDestinationHash()),
