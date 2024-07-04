@@ -135,6 +135,10 @@ public class MeshApp {
                         rpl.teardown();
                         //var teardownPacket = new Packet(rpl, rpl.getLinkId(), LINKCLOSE);
                         //teardownPacket.send();
+                        log.info("peerLink: {} - status: {}", rpl, rpl.getStatus());
+                    } else if (inData.equalsIgnoreCase("open")) {
+                        randomPeer.getOrInitPeerLink();
+                        log.info("peerLink: {} - status: {}", randomPeer.getPeerLink(), randomPeer.getPeerLink().getStatus());
                     } else {
                         var data = inData.getBytes(UTF_8);
                         log.info("sending text \"{}\" to random peer", inData);
@@ -217,6 +221,8 @@ public class MeshApp {
         RNSPeer peer = null;
         for (RNSPeer p : lps) {
             var pLink = p.getPeerLink();
+            log.info("* find - peerLink hash: {}, link destination hash: {}",
+                    pLink.getDestination().getHash(), link.getDestination().getHash());
             if (Arrays.equals(pLink.getDestination().getHash(),link.getDestination().getHash())) {
                 log.info("found peer matching destinationHash");
                 peer = p;
@@ -293,7 +299,10 @@ public class MeshApp {
         public RNSPeer(byte[] dhash) {
             this.destinationHash = dhash;
             this.serverIdentity = recall(dhash);
+            initPeerLink();
+        }
 
+        public void initPeerLink() {
             peerDestination = new Destination(
                 serverIdentity,
                 Direction.OUT, 
@@ -312,6 +321,15 @@ public class MeshApp {
             peerLink.setLinkEstablishedCallback(this::linkEstablished);
             peerLink.setLinkClosedCallback(this::linkClosed);
             peerLink.setPacketCallback(this::linkPacketReceived);
+        }
+
+        public Link getOrInitPeerLink() {
+            if (this.peerLink.getStatus() == ACTIVE) {
+                return this.peerLink;
+            } else {
+                initPeerLink();
+            }
+            return this.peerLink;
         }
 
         public void shutdown() {
