@@ -266,12 +266,19 @@ public class MeshApp {
                 //}
                 // TODO: which parts of the peer need to be checked for equality ?
                 if (Arrays.equals(p.getDestinationHash(), destinationHash)) {
-                    log.info("peer exists - found peer matching destinationHash");
+                    log.info("MeshAnnounceHandler - peer exists - found peer matching destinationHash");
                     if (nonNull(p.getPeerLink())) {
                         log.info("peer link: {}, status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
                     }
                     peerExists = true;
                     break;
+                } else {
+                    log.info("MeshAnnounceHandler - no matching peer,  peerLink hash: {}, link destination hash: {}",
+                            Hex.encodeHexString(p.getDestinationHash()),
+                            Hex.encodeHexString(destinationHash));
+                    if (nonNull(p.getPeerLink())) {
+                        log.info("peer link: {}, status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
+                    }
                 }
             }
             //if (peer == null) {
