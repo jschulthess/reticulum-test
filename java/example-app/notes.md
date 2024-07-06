@@ -2,7 +2,7 @@
 
 ## reticulum
 
-issues:
+unknown:
 
-* Transport.inbound(): ifac != expectedIfac <=> where is this set? Should be passed to server on initiating connection (?)
-* Annouce2App: why header_2 if only one destination is created???
+* channel, Resource: not yet verified and tested in [reticulum-network-stack](https://github.com/sergst83/reticulum-network-stack)
+* need more of the interfaces in Java: starting with TCPServerInterface, KISS, RNode, ...
