@@ -11,6 +11,8 @@ import io.reticulum.identity.Identity;
 import io.reticulum.link.Link;
 //import io.reticulum.constant.LinkConstant;
 import io.reticulum.packet.Packet;
+import io.reticulum.packet.PacketReceipt;
+import io.reticulum.packet.PacketReceiptStatus;
 import io.reticulum.transport.AnnounceHandler;
 import static io.reticulum.link.TeardownSession.DESTINATION_CLOSED;
 import static io.reticulum.link.TeardownSession.INITIATOR_CLOSED;
@@ -130,6 +132,7 @@ public class MeshApp {
                     System.out.println("> ");
                 } else if (inData.equalsIgnoreCase("help") || inData.equals("?")) {
                     log.info("=> press Enter    to do a Reticulum announce (and initiate peers to connect)");
+                    log.info("=> enter 'probe' to ping peers to probe remote availability (closes peerLink on timeout)");
                     log.info("=> enter 'status' to see status of peer links");
                     log.info("=> enter some text (other than keywords) to send message to peers");
                     log.info("=> enter 'close'/'open' to teardown/re-open existing peer links");
@@ -144,11 +147,11 @@ public class MeshApp {
                     } else {
                         for (RNSPeer p: linkedPeers) {
                             var rpl = p.getPeerLink();
-                            if (inData.equalsIgnoreCase("close")) {
-                                    rpl.teardown();
-                                    //var teardownPacket = new Packet(rpl, rpl.getLinkId(), LINKCLOSE);
-                                    //teardownPacket.send();
-                                    log.info("peerLink: {} - status: {}", rpl, rpl.getStatus());
+                            if (inData.equalsIgnoreCase("probe")) {
+                                p.pingRemote();
+                            } else if (inData.equalsIgnoreCase("close")) {
+                                rpl.teardown();
+                                log.info("peerLink: {} - status: {}", rpl, rpl.getStatus());
                             } else if (inData.equalsIgnoreCase("open")) {
                                 p.getOrInitPeerLink();
                                 log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
@@ -195,8 +198,13 @@ public class MeshApp {
         link.setLinkClosedCallback(this::clientDisconnected);
         link.setPacketCallback(this::serverPacketReceived);
         var peer = findPeerByLink(link);
-        log.info("peer {} closed (link: {}), link destination hash: {}",
-            peer, link, Hex.encodeHexString(link.getDestination().getHash()));
+        if (nonNull(peer)) {
+            log.info("peer {} closed (link: {}), link destination hash: {}",
+                peer, link, Hex.encodeHexString(link.getDestination().getHash()));
+        } else {
+            log.info("non-initiator closed (link: {}), link destination hash (initiator): {}",
+                peer, link, Hex.encodeHexString(link.getDestination().getHash()));
+        }
         //latestClientLink = link;
         log.info("***> Client connected, link: {}", link);
     }
@@ -410,6 +418,44 @@ public class MeshApp {
             } else {
                 log.info("message received: {}", msgText);
             }
+        }
+
+        // PacketReceipt callbacks
+        public void packetTimedOut(PacketReceipt receipt) {
+            log.info("packet timed out");
+            if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
+                log.info("packet timed out, receipt status: {}", PacketReceiptStatus.FAILED);
+                peerLink.teardown();
+            }
+        }
+
+        public void packetDelivered(PacketReceipt receipt) {
+            var rttString = new String("");
+            //log.info("packet delivered callback, receipt: {}", receipt);
+            if (receipt.getStatus() == PacketReceiptStatus.DELIVERED) {
+                var rtt = receipt.getRtt();    // rtt (Java) is in miliseconds
+                if (rtt >= 1000) {
+                    rtt = Math.round(rtt / 1000);
+                    rttString = String.format("%d seconds", rtt);
+                } else {
+                    rttString = String.format("%d miliseconds", rtt);
+                }
+                log.info("Valid reply received from {}, round-trip time is {}",
+                        Hex.encodeHexString(receipt.getDestination().getHash()), rttString);
+            }
+        }
+
+        // utility methods
+        public void pingRemote() {
+            var link = this.peerLink;
+            log.info("pinging remote: {}", link);
+            var data = "ping".getBytes(UTF_8);
+            link.setPacketCallback(this::linkPacketReceived);
+            Packet pingPacket = new Packet(link, data);
+            PacketReceipt packetReceipt = pingPacket.send();
+            packetReceipt.setTimeout(3L);
+            packetReceipt.setTimeoutCallback(this::packetTimedOut);
+            packetReceipt.setDeliveryCallback(this::packetDelivered);
         }
     }
 
