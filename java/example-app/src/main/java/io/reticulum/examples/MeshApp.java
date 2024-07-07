@@ -355,6 +355,7 @@ public class MeshApp {
         }
 
         @Override
+        @Synchronized
         public void receivedAnnounce(byte[] destinationHash, Identity announcedIdentity, byte[] appData) {
             var peerExists = false;
 
@@ -399,7 +400,7 @@ public class MeshApp {
                 lps.add(newPeer);
                 log.info("added new RNSPeer, destinationHash: {}", Hex.encodeHexString(destinationHash));
                 var pLink = newPeer.getPeerLink();
-                var data = concatArrays("open::".getBytes(UTF_8), destinationHash);
+                var data = concatArrays("open::".getBytes(), destinationHash);
                 Packet closePacket = new Packet(pLink, data);
                 var packetReceipt = closePacket.send();
                 //packetReceipt.setTimeout(3L);
