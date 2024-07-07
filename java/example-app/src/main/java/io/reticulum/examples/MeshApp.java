@@ -215,15 +215,16 @@ public class MeshApp {
         if (nonNull(peer)) {
             log.info("initiator peer {} closed link (link lookup: {}), link destination hash: {}",
                 Hex.encodeHexString(peer.getDestinationHash()), link, Hex.encodeHexString(link.getDestination().getHash()));
-            // if we have a peer pointing to that destination, we can close and remove it
-            peer = findPeerByDestinationHash(link.getDestination().getHash());
-            if (nonNull(peer)) {
-                peer.getPeerLink().teardown();
-                // Note: no shutdown as the remobe peer could be only rebooting.
-            }
         } else {
             log.info("non-initiator closed link (link lookup: {}), link destination hash (initiator): {}",
                 peer, link, Hex.encodeHexString(link.getDestination().getHash()));
+        }
+        // if we have a peer pointing to that destination, we can close and remove it
+        peer = findPeerByDestinationHash(link.getDestination().getHash());
+        if (nonNull(peer)) {
+            // Note: no shutdown as the remobe peer could be only rebooting.
+            //       keep it to reopen link later if possible.
+            peer.getPeerLink().teardown();
         }
     }
 
