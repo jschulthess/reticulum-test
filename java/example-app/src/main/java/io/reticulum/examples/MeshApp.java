@@ -199,10 +199,10 @@ public class MeshApp {
         link.setPacketCallback(this::serverPacketReceived);
         var peer = findPeerByLink(link);
         if (nonNull(peer)) {
-            log.info("peer {} closed (link: {}), link destination hash: {}",
-                peer, link, Hex.encodeHexString(link.getDestination().getHash()));
+            log.info("initiator peer {} opened link (link lookup: {}), link destination hash: {}",
+                Hex.encodeHexString(peer.getDestinationHash()), link, Hex.encodeHexString(link.getDestination().getHash()));
         } else {
-            log.info("non-initiator closed (link: {}), link destination hash (initiator): {}",
+            log.info("non-initiator closed link (link lookup: {}), link destination hash (initiator): {}",
                 peer, link, Hex.encodeHexString(link.getDestination().getHash()));
         }
         //latestClientLink = link;
@@ -211,14 +211,20 @@ public class MeshApp {
 
     public void clientDisconnected(Link link) {
         log.info("***> Client disconnected");
-        //prunePeers(link);
         var peer = findPeerByLink(link);
-        log.info("peer {} closed (link: {}), link destination hash: {}",
-            peer, link, Hex.encodeHexString(link.getDestination().getHash()));
-        //if (nonNull(peer)) {
-        //    linkedPeers.remove(peer);
-        //}
-        //log.info("removed peer, remaining peers: {}", linkedPeers.size());
+        if (nonNull(peer)) {
+            log.info("initiator peer {} closed link (link lookup: {}), link destination hash: {}",
+                Hex.encodeHexString(peer.getDestinationHash()), link, Hex.encodeHexString(link.getDestination().getHash()));
+            // if we have a peer pointing to that destination, we can close and remove it
+            peer = findPeerByDestinationHash(link.getDestination().getHash());
+            if (nonNull(peer)) {
+                peer.getPeerLink().teardown();
+                // Note: no shutdown as the remobe peer could be only rebooting.
+            }
+        } else {
+            log.info("non-initiator closed link (link lookup: {}), link destination hash (initiator): {}",
+                peer, link, Hex.encodeHexString(link.getDestination().getHash()));
+        }
     }
 
     public void serverPacketReceived(byte[] message, Packet packet) {
@@ -259,6 +265,19 @@ public class MeshApp {
                     Hex.encodeHexString(link.getDestination().getHash()));
             if (Arrays.equals(pLink.getDestination().getHash(),link.getDestination().getHash())) {
                 log.info("found peer matching destinationHash");
+                peer = p;
+                break;
+            }
+        }
+        return peer;
+    }
+
+    public RNSPeer findPeerByDestinationHash(byte[] dhash) {
+        List<RNSPeer> lps = getLinkedPeers();
+        RNSPeer peer = null;
+        for (RNSPeer p : lps) {
+            if (Arrays.equals(p.getDestinationHash(), dhash)) {
+                log.info("found peer matching destinationHash: {}", Hex.encodeHexString(dhash));
                 peer = p;
                 break;
             }
