@@ -399,38 +399,38 @@ public class MeshApp {
                 newPeer.setIsInitiator(true);
                 lps.add(newPeer);
                 log.info("added new RNSPeer, destinationHash: {}", Hex.encodeHexString(destinationHash));
-                var pLink = newPeer.getPeerLink();
-                var data = concatArrays("open::".getBytes(), destinationHash);
-                Packet closePacket = new Packet(pLink, data);
-                var packetReceipt = closePacket.send();
-                //packetReceipt.setTimeout(3L);
-                packetReceipt.setDeliveryCallback(this::openPacketDelivered);
-                packetReceipt.setTimeoutCallback(this::packetTimedOut);
+                //var pLink = newPeer.getPeerLink();
+                //var data = concatArrays("open::".getBytes(), destinationHash);
+                //Packet closePacket = new Packet(pLink, data);
+                //var packetReceipt = closePacket.send();
+                ////packetReceipt.setTimeout(3L);
+                //packetReceipt.setDeliveryCallback(this::openPacketDelivered);
+                //packetReceipt.setTimeoutCallback(this::packetTimedOut);
             }
         }
 
-        public void openPacketDelivered(PacketReceipt receipt) {
-            var rttString = new String("");
-            if (receipt.getStatus() == PacketReceiptStatus.DELIVERED) {
-                var rtt = receipt.getRtt();    // rtt (Java) is in miliseconds
-                //log.info("qqp - packetDelivered - rtt: {}", rtt);
-                if (rtt >= 1000) {
-                    rtt = Math.round(rtt / 1000);
-                    rttString = String.format("%d seconds", rtt);
-                } else {
-                    rttString = String.format("%d miliseconds", rtt);
-                }
-                log.info("Shutdown packet confirmation received from {}, round-trip time is {}",
-                        Hex.encodeHexString(receipt.getDestination().getHash()), rttString);
-            }
-        }
-
-        public void packetTimedOut(PacketReceipt receipt) {
-            log.info("packet timed out");
-            if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
-                log.info("packet timed out, receipt status: {}", PacketReceiptStatus.FAILED);
-            }
-        }
+        //public void openPacketDelivered(PacketReceipt receipt) {
+        //    var rttString = new String("");
+        //    if (receipt.getStatus() == PacketReceiptStatus.DELIVERED) {
+        //        var rtt = receipt.getRtt();    // rtt (Java) is in miliseconds
+        //        //log.info("qqp - packetDelivered - rtt: {}", rtt);
+        //        if (rtt >= 1000) {
+        //            rtt = Math.round(rtt / 1000);
+        //            rttString = String.format("%d seconds", rtt);
+        //        } else {
+        //            rttString = String.format("%d miliseconds", rtt);
+        //        }
+        //        log.info("Shutdown packet confirmation received from {}, round-trip time is {}",
+        //                Hex.encodeHexString(receipt.getDestination().getHash()), rttString);
+        //    }
+        //}
+        //
+        //public void packetTimedOut(PacketReceipt receipt) {
+        //    log.info("packet timed out");
+        //    if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
+        //        log.info("packet timed out, receipt status: {}", PacketReceiptStatus.FAILED);
+        //    }
+        //}
     }
 
     /************/
