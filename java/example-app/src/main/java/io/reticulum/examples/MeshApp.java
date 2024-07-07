@@ -272,14 +272,14 @@ public class MeshApp {
     public void serverPacketReceived(byte[] message, Packet packet) {
         String text = new String(message, StandardCharsets.UTF_8);
         log.info("Received data on the link: \"{}\"", text);
-        if (text.startsWith("close::")) {
-            var targetPeerHash = subarray(message, 6, message.length);
-            var peer = findPeerByDestinationHash(targetPeerHash);
-            if (nonNull(peer)) {
-                log.info("found peer matching close packet - closing link for: {}", targetPeerHash);
-                peer.getPeerLink().teardown();
-            }
-        }
+        //if (text.startsWith("close::")) {
+        //    var targetPeerHash = subarray(message, 6, message.length);
+        //    var peer = findPeerByDestinationHash(targetPeerHash);
+        //    if (nonNull(peer)) {
+        //        log.info("found peer matching close packet - closing link for: {}", targetPeerHash);
+        //        peer.getPeerLink().teardown();
+        //    }
+        //}
         //var peer = findPeerByDestinationHash(packet.getDestinationHash());
         //// send reply
         //if (nonNull(peer)) {
@@ -490,6 +490,21 @@ public class MeshApp {
                 log.info("received ping on link");
             } else {
                 log.info("message received: {}", msgText);
+                if (msgText.startsWith("close::")) {
+                    var targetPeerHash = subarray(message, 6, message.length);
+                    log.info("peer dest hash: {}, target hash: {}",
+                        Hex.encodeHexString(destinationHash),
+                        Hex.encodeHexString(targetPeerHash));
+                    if (Arrays.equals(destinationHash, targetPeerHash)) {
+                        log.info("closing link: {}", peerLink.getDestination().getHexHash());
+                        peerLink.teardown();
+                    }
+                    //var peer = findPeerByDestinationHash(targetPeerHash);
+                    //if (nonNull(peer)) {
+                    //    log.info("found peer matching close packet - closing link for: {}", targetPeerHash);
+                    //    peer.getPeerLink().teardown();
+                    //}
+                }
             }
         }
 
