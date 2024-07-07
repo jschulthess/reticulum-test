@@ -131,6 +131,7 @@ public class MeshApp {
                     log.info("Sent announce from {} ({})", destination.getHexHash(), destination.getName());
                     System.out.println("> ");
                 } else if (inData.equalsIgnoreCase("help") || inData.equals("?")) {
+                    log.info("**********************************  keywords  **********************************");
                     log.info("=> press Enter    to do a Reticulum announce (and initiate peers to connect)");
                     log.info("=> enter 'probe' to ping peers to probe remote availability (closes peerLink on timeout)");
                     log.info("=> enter 'status' to see status of peer links");
@@ -139,6 +140,7 @@ public class MeshApp {
                     log.info("=> enter 'clean' to shutdown and remove all local peer objects");
                     log.info("=> enter 'quit' to exit");
                     log.info("=> enter '?' or 'help' to see this message");
+                    log.info("********************************************************************************");
                 } else {
                     //var rand = new Random();
                     //var randomPeer = linkedPeers.get(rand.nextInt(linkedPeers.size()));
@@ -265,7 +267,7 @@ public class MeshApp {
                     Hex.encodeHexString(pLink.getDestination().getHash()),
                     Hex.encodeHexString(link.getDestination().getHash()));
             if (Arrays.equals(pLink.getDestination().getHash(),link.getDestination().getHash())) {
-                log.info("found peer matching destinationHash");
+                log.info("  findPeerByLink - found peer matching destinationHash");
                 peer = p;
                 break;
             }
@@ -277,8 +279,12 @@ public class MeshApp {
         List<RNSPeer> lps = getLinkedPeers();
         RNSPeer peer = null;
         for (RNSPeer p : lps) {
+            var pLink = p.getPeerLink();
+            log.info("* findPeerByDestinationHash - peerLink hash: {}, search hash: {}",
+                    Hex.encodeHexString(pLink.getDestination().getHash()),
+                    Hex.encodeHexString(dhash));
             if (Arrays.equals(p.getDestinationHash(), dhash)) {
-                log.info("found peer matching destinationHash: {}", Hex.encodeHexString(dhash));
+                log.info("  findPeerByDestinationHash - found peer matching destinationHash");
                 peer = p;
                 break;
             }
