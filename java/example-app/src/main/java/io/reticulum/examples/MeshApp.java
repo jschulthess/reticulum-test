@@ -174,6 +174,12 @@ public class MeshApp {
                                 testPacket.send();
                             }
                         }
+                        if (inData.equalsIgnoreCase("status")) {
+                            log.info("we have {} non-initiator links, list: {}", incomingLinks.size(), incomingLinks);
+                            for (Link l: incomingLinks) {
+                                log.info("incoming link {}, status: {}", l, l.getStatus());
+                            }
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -195,7 +201,6 @@ public class MeshApp {
                 log.error("exception: {}", e);
             }
         }
-        // TODO: send "close" packet to all initiator peers (incomingLinks) to close il.getDestination().getHash());
         // gracefully close links of peers that point to us
         for (Link l: incomingLinks) {
             var data = concatArrays("close::".getBytes(UTF_8),l.getDestination().getHash());
@@ -393,9 +398,38 @@ public class MeshApp {
                 newPeer.setIsInitiator(true);
                 lps.add(newPeer);
                 log.info("added new RNSPeer, destinationHash: {}", Hex.encodeHexString(destinationHash));
+                var pLink = newPeer.getPeerLink();
+                var data = concatArrays("open::".getBytes(UTF_8),pLink.getDestination().getHash());
+                Packet closePacket = new Packet(pLink, data);
+                var packetReceipt = closePacket.send();
+                //packetReceipt.setTimeout(3L);
+                packetReceipt.setDeliveryCallback(this::openPacketDelivered);
+                packetReceipt.setTimeoutCallback(this::packetTimedOut);
             }
         }
 
+        public void openPacketDelivered(PacketReceipt receipt) {
+            var rttString = new String("");
+            if (receipt.getStatus() == PacketReceiptStatus.DELIVERED) {
+                var rtt = receipt.getRtt();    // rtt (Java) is in miliseconds
+                //log.info("qqp - packetDelivered - rtt: {}", rtt);
+                if (rtt >= 1000) {
+                    rtt = Math.round(rtt / 1000);
+                    rttString = String.format("%d seconds", rtt);
+                } else {
+                    rttString = String.format("%d miliseconds", rtt);
+                }
+                log.info("Shutdown packet confirmation received from {}, round-trip time is {}",
+                        Hex.encodeHexString(receipt.getDestination().getHash()), rttString);
+            }
+        }
+
+        public void packetTimedOut(PacketReceipt receipt) {
+            log.info("packet timed out");
+            if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
+                log.info("packet timed out, receipt status: {}", PacketReceiptStatus.FAILED);
+            }
+        }
     }
 
     /************/
@@ -488,22 +522,23 @@ public class MeshApp {
             var msgText = new String(message, StandardCharsets.UTF_8);
             if (msgText.equals("ping")) {
                 log.info("received ping on link");
-            } else {
-                log.info("message received: {}", msgText);
-                if (msgText.startsWith("close::")) {
-                    var targetPeerHash = subarray(message, 7, message.length);
-                    log.info("peer dest hash: {}, target hash: {}",
-                        Hex.encodeHexString(destinationHash),
-                        Hex.encodeHexString(targetPeerHash));
-                    if (Arrays.equals(destinationHash, targetPeerHash)) {
-                        log.info("closing link: {}", peerLink.getDestination().getHexHash());
-                        peerLink.teardown();
-                    }
-                    //var peer = findPeerByDestinationHash(targetPeerHash);
-                    //if (nonNull(peer)) {
-                    //    log.info("found peer matching close packet - closing link for: {}", targetPeerHash);
-                    //    peer.getPeerLink().teardown();
-                    //}
+            } else if (msgText.startsWith("close::")) {
+                var targetPeerHash = subarray(message, 7, message.length);
+                log.info("peer dest hash: {}, target hash: {}",
+                    Hex.encodeHexString(destinationHash),
+                    Hex.encodeHexString(targetPeerHash));
+                if (Arrays.equals(destinationHash, targetPeerHash)) {
+                    log.info("closing link: {}", peerLink.getDestination().getHexHash());
+                    peerLink.teardown();
+                }
+            } else if (msgText.startsWith("open::")) {
+                var targetPeerHash = subarray(message, 7, message.length);
+                log.info("peer dest hash: {}, target hash: {}",
+                    Hex.encodeHexString(destinationHash),
+                    Hex.encodeHexString(targetPeerHash));
+                if (Arrays.equals(destinationHash, targetPeerHash)) {
+                    log.info("closing link: {}", peerLink.getDestination().getHexHash());
+                    getOrInitPeerLink();
                 }
             }
         }
