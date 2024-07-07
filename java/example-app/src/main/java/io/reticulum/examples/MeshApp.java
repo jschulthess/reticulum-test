@@ -133,7 +133,7 @@ public class MeshApp {
                     log.info("=> enter 'status' to see status of peer links");
                     log.info("=> enter some text (other than keywords) to send message to peers");
                     log.info("=> enter 'close'/'open' to teardown/re-open existing peer links");
-                    log.info("=> enter 'clean' to remove all local peer objects");
+                    log.info("=> enter 'clean' to shutdown and remove all local peer objects");
                     log.info("=> enter 'quit' to exit");
                     log.info("=> enter '?' or 'help' to see this message");
                 } else {
@@ -216,11 +216,13 @@ public class MeshApp {
     public void serverPacketReceived(byte[] message, Packet packet) {
         String text = new String(message, StandardCharsets.UTF_8);
         log.info("Received data on the link: \"{}\"", text);
-    //    // send reply
-    //    String replyText = "I received \""+text+"\" over the link";
-    //    byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
-    //    Packet reply = new Packet(latestClientLink, replyData);
-    //    reply.send();
+        //var peer = findPeerByDestinationHash(packet.getDestinationHash());
+        //// send reply
+        //if (nonNull(peer)) {
+        //  String replyText = "pong";
+        //  byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
+        //  Packet reply = new Packet(peer.getPeerLink(), replyData);
+        //}
     }
 
     @Synchronized
@@ -284,7 +286,6 @@ public class MeshApp {
                 //        continue;
                 //    }
                 //}
-                // TODO: which parts of the peer need to be checked for equality ?
                 if (Arrays.equals(p.getDestinationHash(), destinationHash)) {
                     log.info("MeshAnnounceHandler - peer exists - found peer matching destinationHash");
                     if (nonNull(p.getPeerLink())) {
