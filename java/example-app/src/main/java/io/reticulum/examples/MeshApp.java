@@ -20,6 +20,7 @@ import static io.reticulum.link.TeardownSession.TIMEOUT;
 import static io.reticulum.link.LinkStatus.ACTIVE;
 //import static io.reticulum.packet.PacketContextType.LINKCLOSE;
 import static io.reticulum.identity.IdentityKnownDestination.recall;
+import static io.reticulum.utils.IdentityUtils.concatArrays;
 //import static io.reticulum.constant.ReticulumConstant.TRUNCATED_HASHLENGTH;
 import lombok.extern.slf4j.Slf4j;
 import lombok.Data;
@@ -36,6 +37,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 //import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 //import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.ArrayUtils.subarray;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -60,7 +62,7 @@ public class MeshApp {
     public Destination baseDestination;
     private volatile boolean isShuttingDown = false;
     private final List<RNSPeer> linkedPeers = Collections.synchronizedList(new ArrayList<>());
-    //private final List<Link> incomingLinks = Collections.synchronizedList(new ArrayList<>());
+    private final List<Link> incomingLinks = Collections.synchronizedList(new ArrayList<>());
     //public Link latestClientLink;
     //public Link meshLink;
     //public Link clientLink;
@@ -193,7 +195,41 @@ public class MeshApp {
                 log.error("exception: {}", e);
             }
         }
+        // TODO: send "close" packet to all initiator peers (incomingLinks) to close il.getDestination().getHash());
+        // gracefully close links of peers that point to us
+        for (Link l: incomingLinks) {
+            var data = concatArrays("close::".getBytes(UTF_8),l.getDestination().getHash());
+            Packet closePacket = new Packet(l, data);
+            var packetReceipt = closePacket.send();
+            packetReceipt.setTimeout(3L);
+            packetReceipt.setDeliveryCallback(this::closePacketDelivered);
+            packetReceipt.setTimeoutCallback(this::packetTimedOut);
+        }
+        // Note: we still need to get the packet timeout callback to work...
         reticulum.exitHandler();
+    }
+
+    public void closePacketDelivered(PacketReceipt receipt) {
+        var rttString = new String("");
+        if (receipt.getStatus() == PacketReceiptStatus.DELIVERED) {
+            var rtt = receipt.getRtt();    // rtt (Java) is in miliseconds
+            //log.info("qqp - packetDelivered - rtt: {}", rtt);
+            if (rtt >= 1000) {
+                rtt = Math.round(rtt / 1000);
+                rttString = String.format("%d seconds", rtt);
+            } else {
+                rttString = String.format("%d miliseconds", rtt);
+            }
+            log.info("Shutdown packet confirmation received from {}, round-trip time is {}",
+                    Hex.encodeHexString(receipt.getDestination().getHash()), rttString);
+        }
+    }
+
+    public void packetTimedOut(PacketReceipt receipt) {
+        log.info("packet timed out");
+        if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
+            log.info("packet timed out, receipt status: {}", PacketReceiptStatus.FAILED);
+        }
     }
 
     public void clientConnected(Link link) {
@@ -203,15 +239,17 @@ public class MeshApp {
         if (nonNull(peer)) {
             log.info("initiator peer {} opened link (link lookup: {}), link destination hash: {}",
                 Hex.encodeHexString(peer.getDestinationHash()), link, Hex.encodeHexString(link.getDestination().getHash()));
+            // make sure the peerLink is active.
+            peer.getOrInitPeerLink();
         } else {
             log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
                 peer, link, Hex.encodeHexString(link.getDestination().getHash()));
         }
+        incomingLinks.add(link);
         log.info("***> Client connected, link: {}", link);
     }
 
     public void clientDisconnected(Link link) {
-        log.info("***> Client disconnected");
         var peer = findPeerByLink(link);
         if (nonNull(peer)) {
             log.info("initiator peer closed link (link lookup: {}), link destination hash: {}",
@@ -227,11 +265,21 @@ public class MeshApp {
             //       keep it to reopen link later if possible.
             peer.getPeerLink().teardown();
         }
+        incomingLinks.remove(link);
+        log.info("***> Client disconnected");
     }
 
     public void serverPacketReceived(byte[] message, Packet packet) {
         String text = new String(message, StandardCharsets.UTF_8);
         log.info("Received data on the link: \"{}\"", text);
+        if (text.startsWith("close::")) {
+            var targetPeerHash = subarray(message, 6, message.length);
+            var peer = findPeerByDestinationHash(targetPeerHash);
+            if (nonNull(peer)) {
+                log.info("found peer matching close packet - closing link for: {}", targetPeerHash);
+                peer.getPeerLink().teardown();
+            }
+        }
         //var peer = findPeerByDestinationHash(packet.getDestinationHash());
         //// send reply
         //if (nonNull(peer)) {
@@ -279,7 +327,7 @@ public class MeshApp {
         RNSPeer peer = null;
         for (RNSPeer p : lps) {
             var pLink = p.getPeerLink();
-            log.info("* findPeerByDestinationHash - peerLink hash: {}, search hash: {}",
+            log.info("* findPeerByDestinationHash - peerLink destination hash: {}, search hash: {}",
                     Hex.encodeHexString(pLink.getDestination().getHash()),
                     Hex.encodeHexString(dhash));
             if (Arrays.equals(p.getDestinationHash(), dhash)) {
