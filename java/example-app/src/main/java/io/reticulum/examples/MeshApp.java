@@ -139,7 +139,7 @@ public class MeshApp {
                     log.info("=> enter 'status' to see status of peer links");
                     log.info("=> enter some text (other than keywords) to send message to peers");
                     log.info("=> enter 'close'/'open' to teardown/re-open existing peer links");
-                    log.info("=> enter 'clean' to shutdown and remove all local peer objects");
+                    log.info("=> enter 'clean' to shutdown and remove all non-ACTIVE local peer objects");
                     log.info("=> enter 'quit' to exit");
                     log.info("=> enter '?' or 'help' to see this message");
                     log.info("********************************************************************************");
@@ -159,7 +159,7 @@ public class MeshApp {
                             } else if (inData.equalsIgnoreCase("open")) {
                                 p.getOrInitPeerLink();
                                 log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
-                            } else if (inData.equalsIgnoreCase("clean")) {
+                            } else if (inData.equalsIgnoreCase("clean") && (p.getPeerLink().getStatus() != ACTIVE)) {
                                 p.shutdown();
                                 linkedPeers.remove(p);
                             } else if (inData.equalsIgnoreCase("status")) {
@@ -315,13 +315,15 @@ public class MeshApp {
         RNSPeer peer = null;
         for (RNSPeer p : lps) {
             var pLink = p.getPeerLink();
-            log.info("* findPeerByLink - peerLink hash: {}, link destination hash: {}",
-                    Hex.encodeHexString(pLink.getDestination().getHash()),
-                    Hex.encodeHexString(link.getDestination().getHash()));
-            if (Arrays.equals(pLink.getDestination().getHash(),link.getDestination().getHash())) {
-                log.info("  findPeerByLink - found peer matching destinationHash");
-                peer = p;
-                break;
+            if (nonNull(pLink)) {
+                log.info("* findPeerByLink - peerLink hash: {}, link destination hash: {}",
+                        Hex.encodeHexString(pLink.getDestination().getHash()),
+                        Hex.encodeHexString(link.getDestination().getHash()));
+                if (Arrays.equals(pLink.getDestination().getHash(),link.getDestination().getHash())) {
+                    log.info("  findPeerByLink - found peer matching destinationHash");
+                    peer = p;
+                    break;
+                }
             }
         }
         return peer;
@@ -399,38 +401,8 @@ public class MeshApp {
                 newPeer.setIsInitiator(true);
                 lps.add(newPeer);
                 log.info("added new RNSPeer, destinationHash: {}", Hex.encodeHexString(destinationHash));
-                //var pLink = newPeer.getPeerLink();
-                //var data = concatArrays("open::".getBytes(), destinationHash);
-                //Packet closePacket = new Packet(pLink, data);
-                //var packetReceipt = closePacket.send();
-                ////packetReceipt.setTimeout(3L);
-                //packetReceipt.setDeliveryCallback(this::openPacketDelivered);
-                //packetReceipt.setTimeoutCallback(this::packetTimedOut);
             }
         }
-
-        //public void openPacketDelivered(PacketReceipt receipt) {
-        //    var rttString = new String("");
-        //    if (receipt.getStatus() == PacketReceiptStatus.DELIVERED) {
-        //        var rtt = receipt.getRtt();    // rtt (Java) is in miliseconds
-        //        //log.info("qqp - packetDelivered - rtt: {}", rtt);
-        //        if (rtt >= 1000) {
-        //            rtt = Math.round(rtt / 1000);
-        //            rttString = String.format("%d seconds", rtt);
-        //        } else {
-        //            rttString = String.format("%d miliseconds", rtt);
-        //        }
-        //        log.info("Shutdown packet confirmation received from {}, round-trip time is {}",
-        //                Hex.encodeHexString(receipt.getDestination().getHash()), rttString);
-        //    }
-        //}
-        //
-        //public void packetTimedOut(PacketReceipt receipt) {
-        //    log.info("packet timed out");
-        //    if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
-        //        log.info("packet timed out, receipt status: {}", PacketReceiptStatus.FAILED);
-        //    }
-        //}
     }
 
     /************/
