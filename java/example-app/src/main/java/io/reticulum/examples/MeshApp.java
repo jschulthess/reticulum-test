@@ -160,7 +160,7 @@ public class MeshApp {
                                 p.getOrInitPeerLink();
                                 log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
                             } else if (inData.equalsIgnoreCase("clean") && (p.getPeerLink().getStatus() != ACTIVE)) {
-                                p.shutdown();
+                                //p.shutdown();
                                 linkedPeers.remove(p);
                             } else if (inData.equalsIgnoreCase("status")) {
                                 log.info("peer destinationHash: {}, peerLink: {} <=> status: {}",
