@@ -491,7 +491,7 @@ public class MeshApp {
             } else {
                 log.info("message received: {}", msgText);
                 if (msgText.startsWith("close::")) {
-                    var targetPeerHash = subarray(message, 8, message.length);
+                    var targetPeerHash = subarray(message, 7, message.length);
                     log.info("peer dest hash: {}, target hash: {}",
                         Hex.encodeHexString(destinationHash),
                         Hex.encodeHexString(targetPeerHash));
