@@ -204,10 +204,9 @@ public class MeshApp {
             log.info("initiator peer {} opened link (link lookup: {}), link destination hash: {}",
                 Hex.encodeHexString(peer.getDestinationHash()), link, Hex.encodeHexString(link.getDestination().getHash()));
         } else {
-            log.info("non-initiator closed link (link lookup: {}), link destination hash (initiator): {}",
+            log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
                 peer, link, Hex.encodeHexString(link.getDestination().getHash()));
         }
-        //latestClientLink = link;
         log.info("***> Client connected, link: {}", link);
     }
 
@@ -215,7 +214,7 @@ public class MeshApp {
         log.info("***> Client disconnected");
         var peer = findPeerByLink(link);
         if (nonNull(peer)) {
-            log.info("initiator peer {} closed link (link lookup: {}), link destination hash: {}",
+            log.info("initiator peer closed link (link lookup: {}), link destination hash: {}",
                 Hex.encodeHexString(peer.getDestinationHash()), link, Hex.encodeHexString(link.getDestination().getHash()));
         } else {
             log.info("non-initiator closed link (link lookup: {}), link destination hash (initiator): {}",
