@@ -398,13 +398,13 @@ public class MeshApp {
                 newPeer.setIsInitiator(true);
                 lps.add(newPeer);
                 log.info("added new RNSPeer, destinationHash: {}", Hex.encodeHexString(destinationHash));
-                //var pLink = newPeer.getPeerLink();
-                //var data = concatArrays("open::".getBytes(UTF_8),pLink.getDestination().getHash());
-                //Packet closePacket = new Packet(pLink, data);
-                //var packetReceipt = closePacket.send();
-                ////packetReceipt.setTimeout(3L);
-                //packetReceipt.setDeliveryCallback(this::openPacketDelivered);
-                //packetReceipt.setTimeoutCallback(this::packetTimedOut);
+                var pLink = newPeer.getPeerLink();
+                var data = concatArrays("open::".getBytes(UTF_8), destinationHash);
+                Packet closePacket = new Packet(pLink, data);
+                var packetReceipt = closePacket.send();
+                //packetReceipt.setTimeout(3L);
+                packetReceipt.setDeliveryCallback(this::openPacketDelivered);
+                packetReceipt.setTimeoutCallback(this::packetTimedOut);
             }
         }
 
