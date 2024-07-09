@@ -154,6 +154,7 @@ public class MeshApp {
                             if (inData.equalsIgnoreCase("probe")) {
                                 p.pingRemote();
                             } else if (inData.equalsIgnoreCase("close")) {
+                                sendCloseToRemote(rpl);
                                 rpl.teardown();
                                 log.info("peerLink: {} - status: {}", rpl, rpl.getStatus());
                             } else if (inData.equalsIgnoreCase("open")) {
@@ -203,15 +204,19 @@ public class MeshApp {
         }
         // gracefully close links of peers that point to us
         for (Link l: incomingLinks) {
-            var data = concatArrays("close::".getBytes(UTF_8),l.getDestination().getHash());
-            Packet closePacket = new Packet(l, data);
-            var packetReceipt = closePacket.send();
-            packetReceipt.setTimeout(3L);
-            packetReceipt.setDeliveryCallback(this::closePacketDelivered);
-            packetReceipt.setTimeoutCallback(this::packetTimedOut);
+            sendCloseToRemote(l);
         }
         // Note: we still need to get the packet timeout callback to work...
         reticulum.exitHandler();
+    }
+
+    public void sendCloseToRemote(Link link) {
+        var data = concatArrays("close::".getBytes(UTF_8),link.getDestination().getHash());
+        Packet closePacket = new Packet(link, data);
+        var packetReceipt = closePacket.send();
+        packetReceipt.setTimeout(3L);
+        packetReceipt.setDeliveryCallback(this::closePacketDelivered);
+        packetReceipt.setTimeoutCallback(this::packetTimedOut);
     }
 
     public void closePacketDelivered(PacketReceipt receipt) {
