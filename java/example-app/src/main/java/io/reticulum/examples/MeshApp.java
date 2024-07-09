@@ -169,10 +169,14 @@ public class MeshApp {
                                     p.getPeerLink(), p.getPeerLink().getStatus());
                                     continue;
                             } else {
+                                if (rpl.getStatus() == ACTIVE) {
                                 var data = inData.getBytes(UTF_8);
                                 log.info("sending text \"{}\" to peer: {}", inData, Hex.encodeHexString(p.getDestinationHash()));
                                 var testPacket = new Packet(rpl, data);
                                 testPacket.send();
+                                } else {
+                                    log.info("can't send data to link with status: {}", rpl.getStatus());
+                                }
                             }
                         }
                         if (inData.equalsIgnoreCase("status")) {
