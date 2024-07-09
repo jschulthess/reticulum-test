@@ -154,7 +154,7 @@ public class MeshApp {
                             if (inData.equalsIgnoreCase("probe")) {
                                 p.pingRemote();
                             } else if (inData.equalsIgnoreCase("close")) {
-                                sendCloseToRemote(rpl);
+                                //sendCloseToRemote(rpl); // note: this has no effect
                                 rpl.teardown();
                                 log.info("peerLink: {} - status: {}", rpl, rpl.getStatus());
                             } else if (inData.equalsIgnoreCase("open")) {
