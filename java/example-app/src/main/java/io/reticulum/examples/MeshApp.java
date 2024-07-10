@@ -553,14 +553,20 @@ public class MeshApp {
         // utility methods
         public void pingRemote() {
             var link = this.peerLink;
-            log.info("pinging remote: {}", link);
-            var data = "ping".getBytes(UTF_8);
-            link.setPacketCallback(this::linkPacketReceived);
-            Packet pingPacket = new Packet(link, data);
-            PacketReceipt packetReceipt = pingPacket.send();
-            packetReceipt.setTimeout(3L);
-            packetReceipt.setTimeoutCallback(this::packetTimedOut);
-            packetReceipt.setDeliveryCallback(this::packetDelivered);
+            if (nonNull(UTF_8)) {
+                if (peerLink.getStatus() == ACTIVE) {
+                    log.info("pinging remote: {}", link);
+                    var data = "ping".getBytes(UTF_8);
+                    link.setPacketCallback(this::linkPacketReceived);
+                    Packet pingPacket = new Packet(link, data);
+                    PacketReceipt packetReceipt = pingPacket.send();
+                    packetReceipt.setTimeout(3L);
+                    packetReceipt.setTimeoutCallback(this::packetTimedOut);
+                    packetReceipt.setDeliveryCallback(this::packetDelivered);
+                } else {
+                    log.info("can't send ping to a peer with state: {}", peerLink.getStatus());
+                }
+            }
         }
     }
 
