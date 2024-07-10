@@ -564,7 +564,7 @@ public class MeshApp {
                     packetReceipt.setTimeoutCallback(this::packetTimedOut);
                     packetReceipt.setDeliveryCallback(this::packetDelivered);
                 } else {
-                    log.info("can't send ping to a peer {} with state: {}",
+                    log.info("can't send ping to a peer {} with (link) status: {}",
                         Hex.encodeHexString(peerLink.getDestination().getHash()), peerLink.getStatus());
                 }
             }
