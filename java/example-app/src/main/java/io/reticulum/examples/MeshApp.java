@@ -553,7 +553,7 @@ public class MeshApp {
         // utility methods
         public void pingRemote() {
             var link = this.peerLink;
-            if (nonNull(UTF_8)) {
+            if (nonNull(link)) {
                 if (peerLink.getStatus() == ACTIVE) {
                     log.info("pinging remote: {}", link);
                     var data = "ping".getBytes(UTF_8);
