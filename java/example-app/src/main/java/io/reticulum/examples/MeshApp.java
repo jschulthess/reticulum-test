@@ -240,10 +240,10 @@ public class MeshApp {
     }
 
     public void packetTimedOut(PacketReceipt receipt) {
-        log.info("packet timed out");
-        if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
-            log.info("packet timed out, receipt status: {}", PacketReceiptStatus.FAILED);
-        }
+        log.info("packet timed out, receipt status: {}", receipt.getStatus());
+        //if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
+        //    log.info("packet timed out, receipt status: {}", PacketReceiptStatus.FAILED);
+        //}
     }
 
     public void clientConnected(Link link) {
