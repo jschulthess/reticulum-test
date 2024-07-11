@@ -33,6 +33,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.WRITE;
 //import static java.util.Objects.isNull;
 //import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -86,6 +88,13 @@ public class MeshApp {
         } else {
             meshIdentity = new Identity();
             log.info("new mesh identity created dynamically.");
+            // save it back to file by default for next start (possibly add setting to override)
+            try {
+                Files.write(meshIdentityPath, meshIdentity.getPrivateKey(), CREATE, WRITE);
+                log.info("serverIdentity written back to file");
+            } catch (IOException e) {
+                log.error("Error while saving serverIdentity to {}", meshIdentityPath, e);
+            }
         }
 
         // We create a destination that clients can connect to. We
@@ -219,7 +228,7 @@ public class MeshApp {
             var data = concatArrays("close::".getBytes(UTF_8),link.getDestination().getHash());
             Packet closePacket = new Packet(link, data);
             var packetReceipt = closePacket.send();
-            packetReceipt.setTimeout(3L);
+            //packetReceipt.setTimeout(3L);
             packetReceipt.setDeliveryCallback(this::closePacketDelivered);
             packetReceipt.setTimeoutCallback(this::packetTimedOut);
         } else {
@@ -289,7 +298,7 @@ public class MeshApp {
 
     public void serverPacketReceived(byte[] message, Packet packet) {
         String text = new String(message, StandardCharsets.UTF_8);
-        log.info("Received data on the link: \"{}\"", text);
+        log.info("Received data on the link, message: \"{}\"", text);
         //if (text.startsWith("close::")) {
         //    var targetPeerHash = subarray(message, 6, message.length);
         //    var peer = findPeerByDestinationHash(targetPeerHash);
@@ -564,7 +573,7 @@ public class MeshApp {
                     link.setPacketCallback(this::linkPacketReceived);
                     Packet pingPacket = new Packet(link, data);
                     PacketReceipt packetReceipt = pingPacket.send();
-                    packetReceipt.setTimeout(3L);
+                    //packetReceipt.setTimeout(3L);
                     packetReceipt.setTimeoutCallback(this::packetTimedOut);
                     packetReceipt.setDeliveryCallback(this::packetDelivered);
                 } else {
