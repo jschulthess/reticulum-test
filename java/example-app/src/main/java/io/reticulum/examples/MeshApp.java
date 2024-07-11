@@ -228,7 +228,6 @@ public class MeshApp {
             var data = concatArrays("close::".getBytes(UTF_8),link.getDestination().getHash());
             Packet closePacket = new Packet(link, data);
             var packetReceipt = closePacket.send();
-            //packetReceipt.setTimeout(3L);
             packetReceipt.setDeliveryCallback(this::closePacketDelivered);
             packetReceipt.setTimeoutCallback(this::packetTimedOut);
         } else {
@@ -240,7 +239,6 @@ public class MeshApp {
         var rttString = new String("");
         if (receipt.getStatus() == PacketReceiptStatus.DELIVERED) {
             var rtt = receipt.getRtt();    // rtt (Java) is in miliseconds
-            //log.info("qqp - packetDelivered - rtt: {}", rtt);
             if (rtt >= 1000) {
                 rtt = Math.round(rtt / 1000);
                 rttString = String.format("%d seconds", rtt);
@@ -416,7 +414,6 @@ public class MeshApp {
                     }
                 }
             }
-            //if (peer == null) {
             if (!peerExists) {
                 RNSPeer newPeer = new RNSPeer(destinationHash);
                 newPeer.setServerIdentity(announcedIdentity);
@@ -483,9 +480,6 @@ public class MeshApp {
                 if (peerLink.getStatus() == ACTIVE) {
                     peerLink.teardown();
                 }
-                // else {
-                //    peerLink = null;
-                //}
                 this.peerLink = null;
             }
         }
@@ -573,7 +567,7 @@ public class MeshApp {
                     link.setPacketCallback(this::linkPacketReceived);
                     Packet pingPacket = new Packet(link, data);
                     PacketReceipt packetReceipt = pingPacket.send();
-                    //packetReceipt.setTimeout(3L);
+                    // Note: don't setTimeout, we want it to timeout with FAIL if not deliverable
                     packetReceipt.setTimeoutCallback(this::packetTimedOut);
                     packetReceipt.setDeliveryCallback(this::packetDelivered);
                 } else {
