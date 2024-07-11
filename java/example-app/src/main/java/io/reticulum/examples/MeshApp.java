@@ -169,9 +169,11 @@ public class MeshApp {
                             } else if (inData.equalsIgnoreCase("open")) {
                                 p.getOrInitPeerLink();
                                 log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
-                            } else if (inData.equalsIgnoreCase("clean") && (p.getPeerLink().getStatus() != ACTIVE)) {
-                                //p.shutdown();
-                                linkedPeers.remove(p);
+                            } else if (inData.equalsIgnoreCase("clean")) {
+                                if (p.getPeerLink().getStatus() != ACTIVE) {
+                                    //p.shutdown();
+                                    linkedPeers.remove(p);
+                                }
                             } else if (inData.equalsIgnoreCase("status")) {
                                 log.info("peer destinationHash: {}, peerLink: {} <=> status: {}",
                                     Hex.encodeHexString(p.getDestinationHash()),
