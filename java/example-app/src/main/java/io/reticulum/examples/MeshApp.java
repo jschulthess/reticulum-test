@@ -215,12 +215,16 @@ public class MeshApp {
     }
 
     public void sendCloseToRemote(Link link) {
-        var data = concatArrays("close::".getBytes(UTF_8),link.getDestination().getHash());
-        Packet closePacket = new Packet(link, data);
-        var packetReceipt = closePacket.send();
-        packetReceipt.setTimeout(3L);
-        packetReceipt.setDeliveryCallback(this::closePacketDelivered);
-        packetReceipt.setTimeoutCallback(this::packetTimedOut);
+        if (nonNull(link)) {
+            var data = concatArrays("close::".getBytes(UTF_8),link.getDestination().getHash());
+            Packet closePacket = new Packet(link, data);
+            var packetReceipt = closePacket.send();
+            packetReceipt.setTimeout(3L);
+            packetReceipt.setDeliveryCallback(this::closePacketDelivered);
+            packetReceipt.setTimeoutCallback(this::packetTimedOut);
+        } else {
+            log.debug("can't send to null link");
+        }
     }
 
     public void closePacketDelivered(PacketReceipt receipt) {
