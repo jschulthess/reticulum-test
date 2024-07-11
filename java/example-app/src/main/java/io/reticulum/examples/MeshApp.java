@@ -569,8 +569,8 @@ public class MeshApp {
                     link.setPacketCallback(this::linkPacketReceived);
                     Packet pingPacket = new Packet(link, data);
                     PacketReceipt packetReceipt = pingPacket.send();
-                    // Note: don't setTimeout, we want it to timeout with FAIL if not deliverable
-                    packetReceipt.setTimeout(3L);
+                    // Note: don't setTimeout, we want it to timeout with FAIL if remote peer is unreachable.
+                    //packetReceipt.setTimeout(3L);
                     packetReceipt.setTimeoutCallback(this::packetTimedOut);
                     packetReceipt.setDeliveryCallback(this::packetDelivered);
                 } else {
