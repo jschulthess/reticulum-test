@@ -190,12 +190,12 @@ public class MeshApp {
                                 }
                             }
                         }
-                        if (inData.equalsIgnoreCase("status")) {
-                            log.info("we have {} non-initiator links, list: {}", incomingLinks.size(), incomingLinks);
-                            //for (Link l: incomingLinks) {
-                            //    log.info("incoming link {}, destination: {}", l, Hex.encodeHexString(l.getDestination().getHash()));
-                            //}
-                        }
+                        //if (inData.equalsIgnoreCase("status")) {
+                        //    log.info("we have {} non-initiator links, list: {}", incomingLinks.size(), incomingLinks);
+                        //    //for (Link l: incomingLinks) {
+                        //    //    log.info("incoming link {}, destination: {}", l, Hex.encodeHexString(l.getDestination().getHash()));
+                        //    //}
+                        //}
                     }
                 }
             } catch (Exception e) {
