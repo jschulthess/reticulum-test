@@ -38,7 +38,9 @@ import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 //import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
+//import org.apache.commons.codec.binary.Hex;
+//import static org.apache.commons.codec.binary.Hex.encodeHexString;
+import static org.apache.commons.codec.binary.Hex.decodeHex;
 //import org.bouncycastle.util.encoders.UTF8;
 
 import org.apache.commons.cli.*;
@@ -343,7 +345,7 @@ public class LinkApp {
             var instance = new LinkApp();
             if (cLine.hasOption("c")) {
                 try {
-                    instance.client_setup(Hex.decodeHex(cLine.getOptionValue("c")));
+                    instance.client_setup(decodeHex(cLine.getOptionValue("c")));
                 } catch (IllegalArgumentException e) {
                     log.error("Invalid destination entered. Check your input!");
                     System.exit(0);
@@ -372,8 +374,8 @@ public class LinkApp {
         //    } else {
         //        log.info("client - cli inputs: {}, {}", args[0], args[1]);
         //        try {
-        //            //log.info("client - decoded hex sting input[1]: {}", Hex.decodeHex(args[1]));
-        //            instance.client_setup(Hex.decodeHex(args[1]));
+        //            //log.info("client - decoded hex sting input[1]: {}", decodeHex(args[1]));
+        //            instance.client_setup(decodeHex(args[1]));
         //        } catch (DecoderException e) {
         //            log.error("DecoderException: {}", e.fillInStackTrace());
         //        }
