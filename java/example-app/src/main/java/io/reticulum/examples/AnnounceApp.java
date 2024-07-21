@@ -9,8 +9,8 @@ import io.reticulum.destination.ProofStrategy;
 import io.reticulum.identity.Identity;
 import io.reticulum.transport.AnnounceHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+//import org.apache.logging.log4j.Logger;
+//import org.apache.logging.log4j.LogManager;
 import org.apache.commons.codec.binary.Hex;
 
 import java.io.IOException;
