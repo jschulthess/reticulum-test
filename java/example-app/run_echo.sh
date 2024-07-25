@@ -9,7 +9,6 @@
 #fi
 
 ARGS=$*
-#echo $ARGS
 
 source run_dependencies_env
 
