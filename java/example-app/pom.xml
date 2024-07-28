@@ -22,6 +22,7 @@
     <log4j.version>2.23.1</log4j.version>
     <commons-lang3.version>3.14.0</commons-lang3.version>
     <nitrite.version>4.3.0</nitrite.version>
+    <junit.version>5.9.2</junit.version>
   </properties>
 
   <repositories>
@@ -41,7 +42,7 @@
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
-        <version>5.9.2</version>
+        <version>${junit.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -146,17 +147,19 @@
     <dependency>
       <groupId>org.dizitart</groupId>
       <artifactId>nitrite</artifactId>
+        <version>${nitrite.version}</version>
     </dependency>
     <dependency>
       <groupId>org.dizitart</groupId>
       <artifactId>nitrite-mvstore-adapter</artifactId>
+        <version>${nitrite.version}</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <version>2.3.230</version>
-      <scope>test</scope>
+      <!--<scope>test</scope>-->
     </dependency>
     <!-- https://mvnrepository.com/artifact/com.h2database/h2-mvstore -->
     <dependency>
@@ -165,9 +168,17 @@
       <version>2.3.230</version>
     </dependency>
     <!-- Test dependencies-->
+    <!--
+    <dependency>
+      <groupId>org.junit</groupId>
+      <artifactId>org.junit</artifactId>
+      <version>3.8.1</version>
+    </dependency>
+    -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
