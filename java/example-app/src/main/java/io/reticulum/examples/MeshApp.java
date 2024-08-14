@@ -90,6 +90,10 @@ public class MeshApp {
             log.info("new mesh identity created dynamically.");
             // save it back to file by default for next start (possibly add setting to override)
             try {
+                var identitiesPath = reticulum.getStoragePath().resolve("identities");
+                if (Files.notExists(identitiesPath)) {
+                    Files.createDirectories(identitiesPath);
+                }
                 Files.write(meshIdentityPath, meshIdentity.getPrivateKey(), CREATE, WRITE);
                 log.info("serverIdentity written back to file");
             } catch (IOException e) {
