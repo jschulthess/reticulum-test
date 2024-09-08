@@ -2,6 +2,7 @@ package io.reticulum.examples;
 
 import io.reticulum.Reticulum;
 import io.reticulum.Transport;
+import io.reticulum.interfaces.ConnectionInterface;
 import io.reticulum.destination.Destination;
 import io.reticulum.destination.DestinationType;
 import io.reticulum.destination.Direction;
@@ -99,6 +100,11 @@ public class MeshApp {
             } catch (IOException e) {
                 log.error("Error while saving serverIdentity to {}", meshIdentityPath, e);
             }
+        }
+
+        // show the ifac_size of the configured interfaces (debug code)
+        for (ConnectionInterface i: Transport.getInstance().getInterfaces() ) {
+            log.info("interface {}, length: {}", i.getInterfaceName(), i.getIfacSize());
         }
 
         // We create a destination that clients can connect to. We
