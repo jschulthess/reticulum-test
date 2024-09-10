@@ -385,7 +385,8 @@ public class MeshApp {
     private class MeshAnnounceHandler implements AnnounceHandler {
         @Override
         public String getAspectFilter() {
-            return null;
+            //return null;
+            return "example_utilities.meshexample";
         }
 
         @Override
