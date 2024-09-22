@@ -57,6 +57,8 @@ import org.apache.commons.cli.*;
 @Data
 @Slf4j
 public class MeshApp {
+    //private static Boolean isTest = true;
+    //private static final String APP_NAME = isTest ? "example_utilities_test": "example_utilities";
     private static final String APP_NAME = "example_utilities";
     Reticulum reticulum;
     //static final String defaultConfigPath = new String(".reticulum");
