@@ -42,6 +42,7 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 //import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import java.util.Base64;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -50,6 +51,7 @@ import java.util.concurrent.TimeUnit;
 //import static org.apache.commons.codec.binary.Hex.encodeHexString;
 import static org.apache.commons.codec.binary.Hex.decodeHex;
 //import org.bouncycastle.util.encoders.UTF8;
+import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.cli.ParseException;
@@ -187,10 +189,17 @@ public class BufferApp {
          */
         var data = latestBuffer.read(readyBytes);
         //var decodedData = data.getBytes(StandardCharsets.UTF_8);
+        var decodedData = new String();
+        for (Byte b: data) {
+            if (b == 0) {
+                continue;
+            }
+            decodedData = decodedData + b;
+        }
 
-        log.info("Received data over the buffer: {}", data);
+        log.info("Received data over the buffer: {}", decodedData);
 
-        String replyText = "I received \""+data+"\" over the link";
+        String replyText = "I received \""+decodedData+"\" over the link";
         byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
         latestBuffer.write(replyData);
         //latestBuffer.flush();
@@ -353,7 +362,8 @@ public class BufferApp {
     // When the buffer has new data, read it and write it to the terminal.
     public void clientBufferReady(Integer readyBytes) {
         var data = buffer.read(readyBytes);
-        var decodedData = new String(data, StandardCharsets.UTF_8);
+        //var decodedData = new String(data, StandardCharsets.UTF_8);
+        var decodedData = Base64.getEncoder().encodeToString(data);
         log.info("Received data on the link buffer: {}", decodedData);
         System.out.print("> ");
     }
