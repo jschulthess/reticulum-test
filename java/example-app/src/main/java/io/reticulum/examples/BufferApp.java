@@ -188,14 +188,7 @@ public class BufferApp {
          * :param readyBytes: The number of bytes ready to read
          */
         var data = latestBuffer.read(readyBytes);
-        //var decodedData = data.getBytes(StandardCharsets.UTF_8);
-        var decodedData = new String();
-        for (Byte b: data) {
-            if (b == 0) {
-                continue;
-            }
-            decodedData = decodedData + b;
-        }
+        var decodedData = new String(data);
 
         log.info("Received data over the buffer: {}", decodedData);
 
