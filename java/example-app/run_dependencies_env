@@ -26,5 +26,6 @@ DEPENDENCIES="target/example-app-1.0-SNAPSHOT.jar\
 :$HOME/.m2/repository/com/igormaznitsa/jbbp/2.0.6/jbbp-2.0.6-javadoc.jar\
 :$HOME/.m2/repository/io/netty/netty-all/5.0.0.Alpha2/netty-all-5.0.0.Alpha2.jar\
 :$HOME/.m2/repository/com/github/seancfoley/ipaddress/5.4.2/ipaddress-5.4.2.jar\
-:$HOME/.m2/repository/org/yaml/snakeyaml/1.33/snakeyaml-1.33.jar"
+:$HOME/.m2/repository/org/yaml/snakeyaml/1.33/snakeyaml-1.33.jar\
+:$HOME/.m2/repository/com/clickhouse/org.apache.commons.compress/1.9.2/org.apache.commons.compress-1.9.2.jar"
 #:$HOME/.m2/repository/io/netty/netty-all/4.1.106.Final/netty-all-4.1.106.Final.jar"
