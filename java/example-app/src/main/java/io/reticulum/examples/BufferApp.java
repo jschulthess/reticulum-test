@@ -344,13 +344,11 @@ public class BufferApp {
 
     // When the buffer has new data, read it and write it to the terminal.
     public void clientBufferReady(Integer readyBytes) {
+        //log.info("ready bytes to read: {}", readyBytes);
         var data = buffer.read(readyBytes);
         var decodedData = new String(data);
-        if (!decodedData.isEmpty()) {
-            log.info("ready bytes to read: {}", readyBytes);
-            log.info("Received data on the link buffer: {}", decodedData);
-            System.out.print("> ");
-        }
+        log.info("Received data on the link buffer: {}", decodedData);
+        System.out.print("> ");
     }
 
     //public void clientPacketReceived(byte[] message, Packet packet) {
