@@ -43,6 +43,7 @@ import static org.apache.commons.lang3.BooleanUtils.isFalse;
 //import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.Base64;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -142,11 +143,10 @@ public class BufferApp {
     // destination, this function will be called with
     // a reference to the link.
     public void clientConnected(Link link) {
-        //log.info("Client connected");
-        link.setLinkClosedCallback(this::clientDisconnected);
-        //link.setPacketCallback(this::serverPacketReceived);
         latestClientLink = link;
+
         log.info("***> Client connected");
+        link.setLinkClosedCallback(this::clientDisconnected);
 
         // If a new connection is received, the old reader
         // needs to be disconnected
@@ -171,22 +171,12 @@ public class BufferApp {
         log.info("***> Client disconnected");
     }
 
-    //public void serverPacketReceived(byte[] message, Packet packet) {
-    //    String text = new String(message, StandardCharsets.UTF_8);
-    //    log.info("Received data on the link: \"{}\"", text);
-    //    // send reply
-    //    String replyText = "I received \""+text+"\" over the link";
-    //    byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
-    //    Packet reply = new Packet(latestClientLink, replyData);
-    //    reply.send();
-    //}
-
-    public void serverBufferReady (Integer readyBytes) {  // argument: ???
-        /*
-         * Callback from buffer when buffer has data available
-         * 
-         * :param readyBytes: The number of bytes ready to read
-         */
+    /*
+     * Callback from buffer when buffer has data available
+     * 
+     * :param readyBytes: The number of bytes ready to read
+     */
+    public void serverBufferReady (Integer readyBytes) {
         var data = latestBuffer.read(readyBytes);
         var decodedData = new String(data);
 
@@ -195,7 +185,7 @@ public class BufferApp {
         String replyText = "I received \""+decodedData+"\" over the link";
         byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
         latestBuffer.write(replyData);
-        //latestBuffer.flush();
+        latestBuffer.flush();
 
     }
 
@@ -303,9 +293,10 @@ public class BufferApp {
                 else if (isFalse(text.isEmpty())) {
                     // Otherwise, encode the test and write it to the buffer.
                     var data = text.getBytes(UTF_8);
+                    //buffer.write(data, 0, data.length);
                     buffer.write(data);
                     //Flush the buffer to force the data to be sent.
-                    //buffer.flush();
+                    buffer.flush();
                     //if (data.length <= LinkConstant.MDU) {
                     //    Packet testPacket = new Packet(serverLink, data);
                     //    testPacket.send();
@@ -427,7 +418,7 @@ public class BufferApp {
             } else {
                 formatter.printHelp(cmdUsage, options);
             }
-        } catch (ParseException e) {
+        } catch (ParseException | NoSuchElementException e) {
             e.printStackTrace();
             System.out.println(e.getMessage());
             formatter.printHelp(cmdUsage, options);
