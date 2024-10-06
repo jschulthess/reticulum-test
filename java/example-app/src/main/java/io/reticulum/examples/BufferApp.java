@@ -32,7 +32,7 @@ import static io.reticulum.constant.ReticulumConstant.TRUNCATED_HASHLENGTH;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-//import java.nio.charset.StandardCharsets;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
