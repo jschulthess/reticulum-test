@@ -347,7 +347,8 @@ public class BufferApp {
         log.info("ready bytes to read: {}", readyBytes);
         var data = buffer.read(readyBytes);
         //var decodedData = new String(data, StandardCharsets.UTF_8);
-        var decodedData = Base64.getEncoder().encodeToString(data);
+        //var decodedData = Base64.getEncoder().encodeToString(data);
+        var decodedData = new String(data);
         log.info("Received data on the link buffer: {}", decodedData);
         System.out.print("> ");
     }
