@@ -14,8 +14,8 @@ import io.reticulum.destination.Direction;
 //import io.reticulum.destination.ProofStrategy;
 import io.reticulum.identity.Identity;
 import io.reticulum.link.Link;
-import io.reticulum.constant.LinkConstant;
-import io.reticulum.packet.Packet;
+//import io.reticulum.constant.LinkConstant;
+//import io.reticulum.packet.Packet;
 import io.reticulum.buffer.Buffer;
 import io.reticulum.buffer.BufferedRWPair;
 //import io.reticulum.packet.PacketContextType;
@@ -32,7 +32,7 @@ import static io.reticulum.constant.ReticulumConstant.TRUNCATED_HASHLENGTH;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+//import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -52,7 +52,6 @@ import java.util.concurrent.TimeUnit;
 //import static org.apache.commons.codec.binary.Hex.encodeHexString;
 import static org.apache.commons.codec.binary.Hex.decodeHex;
 //import org.bouncycastle.util.encoders.UTF8;
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.cli.ParseException;
@@ -295,7 +294,7 @@ public class BufferApp {
                     var data = text.getBytes(UTF_8);
                     //buffer.write(data, 0, data.length);
                     buffer.write(data);
-                    //Flush the buffer to force the data to be sent.
+                    // Flush the buffer to have a clean buffer for next send.
                     buffer.flush();
                     //if (data.length <= LinkConstant.MDU) {
                     //    Packet testPacket = new Packet(serverLink, data);
@@ -345,6 +344,7 @@ public class BufferApp {
 
     // When the buffer has new data, read it and write it to the terminal.
     public void clientBufferReady(Integer readyBytes) {
+        log.info("ready bytes to read: {}", readyBytes);
         var data = buffer.read(readyBytes);
         //var decodedData = new String(data, StandardCharsets.UTF_8);
         var decodedData = Base64.getEncoder().encodeToString(data);
