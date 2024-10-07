@@ -164,7 +164,7 @@ public class BufferApp {
         //   opposite directions.
         var channel = link.getChannel();
         latestBuffer = Buffer.createBidirectionalBuffer(0, 0, channel, this::serverBufferReady);
-        log.info("server channel: {}, buffer: {}", channel, buffer);
+        log.info("server channel: {}, buffer: {}", channel, latestBuffer);
     }
 
     public void clientDisconnected(Link link) {
