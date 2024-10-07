@@ -149,8 +149,8 @@ public class BufferApp {
 
         // If a new connection is received, the old reader
         // needs to be disconnected
-        if (nonNull(latestBuffer)) {
-            latestBuffer.close();
+        if (nonNull(this.latestBuffer)) {
+            this.latestBuffer.close();
         }
 
         // Create buffer objects.
@@ -163,7 +163,7 @@ public class BufferApp {
         //   separate unidirectional streams flowing in
         //   opposite directions.
         var channel = link.getChannel();
-        latestBuffer = Buffer.createBidirectionalBuffer(0, 0, channel, this::serverBufferReady);
+        this.latestBuffer = Buffer.createBidirectionalBuffer(0, 0, channel, this::serverBufferReady);
     }
 
     public void clientDisconnected(Link link) {
@@ -176,15 +176,15 @@ public class BufferApp {
      * :param readyBytes: The number of bytes ready to read
      */
     public void serverBufferReady (Integer readyBytes) {
-        var data = latestBuffer.read(readyBytes);
+        var data = this.latestBuffer.read(readyBytes);
         var decodedData = new String(data);
 
         log.info("Received data over the buffer: {}", decodedData);
 
         String replyText = "I received \""+decodedData+"\" over the link";
         byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
-        latestBuffer.write(replyData);
-        latestBuffer.flush();
+        this.latestBuffer.write(replyData);
+        this.latestBuffer.flush();
 
     }
 
@@ -293,9 +293,9 @@ public class BufferApp {
                     // Otherwise, encode the test and write it to the buffer.
                     var data = text.getBytes(UTF_8);
                     //buffer.write(data, 0, data.length);
-                    buffer.write(data);
+                    this.buffer.write(data);
                     // Flush the buffer to have a clean buffer for next send.
-                    buffer.flush();
+                    this.buffer.flush();
                     //if (data.length <= LinkConstant.MDU) {
                     //    Packet testPacket = new Packet(serverLink, data);
                     //    testPacket.send();
@@ -319,7 +319,7 @@ public class BufferApp {
         // Create buffer, see serverClientConnected() for
         // more detail about setting up the buffer.
         var channel = link.getChannel();
-        buffer = Buffer.createBidirectionalBuffer(0, 0, channel, this::clientBufferReady);
+        this.buffer = Buffer.createBidirectionalBuffer(0, 0, channel, this::clientBufferReady);
 
         // INform the user that the server is connected
         log.info("Link established with server, enter some text to send, or \"quit\" to quit");
@@ -345,7 +345,7 @@ public class BufferApp {
     // When the buffer has new data, read it and write it to the terminal.
     public void clientBufferReady(Integer readyBytes) {
         //log.info("ready bytes to read: {}", readyBytes);
-        var data = buffer.read(readyBytes);
+        var data = this.buffer.read(readyBytes);
         var decodedData = new String(data);
         log.info("Received data on the link buffer: {}", decodedData);
         System.out.print("> ");
