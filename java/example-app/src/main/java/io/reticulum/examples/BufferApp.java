@@ -149,7 +149,7 @@ public class BufferApp {
 
         // If a new connection is received, the old reader
         // needs to be disconnected
-        if (nonNull(this.latestBuffer)) {
+        if (nonNull(latestBuffer)) {
             this.latestBuffer.close();
         }
 
