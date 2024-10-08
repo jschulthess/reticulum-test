@@ -184,8 +184,10 @@ public class BufferApp {
 
         String replyText = "I received \""+decodedData+"\" over the link";
         byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
+        //log.info("reply text: {}, data: {}", replyText, replyData);
         latestBuffer.write(replyData);
-        latestBuffer.flush();
+        //latestBuffer.flush();
+        //log.info("reply text written: {}", replyText);
 
     }
 
@@ -292,6 +294,7 @@ public class BufferApp {
                     //buffer.write(data, 0, data.length);
                     buffer.write(data);
                     // Flush the buffer to have a clean buffer for next send.
+                    // Note: in Java it will reset the read buffer.
                     buffer.flush();
                     //if (data.length <= LinkConstant.MDU) {
                     //    Packet testPacket = new Packet(serverLink, data);
