@@ -186,7 +186,8 @@ public class BufferApp {
         byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
         //log.info("reply text: {}, data: {}", replyText, replyData);
         latestBuffer.write(replyData);
-        //latestBuffer.flush();
+        // Note: In Java we need to reset (flush) the reader buffer
+        latestBuffer.flush();
         //log.info("reply text written: {}", replyText);
 
     }
