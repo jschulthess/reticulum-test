@@ -162,7 +162,7 @@ public class BufferApp {
         //   use streamId = 0, but there are actually two
         //   separate unidirectional streams flowing in
         //   opposite directions.
-        var channel = link.getChannel();
+        var channel = latestClientLink.getChannel();
         latestBuffer = Buffer.createBidirectionalBuffer(0, 0, channel, this::serverBufferReady);
         log.info("server channel: {}, buffer: {}", channel, latestBuffer);
     }
@@ -315,7 +315,7 @@ public class BufferApp {
 
         // Create buffer, see serverClientConnected() for
         // more detail about setting up the buffer.
-        var channel = link.getChannel();
+        var channel = serverLink.getChannel();
         buffer = Buffer.createBidirectionalBuffer(0, 0, channel, this::clientBufferReady);
         log.info("client channel: {}, buffer: {}", channel, buffer);
 
