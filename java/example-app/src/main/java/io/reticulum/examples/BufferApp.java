@@ -187,8 +187,8 @@ public class BufferApp {
 
         log.info("Received data over the buffer: {}", decodedData);
 
-        String replyText = "I received \""+decodedData+"\" over the link";
-        byte[] replyData = replyText.getBytes(UTF_8);
+        String replyText = new String("I received \""+decodedData+"\" over the link");
+        byte[] replyData = replyText.getBytes();
         //log.info("reply text: {}, data: {}", replyText, replyData);
         latestBuffer.write(replyData);
         // Note: In Java we need to reset (flush) the reader buffer
@@ -357,7 +357,7 @@ public class BufferApp {
         //log.info("ready bytes to read: {}", readyBytes);
         var data = this.buffer.read(readyBytes);
         var decodedData = new String(data);
-        log.info("(initiator) Received data on the link buffer: {}", decodedData);
+        log.info("(initiator) Received data on the buffer: {}", decodedData);
         System.out.print("> ");
     }
 
