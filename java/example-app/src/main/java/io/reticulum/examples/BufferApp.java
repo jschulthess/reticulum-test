@@ -48,7 +48,7 @@ import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 //import org.apache.commons.codec.DecoderException;
-//import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.binary.Hex;
 //import static org.apache.commons.codec.binary.Hex.encodeHexString;
 import static org.apache.commons.codec.binary.Hex.decodeHex;
 //import org.bouncycastle.util.encoders.UTF8;
@@ -104,6 +104,9 @@ public class BufferApp {
             "bufferexample"
         );
         //log.info("destination1 hash: "+destination1.getHexHash());
+        //log.info("sss1 - serverDestination: {}, destination type: {}, direction: {}", 
+        //          destination1.getHexHash(), 
+        //          destination1.getType(), destination1.getDirection());
 
         // We configure a function that will get called every time
         // a new client creates a link to this destination.
@@ -162,9 +165,11 @@ public class BufferApp {
         //   use streamId = 0, but there are actually two
         //   separate unidirectional streams flowing in
         //   opposite directions.
-        var channel = link.getChannel();
+        var channel = latestClientLink.getChannel();
         latestBuffer = Buffer.createBidirectionalBuffer(0, 0, channel, this::serverBufferReady);
-        log.info("server channel: {}, buffer: {}", channel, latestBuffer);
+        log.info("server channel: {}, buffer: {}, dest hash: {}, dest type: {}, direction: {}", channel, latestBuffer, 
+                 Hex.encodeHexString(link.getDestination().getHash()),
+                 destination1.getType(), destination1.getDirection());
     }
 
     public void clientDisconnected(Link link) {
@@ -183,13 +188,13 @@ public class BufferApp {
         log.info("Received data over the buffer: {}", decodedData);
 
         String replyText = "I received \""+decodedData+"\" over the link";
-        byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
+        byte[] replyData = replyText.getBytes(UTF_8);
         //log.info("reply text: {}, data: {}", replyText, replyData);
         latestBuffer.write(replyData);
         // Note: In Java we need to reset (flush) the reader buffer
+        //       rather than flush the write buffer.
         latestBuffer.flush();
         //log.info("reply text written: {}", replyText);
-
     }
 
     /************/
@@ -245,7 +250,9 @@ public class BufferApp {
 
         // And create a link
         link = new Link(serverDestination);
-        //log.info("ccc - serverDestination: {}, destination type: {}, direction: {}", serverDestination.getHexHash(), serverDestination.getType(), serverDestination.getDirection());
+        log.info("ccc - serverDestination: {}, destination type: {}, direction: {}", 
+                 serverDestination.getHexHash(), 
+                 serverDestination.getType(), serverDestination.getDirection());
 
         // We'll also set up functions to inform the user
         // when the link is established or closed
@@ -295,7 +302,8 @@ public class BufferApp {
                     //buffer.write(data, 0, data.length);
                     buffer.write(data);
                     // Flush the buffer to have a clean buffer for next send.
-                    // Note: in Java it will reset the read buffer.
+                    // Note: in Java it will reset (flush) the read buffer
+                    //       rather than flush the write buffer.
                     buffer.flush();
                     //if (data.length <= LinkConstant.MDU) {
                     //    Packet testPacket = new Packet(serverLink, data);
@@ -319,7 +327,7 @@ public class BufferApp {
 
         // Create buffer, see serverClientConnected() for
         // more detail about setting up the buffer.
-        var channel = link.getChannel();
+        var channel = serverLink.getChannel();
         buffer = Buffer.createBidirectionalBuffer(0, 0, channel, this::clientBufferReady);
         log.info("client channel: {}, buffer: {}", channel, buffer);
 
@@ -352,12 +360,6 @@ public class BufferApp {
         log.info("(initiator) Received data on the link buffer: {}", decodedData);
         System.out.print("> ");
     }
-
-    //public void clientPacketReceived(byte[] message, Packet packet) {
-    //    String text = new String(message, StandardCharsets.UTF_8);
-    //    log.info("Received data on the link: {}", text);
-    //    System.out.print("> ");
-    //}
 
     /*********/
     /** Main */
