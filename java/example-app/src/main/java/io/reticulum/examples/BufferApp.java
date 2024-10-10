@@ -181,15 +181,16 @@ public class BufferApp {
      * 
      * :param readyBytes: The number of bytes ready to read
      */
-    public void serverBufferReady (Integer readyBytes) {
+    public void serverBufferReady(Integer readyBytes) {
         var data = latestBuffer.read(readyBytes);
         var decodedData = new String(data);
 
         log.info("Received data over the buffer: {}", decodedData);
 
-        String replyText = new String("I received \""+decodedData+"\" over the link");
+        //String replyText = new String("I received "+decodedData+" over the link");
+        var replyText = "I received ** "+decodedData;
         byte[] replyData = replyText.getBytes();
-        //log.info("reply text: {}, data: {}", replyText, replyData);
+        log.info("reply text: {}, data: {}", replyText, replyData);
         latestBuffer.write(replyData);
         // Note: In Java we need to reset (flush) the reader buffer
         //       rather than flush the write buffer.
@@ -355,7 +356,7 @@ public class BufferApp {
     // When the buffer has new data, read it and write it to the terminal.
     public void clientBufferReady(Integer readyBytes) {
         //log.info("ready bytes to read: {}", readyBytes);
-        var data = this.buffer.read(readyBytes);
+        var data = buffer.read(readyBytes);
         var decodedData = new String(data);
         log.info("(initiator) Received data on the buffer: {}", decodedData);
         System.out.print("> ");
