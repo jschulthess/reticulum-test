@@ -330,6 +330,8 @@ public class BufferApp {
         // We store a reference to the link instance for later use
         this.serverLink = link;
 
+        log.info("(initiator) - link: {}, status: {}", link, link.getStatus());
+
         // Create buffer, see serverClientConnected() for
         // more detail about setting up the buffer.
         var channel = serverLink.getChannel();
