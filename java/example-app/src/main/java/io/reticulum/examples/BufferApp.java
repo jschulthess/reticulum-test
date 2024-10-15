@@ -147,6 +147,8 @@ public class BufferApp {
     public void clientConnected(Link link) {
         latestClientLink = link;
 
+        log.info("(non-initiator) - link: {}, status: {}", link, link.getStatus());
+
         log.info("***> Client connected");
         link.setLinkClosedCallback(this::clientDisconnected);
 
@@ -255,6 +257,8 @@ public class BufferApp {
                  serverDestination.getHexHash(), 
                  serverDestination.getType(), serverDestination.getDirection());
 
+        log.info("(initiator) - link: {}, status: {}", link, link.getStatus());
+        
         // We'll also set up functions to inform the user
         // when the link is established or closed
         link.setLinkEstablishedCallback(this::linkEstablished);
