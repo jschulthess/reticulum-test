@@ -147,8 +147,6 @@ public class BufferApp {
     public void clientConnected(Link link) {
         latestClientLink = link;
 
-        log.info("(non-initiator) - link: {}, status: {}", link, link.getStatus());
-
         log.info("***> Client connected");
         link.setLinkClosedCallback(this::clientDisconnected);
 
@@ -169,9 +167,9 @@ public class BufferApp {
         //   opposite directions.
         var channel = latestClientLink.getChannel();
         latestBuffer = Buffer.createBidirectionalBuffer(0, 0, channel, this::serverBufferReady);
-        log.info("server channel: {}, buffer: {}, dest hash: {}, dest type: {}, direction: {}", channel, latestBuffer, 
-                 Hex.encodeHexString(link.getDestination().getHash()),
-                 destination1.getType(), destination1.getDirection());
+        //log.info("server channel: {}, buffer: {}, dest hash: {}, dest type: {}, direction: {}", channel, latestBuffer, 
+        //         Hex.encodeHexString(link.getDestination().getHash()),
+        //         destination1.getType(), destination1.getDirection());
     }
 
     public void clientDisconnected(Link link) {
@@ -192,7 +190,7 @@ public class BufferApp {
         //String replyText = new String("I received "+decodedData+" over the link");
         var replyText = "I received ** "+decodedData;
         byte[] replyData = replyText.getBytes();
-        log.info("reply text: {}, data: {}", replyText, replyData);
+        //log.info("reply text: {}, data: {}", replyText, replyData);
         latestBuffer.write(replyData);
         // Note: In Java we need to reset (flush) the reader buffer
         //       rather than flush the write buffer.
@@ -257,7 +255,7 @@ public class BufferApp {
                  serverDestination.getHexHash(), 
                  serverDestination.getType(), serverDestination.getDirection());
 
-        log.info("(initiator) - link: {}, status: {}", link, link.getStatus());
+        //log.info("(initiator) - link: {}, status: {}", link, link.getStatus());
         
         // We'll also set up functions to inform the user
         // when the link is established or closed
@@ -330,7 +328,7 @@ public class BufferApp {
         // We store a reference to the link instance for later use
         this.serverLink = link;
 
-        log.info("(initiator) - link: {}, status: {}", link, link.getStatus());
+        //log.info("(initiator) - link: {}, status: {}", link, link.getStatus());
 
         // Create buffer, see serverClientConnected() for
         // more detail about setting up the buffer.
