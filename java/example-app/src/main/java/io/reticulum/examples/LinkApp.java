@@ -34,6 +34,7 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 //import static org.apache.commons.lang3.StringUtils.isBlank;
 
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -129,6 +130,7 @@ public class LinkApp {
         link.setPacketCallback(this::serverPacketReceived);
         latestClientLink = link;
         log.info("***> Client connected");
+        log.info("server - Link status: {}", link.getStatus());
     }
 
     public void clientDisconnected(Link link) {
@@ -138,6 +140,7 @@ public class LinkApp {
     public void serverPacketReceived(byte[] message, Packet packet) {
         String text = new String(message, StandardCharsets.UTF_8);
         log.info("Received data on the link: \"{}\"", text);
+        //log.info("server - link status: {}", latestClientLink.getStatus());
         // send reply
         String replyText = "I received \""+text+"\" over the link";
         byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
@@ -269,6 +272,7 @@ public class LinkApp {
         this.serverLink = link;
 
         // INform the user that the server is connected
+        log.info("client - Link status: {}", link.getStatus());
         log.info("Link established with server, enter some text to send, or \"quit\" to quit");
     }
 
@@ -355,7 +359,7 @@ public class LinkApp {
             } else {
                 formatter.printHelp(cmdUsage, options);
             }
-        } catch (ParseException e) {
+        } catch (ParseException | NoSuchElementException e) {
             e.printStackTrace();
             System.out.println(e.getMessage());
             formatter.printHelp(cmdUsage, options);
