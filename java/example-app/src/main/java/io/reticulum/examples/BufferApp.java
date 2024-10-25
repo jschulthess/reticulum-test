@@ -170,6 +170,7 @@ public class BufferApp {
         //log.info("server channel: {}, buffer: {}, dest hash: {}, dest type: {}, direction: {}", channel, latestBuffer, 
         //         Hex.encodeHexString(link.getDestination().getHash()),
         //         destination1.getType(), destination1.getDirection());
+        log.debug("server - latestClientLink status: {}", latestClientLink.getStatus());
     }
 
     public void clientDisconnected(Link link) {
@@ -186,6 +187,7 @@ public class BufferApp {
         var decodedData = new String(data);
 
         log.info("Received data over the buffer: {}", decodedData);
+        log.debug("server - latestClientLink status: {}", latestClientLink.getStatus());
 
         //String replyText = new String("I received "+decodedData+" over the link");
         var replyText = "I received ** "+decodedData;
@@ -251,11 +253,11 @@ public class BufferApp {
 
         // And create a link
         link = new Link(serverDestination);
-        log.info("ccc - serverDestination: {}, destination type: {}, direction: {}", 
+        log.debug("(initiator) - link: {}, status: {}", link, link.getStatus());
+        log.info("(initiator) - serverDestination: {}, destination type: {}, direction: {}", 
                  serverDestination.getHexHash(), 
                  serverDestination.getType(), serverDestination.getDirection());
 
-        //log.info("(initiator) - link: {}, status: {}", link, link.getStatus());
         
         // We'll also set up functions to inform the user
         // when the link is established or closed
@@ -327,8 +329,7 @@ public class BufferApp {
     public void linkEstablished(Link link) {
         // We store a reference to the link instance for later use
         this.serverLink = link;
-
-        //log.info("(initiator) - link: {}, status: {}", link, link.getStatus());
+        log.debug("(initiator) - linkEstablished, link: {}, status: {}", link, link.getStatus());
 
         // Create buffer, see serverClientConnected() for
         // more detail about setting up the buffer.
