@@ -140,7 +140,12 @@ public class LinkApp {
     public void serverPacketReceived(byte[] message, Packet packet) {
         String text = new String(message, StandardCharsets.UTF_8);
         log.info("Received data on the link: \"{}\"", text);
-        //log.info("server - link status: {}", latestClientLink.getStatus());
+        //if (nonNull(latestClientLink)) {
+        //    log.info("server - latestClienLink status: {}", latestClientLink.getStatus());
+        //}
+        //if (nonNull(serverLink)) {
+        //    log.info("server - serverLink status: {}", serverLink.getStatus());
+        //}
         // send reply
         String replyText = "I received \""+text+"\" over the link";
         byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
