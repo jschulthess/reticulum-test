@@ -130,7 +130,7 @@ public class LinkApp {
         link.setPacketCallback(this::serverPacketReceived);
         latestClientLink = link;
         log.info("***> Client connected");
-        log.info("server - Link status: {}", link.getStatus());
+        //log.info("server - Link status: {}", link.getStatus());
     }
 
     public void clientDisconnected(Link link) {
