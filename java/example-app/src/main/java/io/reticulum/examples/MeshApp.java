@@ -437,6 +437,9 @@ public class MeshApp {
                     if (p.getPeerLink().getStatus() != ACTIVE) {
                         p.getOrInitPeerLink();
                     }
+                    if (useBuffer) {
+                        p.getOrInitPeerBuffer();
+                    }
                     break;
                 } else {
                     log.info("MeshAnnounceHandler - no matching peer,  peerLink hash: {}, link destination hash: {}",
