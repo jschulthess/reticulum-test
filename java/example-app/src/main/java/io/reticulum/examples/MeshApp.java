@@ -44,6 +44,7 @@ import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.Objects.nonNull;
 //import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.ArrayUtils.subarray;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
 import java.util.Base64;
 import java.util.Arrays;
@@ -288,9 +289,12 @@ public class MeshApp {
         //}
     }
 
+    @Synchronized
     public void clientConnected(Link link) {
         link.setLinkClosedCallback(this::clientDisconnected);
-        link.setPacketCallback(this::serverPacketReceived);
+        if (isFalse(useBuffer)) {
+            link.setPacketCallback(this::serverPacketReceived);
+        }
         var peer = findPeerByLink(link);
         if (nonNull(peer)) {
             log.info("initiator peer {} opened link (link lookup: {}), link destination hash: {}",
@@ -554,6 +558,7 @@ public class MeshApp {
             }
         }
 
+        @Synchronized
         public void linkEstablished(Link link) {
             link.setLinkClosedCallback(this::linkClosed);
             if (useBuffer) {
