@@ -460,11 +460,7 @@ public class MeshApp {
                 RNSPeer newPeer = new RNSPeer(destinationHash);
                 newPeer.setServerIdentity(announcedIdentity);
                 newPeer.setIsInitiator(true);
-                //// creating buffer here is too early, link status likely still PENDING
-                //if (useBuffer) {
-                //    var buffer = newPeer.getOrInitPeerBuffer();
-                //    log.info("created buffer: {}", buffer);
-                //}
+                // do we need to set sendStreamId/receiveStreamId (?)
                 lps.add(newPeer);
                 log.info("added new RNSPeer, destinationHash: {}", Hex.encodeHexString(destinationHash));
             }
@@ -512,7 +508,9 @@ public class MeshApp {
 
             peerLink.setLinkEstablishedCallback(this::linkEstablished);
             peerLink.setLinkClosedCallback(this::linkClosed);
-            peerLink.setPacketCallback(this::linkPacketReceived);
+            if (isFalse(useBuffer)) {
+                peerLink.setPacketCallback(this::linkPacketReceived);
+            }
         }
 
         //public void initPeerBuffer(int receiveStreamId, int sendStreamId) {
@@ -526,7 +524,7 @@ public class MeshApp {
 
         @Synchronized
         public BufferedRWPair getOrInitPeerBuffer() {
-            var channel = peerLink.getChannel();
+            Channel channel = peerLink.getChannel();
             log.info("peer channel: {}", channel);
             if (nonNull(this.peerBuffer)) {
                 log.info("peerBuffer exists: {}, link status: {}", this.peerBuffer, this.peerLink.getStatus());
@@ -595,6 +593,7 @@ public class MeshApp {
                     Hex.encodeHexString(targetPeerHash));
                 if (Arrays.equals(destinationHash, targetPeerHash)) {
                     log.info("closing link: {}", peerLink.getDestination().getHexHash());
+                    peerBuffer.close();
                     peerLink.teardown();
                 }
             } else if (msgText.startsWith("open::")) {
@@ -605,6 +604,7 @@ public class MeshApp {
                 if (Arrays.equals(destinationHash, targetPeerHash)) {
                     log.info("closing link: {}", peerLink.getDestination().getHexHash());
                     getOrInitPeerLink();
+                    getOrInitPeerBuffer();
                 }
             }
         }
