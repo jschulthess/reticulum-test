@@ -126,8 +126,8 @@ public class MeshApp {
         );
         //log.info("destination1 hash: "+destination1.getHexHash());
    
-        baseDestination.setProofStrategy(ProofStrategy.PROVE_ALL);
-        baseDestination.setAcceptLinkRequests(true);
+        //baseDestination.setProofStrategy(ProofStrategy.PROVE_ALL);
+        //baseDestination.setAcceptLinkRequests(true);
 
         // We configure a function that will get called every time
         // a new client creates a link to this destination.
@@ -201,6 +201,7 @@ public class MeshApp {
                                     var data = inData.getBytes(UTF_8);
                                     log.info("sending text \"{}\" to peer: {}", inData, Hex.encodeHexString(p.getDestinationHash()));
                                     if (useBuffer) {
+                                        //var peerBuffer = p.getOrInitPeerBuffer();
                                         var peerBuffer = p.getPeerBuffer();
                                         peerBuffer.write(data);
                                         peerBuffer.flush();
@@ -239,7 +240,8 @@ public class MeshApp {
             log.info("shutting down peer: {}", p);
             p.shutdown();
             try {
-                TimeUnit.SECONDS.sleep(1); // allow for peers to disconnect gracefully
+                // allow for peers to disconnect gracefully
+                TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
                 log.error("exception: {}", e);
             }
@@ -293,8 +295,9 @@ public class MeshApp {
         if (nonNull(peer)) {
             log.info("initiator peer {} opened link (link lookup: {}), link destination hash: {}",
                 Hex.encodeHexString(peer.getDestinationHash()), link, Hex.encodeHexString(link.getDestination().getHash()));
-            // make sure the peerLink is active.
-            peer.getOrInitPeerLink();
+            if (nonNull(peer.getPeerBuffer())) {
+                peer.getPeerBuffer().close();
+            }
             if (this.useBuffer) {
                 peer.getOrInitPeerBuffer();
             }
@@ -318,8 +321,11 @@ public class MeshApp {
         // if we have a peer pointing to that destination, we can close and remove it
         peer = findPeerByDestinationHash(link.getDestination().getHash());
         if (nonNull(peer)) {
-            // Note: no shutdown as the remobe peer could be only rebooting.
+            // Note: no shutdown as the remote peer could be only rebooting.
             //       keep it to reopen link later if possible.
+            if (nonNull(peer.getPeerBuffer())) {
+                peer.getPeerBuffer().close();
+            }
             peer.getPeerLink().teardown();
         }
         incomingLinks.remove(link);
@@ -437,9 +443,6 @@ public class MeshApp {
                     if (p.getPeerLink().getStatus() != ACTIVE) {
                         p.getOrInitPeerLink();
                     }
-                    if (useBuffer) {
-                        p.getOrInitPeerBuffer();
-                    }
                     break;
                 } else {
                     log.info("MeshAnnounceHandler - no matching peer,  peerLink hash: {}, link destination hash: {}",
@@ -454,6 +457,11 @@ public class MeshApp {
                 RNSPeer newPeer = new RNSPeer(destinationHash);
                 newPeer.setServerIdentity(announcedIdentity);
                 newPeer.setIsInitiator(true);
+                //// creating buffer here is too early, link status likely still PENDING
+                //if (useBuffer) {
+                //    var buffer = newPeer.getOrInitPeerBuffer();
+                //    log.info("created buffer: {}", buffer);
+                //}
                 lps.add(newPeer);
                 log.info("added new RNSPeer, destinationHash: {}", Hex.encodeHexString(destinationHash));
             }
@@ -513,11 +521,15 @@ public class MeshApp {
         //    }
         //}
 
+        @Synchronized
         public BufferedRWPair getOrInitPeerBuffer() {
+            var channel = peerLink.getChannel();
+            log.info("peer channel: {}", channel);
             if (nonNull(this.peerBuffer)) {
+                log.info("peerBuffer exists: {}, link status: {}", this.peerBuffer, this.peerLink.getStatus());
                 return this.peerBuffer;
             } else {
-                var channel = this.peerLink.getChannel();
+                log.info("creating buffer - peerLink status: {}", this.peerLink.getStatus());
                 this.peerBuffer = Buffer.createBidirectionalBuffer(receiveStreamId, sendStreamId, channel, this::peerBufferReady);
             }
             return this.peerBuffer;
