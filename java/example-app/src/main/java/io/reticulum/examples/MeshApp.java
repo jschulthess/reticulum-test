@@ -289,7 +289,6 @@ public class MeshApp {
         //}
     }
 
-    @Synchronized
     public void clientConnected(Link link) {
         link.setLinkClosedCallback(this::clientDisconnected);
         if (isFalse(useBuffer)) {
@@ -558,12 +557,11 @@ public class MeshApp {
             }
         }
 
-        @Synchronized
         public void linkEstablished(Link link) {
             link.setLinkClosedCallback(this::linkClosed);
             if (useBuffer) {
                 var channel = this.peerLink.getChannel();
-                this.peerBuffer = Buffer.createBidirectionalBuffer(receiveStreamId, sendStreamId, channel, this::clientBufferReady);
+                this.peerBuffer = Buffer.createBidirectionalBuffer(receiveStreamId, sendStreamId, channel, this::peerBufferReady);
             }
             log.info("peerLink {} established (link: {}) with peer: hash - {}, link destination hash: {}", 
                 peerLink, link, Hex.encodeHexString(destinationHash),
@@ -611,14 +609,14 @@ public class MeshApp {
             }
         }
 
-        // When the buffer has new data, process ist
-        // here, process = read it and write it to the terminal
-        public void clientBufferReady(Integer readyBytes) {
-            var data = this.peerBuffer.read(readyBytes);
-            var decodedData = new String(data);
-            log.info("(initiator) Received data on the buffer: {}", decodedData);
-            System.out.print("> ");
-        }
+        //// When the buffer has new data, process ist
+        //// here, process = read it and write it to the terminal
+        //public void peerBufferReady(Integer readyBytes) {
+        //    var data = this.peerBuffer.read(readyBytes);
+        //    var decodedData = new String(data);
+        //    log.info("(initiator) Received data on the buffer: {}", decodedData);
+        //    System.out.print("> ");
+        //}
 
         /*
          * Callback from buffer when buffer has data available
