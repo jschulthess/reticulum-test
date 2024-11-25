@@ -301,12 +301,15 @@ public class MeshApp {
             if (nonNull(peer.getPeerBuffer())) {
                 peer.getPeerBuffer().close();
             }
-            if (this.useBuffer) {
-                peer.getOrInitPeerBuffer();
-            }
+            //if (this.useBuffer) {
+            //    peer.getOrInitPeerBuffer();
+            //}
         } else {
             log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
                 peer, link, Hex.encodeHexString(link.getDestination().getHash()));
+        }
+        if (this.useBuffer) {
+            peer.getOrInitPeerBuffer();
         }
         incomingLinks.add(link);
         log.info("***> Client connected, link: {}", link);
@@ -460,6 +463,7 @@ public class MeshApp {
                 RNSPeer newPeer = new RNSPeer(destinationHash);
                 newPeer.setServerIdentity(announcedIdentity);
                 newPeer.setIsInitiator(true);
+                log.info("peer channel status: {}", newPeer.getPeerLink().getStatus());
                 // do we need to set sendStreamId/receiveStreamId (?)
                 lps.add(newPeer);
                 log.info("added new RNSPeer, destinationHash: {}", Hex.encodeHexString(destinationHash));
@@ -511,6 +515,7 @@ public class MeshApp {
             if (isFalse(useBuffer)) {
                 peerLink.setPacketCallback(this::linkPacketReceived);
             }
+
         }
 
         //public void initPeerBuffer(int receiveStreamId, int sendStreamId) {
@@ -524,16 +529,16 @@ public class MeshApp {
 
         @Synchronized
         public BufferedRWPair getOrInitPeerBuffer() {
-            Channel channel = peerLink.getChannel();
+            Channel channel = this.peerLink.getChannel();
             log.info("peer channel: {}", channel);
             if (nonNull(this.peerBuffer)) {
                 log.info("peerBuffer exists: {}, link status: {}", this.peerBuffer, this.peerLink.getStatus());
-                return this.peerBuffer;
+                return getPeerBuffer();
             } else {
                 log.info("creating buffer - peerLink status: {}", this.peerLink.getStatus());
                 this.peerBuffer = Buffer.createBidirectionalBuffer(receiveStreamId, sendStreamId, channel, this::peerBufferReady);
             }
-            return this.peerBuffer;
+            return getPeerBuffer();
         }
 
         public Link getOrInitPeerLink() {
