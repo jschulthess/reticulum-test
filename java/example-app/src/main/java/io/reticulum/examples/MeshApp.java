@@ -184,9 +184,17 @@ public class MeshApp {
                                 //sendCloseToRemote(rpl); // note: this has no effect
                                 rpl.teardown();
                                 log.info("peerLink: {} - status: {}", rpl, rpl.getStatus());
+                                if (useBuffer) {
+                                    p.getPeerBuffer().close();
+                                    log.info("buffer: {}", p.getPeerBuffer());
+                                }
                             } else if (inData.equalsIgnoreCase("open")) {
                                 p.getOrInitPeerLink();
                                 log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
+                                log.info("buffer: {}", p.getPeerBuffer());
+                                if (useBuffer) {
+                                    p.getOrInitPeerBuffer();
+                                }
                             } else if (inData.equalsIgnoreCase("clean")) {
                                 if (p.getPeerLink().getStatus() != ACTIVE) {
                                     //p.shutdown();
@@ -196,7 +204,8 @@ public class MeshApp {
                                 log.info("peer destinationHash: {}, peerLink: {} <=> status: {}",
                                     Hex.encodeHexString(p.getDestinationHash()),
                                     p.getPeerLink(), p.getPeerLink().getStatus());
-                                    continue;
+                                log.info("peer buffer: {}", p.getPeerBuffer());
+                                continue;
                             } else {
                                 if (rpl.getStatus() == ACTIVE) {
                                     var data = inData.getBytes(UTF_8);
@@ -577,6 +586,9 @@ public class MeshApp {
         public void shutdown() {
             if (nonNull(peerLink)) {
                 log.info("shutdown - peerLink: {}, status: {}", peerLink, peerLink.getStatus());
+                if ((useBuffer) & nonNull(this.peerBuffer)) {
+                    this.peerBuffer.close();
+                }
                 if (peerLink.getStatus() == ACTIVE) {
                     peerLink.teardown();
                 }
