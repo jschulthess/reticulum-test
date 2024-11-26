@@ -307,10 +307,12 @@ public class MeshApp {
         if (nonNull(peer)) {
             log.info("initiator peer {} opened link (link lookup: {}), link destination hash: {}",
                 Hex.encodeHexString(peer.getDestinationHash()), link, Hex.encodeHexString(link.getDestination().getHash()));
-            if (nonNull(peer.getPeerBuffer())) {
-                peer.getPeerBuffer().close();
-            }
             if (this.useBuffer) {
+                if (nonNull(peer.getPeerBuffer())) {
+                    // close previous buffer
+                    peer.getPeerBuffer().close();
+                }
+                // get nuew buffer
                 peer.getOrInitPeerBuffer();
             }
         }
@@ -587,7 +589,7 @@ public class MeshApp {
             if (nonNull(peerLink)) {
                 log.info("shutdown - peerLink: {}, status: {}", peerLink, peerLink.getStatus());
                 if ((useBuffer) & nonNull(this.peerBuffer)) {
-                    this.peerBuffer.close();
+                    getPeerBuffer().close();
                 }
                 if (peerLink.getStatus() == ACTIVE) {
                     peerLink.teardown();
