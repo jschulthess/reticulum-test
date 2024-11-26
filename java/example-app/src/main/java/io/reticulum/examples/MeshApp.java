@@ -301,16 +301,23 @@ public class MeshApp {
             if (nonNull(peer.getPeerBuffer())) {
                 peer.getPeerBuffer().close();
             }
-            //if (this.useBuffer) {
-            //    peer.getOrInitPeerBuffer();
-            //}
-        } else {
-            log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
-                peer, link, Hex.encodeHexString(link.getDestination().getHash()));
+            if (this.useBuffer) {
+                peer.getOrInitPeerBuffer();
+            }
         }
-        if (this.useBuffer) {
-            peer.getOrInitPeerBuffer();
+        else {
+            // non-initiator - create peer from link
+            List<RNSPeer> lps =  getLinkedPeers();
+            RNSPeer newPeer = new RNSPeer(link);
+            newPeer.setIsInitiator(false);
+            log.info("peer channel status: {}", newPeer.getPeerLink().getStatus());
+            // do we need to set sendStreamId/receiveStreamId (?)
+            lps.add(newPeer);
         }
+        //else {
+        //    log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
+        //        peer, link, Hex.encodeHexString(link.getDestination().getHash()));
+        //}
         incomingLinks.add(link);
         log.info("***> Client connected, link: {}", link);
     }
@@ -488,10 +495,30 @@ public class MeshApp {
         int sendStreamId = 0;
         Reticulum rns = reticulum;
 
+        /**
+         * Constructor from Announce Handler (initiator)
+         */
         public RNSPeer(byte[] dhash) {
             this.destinationHash = dhash;
             this.serverIdentity = recall(dhash);
             initPeerLink();
+        }
+
+        /**
+         * Constructor for existing Link
+         */
+        public RNSPeer(Link link) {
+            this.peerDestination = link.getDestination();
+            this.destinationHash = this.peerDestination.getHash();
+            this.peerLink = link;
+
+            setCreationTimestamp(System.currentTimeMillis());
+            lastAccessTimestamp = null;
+            isInitiator = true;
+
+            peerLink.setLinkEstablishedCallback(this::linkEstablished);
+            peerLink.setLinkClosedCallback(this::linkClosed);
+            peerLink.setPacketCallback(this::linkPacketReceived);
         }
 
         public void initPeerLink() {
@@ -512,10 +539,7 @@ public class MeshApp {
 
             peerLink.setLinkEstablishedCallback(this::linkEstablished);
             peerLink.setLinkClosedCallback(this::linkClosed);
-            if (isFalse(useBuffer)) {
-                peerLink.setPacketCallback(this::linkPacketReceived);
-            }
-
+            peerLink.setPacketCallback(this::linkPacketReceived);
         }
 
         //public void initPeerBuffer(int receiveStreamId, int sendStreamId) {
