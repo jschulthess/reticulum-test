@@ -488,8 +488,9 @@ public class MeshApp {
                 RNSPeer newPeer = new RNSPeer(destinationHash);
                 newPeer.setServerIdentity(announcedIdentity);
                 newPeer.setIsInitiator(true);
-                log.info("peer channel status: {}", newPeer.getPeerLink().getStatus());
+                //log.info("peer link status: {}", newPeer.getPeerLink().getStatus());
                 // do we need to set sendStreamId/receiveStreamId (?)
+                // we won't init the buffer. We can only do this once the link is established.
                 lps.add(newPeer);
                 log.info("added new RNSPeer, destinationHash: {}", Hex.encodeHexString(destinationHash));
             }
@@ -526,17 +527,20 @@ public class MeshApp {
          * Constructor for existing Link
          */
         public RNSPeer(Link link) {
-            this.peerDestination = link.getDestination();
-            this.destinationHash = this.peerDestination.getHash();
             this.peerLink = link;
+            this.serverIdentity = this.peerLink.getRemoteIdentity();
+
+            this.peerDestination = this.peerLink.getDestination();
+            this.destinationHash = this.peerDestination.getHash();
+            this.peerDestination.setProofStrategy(ProofStrategy.PROVE_ALL);
 
             setCreationTimestamp(System.currentTimeMillis());
-            lastAccessTimestamp = null;
-            isInitiator = true;
+            this.lastAccessTimestamp = null;
+            this.isInitiator = true;
 
-            peerLink.setLinkEstablishedCallback(this::linkEstablished);
-            peerLink.setLinkClosedCallback(this::linkClosed);
-            peerLink.setPacketCallback(this::linkPacketReceived);
+            this.peerLink.setLinkEstablishedCallback(this::linkEstablished);
+            this.peerLink.setLinkClosedCallback(this::linkClosed);
+            this.peerLink.setPacketCallback(this::linkPacketReceived);
         }
 
         public void initPeerLink() {
