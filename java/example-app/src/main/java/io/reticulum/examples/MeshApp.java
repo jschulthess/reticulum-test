@@ -127,8 +127,8 @@ public class MeshApp {
         );
         //log.info("destination1 hash: "+destination1.getHexHash());
    
-        //baseDestination.setProofStrategy(ProofStrategy.PROVE_ALL);
-        //baseDestination.setAcceptLinkRequests(true);
+        baseDestination.setProofStrategy(ProofStrategy.PROVE_ALL);
+        baseDestination.setAcceptLinkRequests(true);
 
         // We configure a function that will get called every time
         // a new client creates a link to this destination.
@@ -204,7 +204,9 @@ public class MeshApp {
                                 log.info("peer destinationHash: {}, peerLink: {} <=> status: {}",
                                     Hex.encodeHexString(p.getDestinationHash()),
                                     p.getPeerLink(), p.getPeerLink().getStatus());
-                                log.info("peer buffer: {}", p.getPeerBuffer());
+                                if (useBuffer) {
+                                    log.info("peer buffer: {}", p.getPeerBuffer());
+                                }
                                 continue;
                             } else {
                                 if (rpl.getStatus() == ACTIVE) {
@@ -308,12 +310,15 @@ public class MeshApp {
             log.info("initiator peer {} opened link (link lookup: {}), link destination hash: {}",
                 Hex.encodeHexString(peer.getDestinationHash()), link, Hex.encodeHexString(link.getDestination().getHash()));
             if (this.useBuffer) {
+                log.info("clientConnected -- buffer: {}", peer.getPeerBuffer());
                 if (nonNull(peer.getPeerBuffer())) {
                     // close previous buffer
                     peer.getPeerBuffer().close();
+                    log.info("clientConnected -- buffer after close old: {}", peer.getPeerBuffer());
                 }
-                // get nuew buffer
+                // get new buffer
                 peer.getOrInitPeerBuffer();
+                log.info("clientConnected -- buffer final: {}", peer.getPeerBuffer());
             }
         }
         else {
@@ -324,6 +329,8 @@ public class MeshApp {
             log.info("peer channel status: {}", newPeer.getPeerLink().getStatus());
             // do we need to set sendStreamId/receiveStreamId (?)
             lps.add(newPeer);
+            log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
+                    peer, link, Hex.encodeHexString(link.getDestination().getHash()));
         }
         //else {
         //    log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
