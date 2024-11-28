@@ -181,13 +181,13 @@ public class MeshApp {
                             if (inData.equalsIgnoreCase("probe")) {
                                 p.pingRemote();
                             } else if (inData.equalsIgnoreCase("close")) {
-                                //sendCloseToRemote(rpl); // note: this has no effect
-                                rpl.teardown();
-                                log.info("peerLink: {} - status: {}", rpl, rpl.getStatus());
                                 if (useBuffer) {
                                     p.getPeerBuffer().close();
                                     log.info("buffer: {}", p.getPeerBuffer());
                                 }
+                                //sendCloseToRemote(rpl); // note: this has no effect
+                                rpl.teardown();
+                                log.info("peerLink: {} - status: {}", rpl, rpl.getStatus());
                             } else if (inData.equalsIgnoreCase("open")) {
                                 p.getOrInitPeerLink();
                                 log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
@@ -218,12 +218,12 @@ public class MeshApp {
                                         peerBuffer.write(data);
                                         peerBuffer.flush();
                                     } else {
-                                        if (data.length <= LinkConstant.MDU) {
+                                        //if (data.length <= LinkConstant.MDU) {
                                             var testPacket = new Packet(rpl, data);
                                             testPacket.send();
-                                        } else {
-                                            log.info("Cannot send this packet, the data length of {} bytes exceeds link MDU of {} bytes", data.length, LinkConstant.MDU);
-                                        }
+                                        //} else {
+                                        //    log.info("Cannot send this packet, the data length of {} bytes exceeds link MDU of {} bytes", data.length, LinkConstant.MDU);
+                                        //}
                                     }
                                 } else {
                                     log.info("can't send data to link with status: {}", rpl.getStatus());
@@ -321,21 +321,21 @@ public class MeshApp {
                 log.info("clientConnected -- buffer final: {}", peer.getPeerBuffer());
             }
         }
-        else {
-            // non-initiator - create peer from link
-            List<RNSPeer> lps =  getLinkedPeers();
-            RNSPeer newPeer = new RNSPeer(link);
-            newPeer.setIsInitiator(false);
-            log.info("peer channel status: {}", newPeer.getPeerLink().getStatus());
-            // do we need to set sendStreamId/receiveStreamId (?)
-            lps.add(newPeer);
-            log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
-                    peer, link, Hex.encodeHexString(link.getDestination().getHash()));
-        }
         //else {
+        //    // non-initiator - create peer from link
+        //    List<RNSPeer> lps =  getLinkedPeers();
+        //    RNSPeer newPeer = new RNSPeer(link);
+        //    newPeer.setIsInitiator(false);
+        //    log.info("peer channel status: {}", newPeer.getPeerLink().getStatus());
+        //    // do we need to set sendStreamId/receiveStreamId (?)
+        //    lps.add(newPeer);
         //    log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
-        //        peer, link, Hex.encodeHexString(link.getDestination().getHash()));
+        //            peer, link, Hex.encodeHexString(link.getDestination().getHash()));
         //}
+        else {
+            log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
+                peer, link, Hex.encodeHexString(link.getDestination().getHash()));
+        }
         incomingLinks.add(link);
         log.info("***> Client connected, link: {}", link);
     }
@@ -356,6 +356,7 @@ public class MeshApp {
             //       keep it to reopen link later if possible.
             if (nonNull(peer.getPeerBuffer())) {
                 peer.getPeerBuffer().close();
+                peer.setPeerBuffer(null);
             }
             peer.getPeerLink().teardown();
         }
