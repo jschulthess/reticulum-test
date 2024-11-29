@@ -39,6 +39,7 @@ import java.nio.file.Files;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.WRITE;
+import static java.util.Objects.isNull;
 //import static java.util.Objects.isNull;
 //import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -213,8 +214,7 @@ public class MeshApp {
                                     var data = inData.getBytes(UTF_8);
                                     log.info("sending text \"{}\" to peer: {}", inData, Hex.encodeHexString(p.getDestinationHash()));
                                     if (useBuffer) {
-                                        //var peerBuffer = p.getOrInitPeerBuffer();
-                                        var peerBuffer = p.getPeerBuffer();
+                                        var peerBuffer = p.getOrInitPeerBuffer();
                                         peerBuffer.write(data);
                                         peerBuffer.flush();
                                     } else {
@@ -510,6 +510,7 @@ public class MeshApp {
         Long lastAccessTimestamp;
         Boolean isInitiator;
         Link peerLink;
+        Channel peerChannel;
         BufferedRWPair peerBuffer;
         int receiveStreamId = 0;
         int sendStreamId = 0;
@@ -529,6 +530,7 @@ public class MeshApp {
          */
         public RNSPeer(Link link) {
             this.peerLink = link;
+            this.peerChannel = this.peerLink.getChannel();
             this.serverIdentity = this.peerLink.getRemoteIdentity();
 
             this.peerDestination = this.peerLink.getDestination();
@@ -559,6 +561,7 @@ public class MeshApp {
             this.isInitiator = true;
 
             this.peerLink = new Link(peerDestination);
+            this.peerChannel = this.peerLink.getChannel();
 
             this.peerLink.setLinkEstablishedCallback(this::linkEstablished);
             this.peerLink.setLinkClosedCallback(this::linkClosed);
@@ -576,15 +579,15 @@ public class MeshApp {
 
         @Synchronized
         public BufferedRWPair getOrInitPeerBuffer() {
-            //Channel channel = this.peerLink.getChannel();
-            //log.info("peer channel: {}", channel);
             if (nonNull(this.peerBuffer)) {
                 log.info("peerBuffer exists: {}, link status: {}", this.peerBuffer, this.peerLink.getStatus());
                 return this.peerBuffer;
             } else {
-                var channel = this.peerLink.getChannel();
-                log.info("creating buffer - peerLink status: {}, channel: {}", this.peerLink.getStatus(), channel);
-                this.peerBuffer = Buffer.createBidirectionalBuffer(receiveStreamId, sendStreamId, channel, this::peerBufferReady);
+                if (isNull(this.peerChannel)) {
+                    this.peerChannel = this.peerLink.getChannel();
+                }
+                log.info("creating buffer - peerLink status: {}, channel: {}", this.peerLink.getStatus(), this.peerChannel);
+                this.peerBuffer = Buffer.createBidirectionalBuffer(receiveStreamId, sendStreamId, this.peerChannel, this::peerBufferReady);
             }
             return getPeerBuffer();
         }
@@ -616,8 +619,10 @@ public class MeshApp {
         public void linkEstablished(Link link) {
             link.setLinkClosedCallback(this::linkClosed);
             if (useBuffer) {
-                var channel = this.peerLink.getChannel();
-                this.peerBuffer = Buffer.createBidirectionalBuffer(receiveStreamId, sendStreamId, channel, this::peerBufferReady);
+                if (isNull(this.peerChannel)) {
+                    this.peerChannel = this.peerLink.getChannel();
+                }
+                this.peerBuffer = Buffer.createBidirectionalBuffer(receiveStreamId, sendStreamId, this.peerChannel, this::peerBufferReady);
             }
             log.info("peerLink {} established (link: {}) with peer: hash - {}, link destination hash: {}", 
                 this.peerLink, link, Hex.encodeHexString(this.destinationHash),
