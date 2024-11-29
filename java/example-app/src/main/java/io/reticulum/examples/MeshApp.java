@@ -329,15 +329,15 @@ public class MeshApp {
             //log.info("peer channel status: {}", newPeer.getPeerLink().getStatus());
             //// do we need to set sendStreamId/receiveStreamId (?)
             //lps.add(newPeer);
-            log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
-                    peer, link, Hex.encodeHexString(link.getDestination().getHash()));
+            log.info("non-initiator opened link (link: {}), link destination hash (initiator): {}",
+                    link, Hex.encodeHexString(link.getDestination().getHash()));
         }
         //else {
         //    log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
         //        peer, link, Hex.encodeHexString(link.getDestination().getHash()));
         //}
         incomingLinks.add(link);
-        log.info("***> Client connected, link: {}", link);
+        log.info("***> Client connected (1), link: {}", link);
     }
 
     public void clientDisconnected(Link link) {
