@@ -321,21 +321,21 @@ public class MeshApp {
                 log.info("clientConnected -- buffer final: {}", peer.getPeerBuffer());
             }
         }
-        //else {
-        //    // non-initiator - create peer from link
-        //    List<RNSPeer> lps =  getLinkedPeers();
-        //    RNSPeer newPeer = new RNSPeer(link);
-        //    newPeer.setIsInitiator(false);
-        //    log.info("peer channel status: {}", newPeer.getPeerLink().getStatus());
-        //    // do we need to set sendStreamId/receiveStreamId (?)
-        //    lps.add(newPeer);
-        //    log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
-        //            peer, link, Hex.encodeHexString(link.getDestination().getHash()));
-        //}
         else {
+            // non-initiator - create peer from link
+            List<RNSPeer> lps =  getLinkedPeers();
+            RNSPeer newPeer = new RNSPeer(link);
+            newPeer.setIsInitiator(false);
+            log.info("peer channel status: {}", newPeer.getPeerLink().getStatus());
+            // do we need to set sendStreamId/receiveStreamId (?)
+            lps.add(newPeer);
             log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
-                peer, link, Hex.encodeHexString(link.getDestination().getHash()));
+                    peer, link, Hex.encodeHexString(link.getDestination().getHash()));
         }
+        //else {
+        //    log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
+        //        peer, link, Hex.encodeHexString(link.getDestination().getHash()));
+        //}
         incomingLinks.add(link);
         log.info("***> Client connected, link: {}", link);
     }
