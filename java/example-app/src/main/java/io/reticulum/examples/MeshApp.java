@@ -202,14 +202,15 @@ public class MeshApp {
                                     linkedPeers.remove(p);
                                 }
                             } else if (inData.equalsIgnoreCase("status")) {
-                                log.info("peer destinationHash: {}, peerLink: {} <=> status: {}",
-                                    Hex.encodeHexString(p.getDestinationHash()),
+                                var peerType = p.getIsInitiator() ? "initiator": "non-initiator";
+                                log.info("peer destinationHash: {} ({}), peerLink: {} <=> status: {}",
+                                    Hex.encodeHexString(p.getDestinationHash()), peerType,
                                     p.getPeerLink(), p.getPeerLink().getStatus());
                                 if (useBuffer) {
                                     log.info("peer buffer: {}", p.getPeerBuffer());
                                 }
                                 continue;
-                            } else {
+                            } else if (p.getIsInitiator()) {
                                 if (rpl.getStatus() == ACTIVE) {
                                     var data = inData.getBytes(UTF_8);
                                     log.info("sending text \"{}\" to peer: {}", inData, Hex.encodeHexString(p.getDestinationHash()));
