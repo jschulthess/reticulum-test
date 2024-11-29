@@ -300,6 +300,7 @@ public class MeshApp {
         //}
     }
 
+    @Synchronized
     public void clientConnected(Link link) {
         link.setLinkClosedCallback(this::clientDisconnected);
         //if (isFalse(useBuffer)) {
@@ -322,13 +323,14 @@ public class MeshApp {
             }
         }
         else {
-            //// non-initiator - create peer from link
-            //List<RNSPeer> lps =  getLinkedPeers();
-            //RNSPeer newPeer = new RNSPeer(link);
-            //newPeer.setIsInitiator(false);
+            // non-initiator - create peer from link
+            List<RNSPeer> lps =  getLinkedPeers();
+            RNSPeer newPeer = new RNSPeer(link);
+            newPeer.setIsInitiator(false);
             //log.info("peer channel status: {}", newPeer.getPeerLink().getStatus());
-            //// do we need to set sendStreamId/receiveStreamId (?)
-            //lps.add(newPeer);
+            // do we need to set sendStreamId/receiveStreamId (?)
+            newPeer.getOrInitPeerBuffer();
+            lps.add(newPeer);
 
             // TODO: how do we create a peer at this point (somehow need destination = source from 'link')
             //       create buffer data ready callback on non-initiator
@@ -537,6 +539,8 @@ public class MeshApp {
             this.peerLink = link;
             this.peerChannel = this.peerLink.getChannel();
             this.serverIdentity = this.peerLink.getRemoteIdentity();
+            log.info("peer from link {}, channel: {}, remote identity: {}",
+                this.peerLink, this.peerChannel, this.serverIdentity);
 
             this.peerDestination = this.peerLink.getDestination();
             this.destinationHash = this.peerDestination.getHash();
@@ -627,7 +631,7 @@ public class MeshApp {
                 if (isNull(this.peerChannel)) {
                     this.peerChannel = this.peerLink.getChannel();
                 }
-                this.peerBuffer = Buffer.createBidirectionalBuffer(receiveStreamId, sendStreamId, this.peerChannel, this::peerBufferReady);
+                this.peerBuffer = Buffer.createBidirectionalBuffer(this.receiveStreamId, this.sendStreamId, this.peerChannel, this::peerBufferReady);
             }
             log.info("peerLink {} established (link: {}) with peer: hash - {}, link destination hash: {}", 
                 this.peerLink, link, Hex.encodeHexString(this.destinationHash),
