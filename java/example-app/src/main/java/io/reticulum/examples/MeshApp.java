@@ -322,13 +322,13 @@ public class MeshApp {
             }
         }
         else {
-            // non-initiator - create peer from link
-            List<RNSPeer> lps =  getLinkedPeers();
-            RNSPeer newPeer = new RNSPeer(link);
-            newPeer.setIsInitiator(false);
-            log.info("peer channel status: {}", newPeer.getPeerLink().getStatus());
-            // do we need to set sendStreamId/receiveStreamId (?)
-            lps.add(newPeer);
+            //// non-initiator - create peer from link
+            //List<RNSPeer> lps =  getLinkedPeers();
+            //RNSPeer newPeer = new RNSPeer(link);
+            //newPeer.setIsInitiator(false);
+            //log.info("peer channel status: {}", newPeer.getPeerLink().getStatus());
+            //// do we need to set sendStreamId/receiveStreamId (?)
+            //lps.add(newPeer);
             log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
                     peer, link, Hex.encodeHexString(link.getDestination().getHash()));
         }
