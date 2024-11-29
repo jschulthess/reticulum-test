@@ -329,6 +329,11 @@ public class MeshApp {
             //log.info("peer channel status: {}", newPeer.getPeerLink().getStatus());
             //// do we need to set sendStreamId/receiveStreamId (?)
             //lps.add(newPeer);
+
+            // TODO: how do we create a peer at this point (somehow need destination = source from 'link')
+            //       create buffer data ready callback on non-initiator
+            //var channel = link.getChannel();
+            //Buffer.createBidirectionalBuffer(0, 0, channel, this::peerBufferReady);
             log.info("non-initiator opened link (link: {}), link destination hash (initiator): {}",
                     link, Hex.encodeHexString(link.getDestination().getHash()));
         }
