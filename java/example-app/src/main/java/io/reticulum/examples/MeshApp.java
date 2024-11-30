@@ -716,10 +716,6 @@ public class MeshApp {
                     Hex.encodeHexString(targetPeerHash));
                 if (Arrays.equals(destinationHash, targetPeerHash)) {
                     log.info("closing link: {}", this.peerLink.getDestination().getHexHash());
-                    if (useBuffer) {
-                        this.peerBuffer.close();
-                        this.peerBuffer = null;
-                    }
                     peerLink.teardown();
                 }
             } else if (msgText.startsWith("open::")) {
@@ -731,6 +727,7 @@ public class MeshApp {
                     log.info("closing link: {}", peerLink.getDestination().getHexHash());
                     getOrInitPeerLink();
                     if (useBuffer) {
+                        // make sure we have a buffer if buffers are turned on
                         getOrInitPeerBuffer();
                     }
                 }
