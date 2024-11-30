@@ -767,11 +767,13 @@ public class MeshApp {
             log.info("Received data over the buffer: {}", decodedData);
             log.debug("server - latestClientLink status: {}", this.peerLink.getStatus());
 
-            //// process data. In this example: reply data back to client
-            //var replyText = "I received ** "+decodedData;
-            //byte[] replyData = replyText.getBytes();
-            //this.peerBuffer.write(replyData);
-            //this.peerBuffer.flush();
+            // process data. In this example: reply data back to client
+            if (doReply) {
+                var replyText = "I received ** "+decodedData;
+                byte[] replyData = replyText.getBytes();
+                this.peerBuffer.write(replyData);
+                this.peerBuffer.flush();
+            }
         }
 
         // PacketReceipt callbacks
