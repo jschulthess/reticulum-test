@@ -222,12 +222,12 @@ public class MeshApp {
                                         peerBuffer.write(data);
                                         peerBuffer.flush();
                                     } else {
-                                        //if (data.length <= LinkConstant.MDU) {
+                                        if (data.length <= LinkConstant.MDU) {
                                             var testPacket = new Packet(rpl, data);
                                             testPacket.send();
-                                        //} else {
-                                        //    log.info("Cannot send this packet, the data length of {} bytes exceeds link MDU of {} bytes", data.length, LinkConstant.MDU);
-                                        //}
+                                        } else {
+                                            log.info("Cannot send this packet, the data length of {} bytes exceeds link MDU of {} bytes", data.length, LinkConstant.MDU);
+                                        }
                                     }
                                 } else {
                                     log.info("can't send data to link with status: {}", rpl.getStatus());
