@@ -766,13 +766,14 @@ public class MeshApp {
 
             log.info("Received data over the buffer: {}", decodedData);
             log.debug("server - latestClientLink status: {}", this.peerLink.getStatus());
+            this.peerBuffer.flush(); // clear buffer
 
             // process data. In this example: reply data back to client
-            if ((doReply) & (this.isInitiator)) {
+            if ((doReply) & (isFalse(this.isInitiator))) {
                 var replyText = "I received ** "+decodedData;
                 byte[] replyData = replyText.getBytes();
                 this.peerBuffer.write(replyData);
-                this.peerBuffer.flush();
+                this.peerBuffer.flush(); // clear buffer
             }
         }
 
