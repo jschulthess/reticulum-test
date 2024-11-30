@@ -730,6 +730,9 @@ public class MeshApp {
                         getOrInitPeerBuffer();
                     }
                 }
+            } else if (isFalse(useBuffer)) {
+                var decodedData = new String(packet.getData());
+                log.info("Received data over the buffer: {}", decodedData);
             }
         }
 
