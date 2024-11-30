@@ -768,7 +768,7 @@ public class MeshApp {
             log.debug("server - latestClientLink status: {}", this.peerLink.getStatus());
 
             // process data. In this example: reply data back to client
-            if (doReply) {
+            if ((doReply) & (this.isInitiator)) {
                 var replyText = "I received ** "+decodedData;
                 byte[] replyData = replyText.getBytes();
                 this.peerBuffer.write(replyData);
