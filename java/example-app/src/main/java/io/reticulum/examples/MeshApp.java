@@ -664,7 +664,7 @@ public class MeshApp {
         public void shutdown() {
             if (nonNull(this.peerLink)) {
                 if (this.isInitiator) {
-                    sendCloseToRemote(peerLink);
+                    //sendCloseToRemote(peerLink);  // blocks job
                     if (useBuffer) {
                         this.peerBuffer.close();
                     }
