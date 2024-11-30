@@ -78,7 +78,8 @@ public class MeshApp {
     //public Link latestClientLink;
     //public BufferedRWPair buffer;   // A reference to the buffer object, needed to share the
     //                                // object from the link connected callback to the client loop.
-    Boolean useBuffer = false;
+    Boolean useBuffer = false;   // program option -b
+    Boolean doReply = false;     // program option -r
     
     /************/
     /** Mesh   **/
@@ -731,8 +732,14 @@ public class MeshApp {
                     }
                 }
             } else if (isFalse(useBuffer)) {
-                var decodedData = new String(packet.getPlaintext());
-                log.info("Received data over the buffer: {}", decodedData);
+                var text = new String(message, StandardCharsets.UTF_8);
+                log.info("Received data on the link: \"{}\"", text);
+                if (doReply) {
+                    String replyText = "I received \""+text+"\" over the link";
+                    byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
+                    Packet reply = new Packet(this.peerLink, replyData);
+                    reply.send();
+                }
             }
         }
 
@@ -844,6 +851,12 @@ public class MeshApp {
                             .desc("use buffer for transfer (instead of raw link)")
                             .build();
         options.addOption(o_buffer);
+        Option o_reply = Option.builder("r").longOpt("reply")
+                            .hasArg(false)
+                            .required(false)
+                            .desc("send response to messages received")
+                            .build();
+        options.addOption(o_reply);
         // define parser
         CommandLine cLine;
         CommandLineParser parser = new DefaultParser();
@@ -862,6 +875,11 @@ public class MeshApp {
             if (cLine.hasOption("b")) {
                 System.out.println("buffer mode - using Reticulum Buffer for data transfer");
                 instance.setUseBuffer(true);
+            }
+
+            if (cLine.hasOption("r")) {
+                System.out.println("reply mode - echo back reply text");
+                instance.setDoReply(true);
             }
 
             if (cLine.hasOption("config")) {
