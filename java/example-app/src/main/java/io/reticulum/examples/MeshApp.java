@@ -312,8 +312,13 @@ public class MeshApp {
 
         log.info("***> Client connected, link: {}", link);
         link.setLinkClosedCallback(this::clientDisconnected);
-        
+
         if (useBuffer) {
+            // If a new connection is received, the old reader
+            // needs to be disconnected (only with global latestBuffer)
+            if (nonNull(latestBuffer)) {
+                this.latestBuffer.close();
+            }
             // Create buffer objects.
             //   The streamId parameter to these functions is
             //   a bit like a file description, except that it
