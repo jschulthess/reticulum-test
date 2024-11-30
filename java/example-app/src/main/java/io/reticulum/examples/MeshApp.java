@@ -74,14 +74,11 @@ public class MeshApp {
     private volatile boolean isShuttingDown = false;
     private final List<RNSPeer> linkedPeers = Collections.synchronizedList(new ArrayList<>());
     private final List<Link> incomingLinks = Collections.synchronizedList(new ArrayList<>());
+    //public BufferedRWPair latestBuffer;
     //public Link latestClientLink;
-    //public Link meshLink;
-    //public Link clientLink;
+    //public BufferedRWPair buffer;   // A reference to the buffer object, needed to share the
+    //                                // object from the link connected callback to the client loop.
     Boolean useBuffer = false;
-    public BufferedRWPair latestBuffer;
-    public Link latestClientLink;
-    public BufferedRWPair buffer;   // A reference to the buffer object, needed to share the
-                                    // object from the link connected callback to the client loop.
     
     /************/
     /** Mesh   **/
@@ -186,23 +183,26 @@ public class MeshApp {
                             if (inData.equalsIgnoreCase("probe")) {
                                 p.pingRemote();
                             } else if (inData.equalsIgnoreCase("close")) {
-                                if (useBuffer) {
+                                if (isFalse(rpl.isInitiator())) {
+                                    linkedPeers.remove(p);
+                                } else if ((useBuffer) & (nonNull(p.getPeerBuffer()))) {
                                     p.getPeerBuffer().close();
-                                    log.info("buffer: {}", p.getPeerBuffer());
+                                    log.info("buffer after close(): {}", p.getPeerBuffer());
+                                    p.setPeerBuffer(null);
                                 }
-                                //sendCloseToRemote(rpl); // note: this has no effect
+                                sendCloseToRemote(rpl); // note: this has no effect unless remote is peer
                                 rpl.teardown();
                                 log.info("peerLink: {} - status: {}", rpl, rpl.getStatus());
                             } else if (inData.equalsIgnoreCase("open")) {
                                 p.getOrInitPeerLink();
                                 log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
-                                if (useBuffer) {
+                                if ((useBuffer) & (isNull(p.getPeerBuffer()))) {
                                     p.getOrInitPeerBuffer();
-                                    log.info("buffer: {}", p.getPeerBuffer());
+                                    log.info("buffer after 'open': {}", p.getPeerBuffer());
                                 }
                             } else if (inData.equalsIgnoreCase("clean")) {
                                 if (p.getPeerLink().getStatus() != ACTIVE) {
-                                    //p.shutdown();
+                                    p.shutdown();
                                     linkedPeers.remove(p);
                                 }
                             } else if (inData.equalsIgnoreCase("status")) {
@@ -214,7 +214,8 @@ public class MeshApp {
                                     log.info("peer buffer: {}", p.getPeerBuffer());
                                 }
                                 continue;
-                            } else if (p.getIsInitiator()) {
+                            } else if (rpl.isInitiator()) {
+                            //} else if (p.getIsInitiator()) {
                                 if (rpl.getStatus() == ACTIVE) {
                                     var data = inData.getBytes(UTF_8);
                                     log.info("sending text \"{}\" to peer: {}", inData, Hex.encodeHexString(p.getDestinationHash()));
@@ -228,12 +229,14 @@ public class MeshApp {
                                             var testPacket = new Packet(rpl, data);
                                             testPacket.send();
                                         } else {
-                                            log.info("-!!!- Cannot send this packet, the data length of {} bytes exceeds link MDU of {} bytes -!!!-", data.length, LinkConstant.MDU);
+                                            log.info("!!! Cannot send this packet, the data length of {} bytes exceeds link MDU of {} bytes !!!", data.length, LinkConstant.MDU);
                                         }
                                     }
                                 } else {
                                     log.info("can't send data to link with status: {}", rpl.getStatus());
                                 }
+                            } else {
+                                log.info("no link to work with - peerLink: {}", rpl);
                             }
                         }
                         //if (inData.equalsIgnoreCase("status")) {
@@ -310,96 +313,90 @@ public class MeshApp {
     // destination, this function will be called with
     // a reference to the link.
     public void clientConnected(Link link) {
-        latestClientLink = link;
-
-        log.info("***> Client connected, link: {}", link);
-        link.setLinkClosedCallback(this::clientDisconnected);
-
-        if (useBuffer) {
-            // If a new connection is received, the old reader
-            // needs to be disconnected (only with global latestBuffer)
-            if (nonNull(latestBuffer)) {
-                this.latestBuffer.close();
-            }
-            // Create buffer objects.
-            //   The streamId parameter to these functions is
-            //   a bit like a file description, except that it
-            //   is unique to the receiver.
-            //
-            //   In this example, both the reader and the writer
-            //   use streamId = 0, but there are actually two
-            //   separate unidirectional streams flowing in
-            //   opposite directions.
-            var channel = latestClientLink.getChannel();
-            latestBuffer = Buffer.createBidirectionalBuffer(0, 0, channel, this::serverBufferReady);
-        } else {
-            link.setPacketCallback(this::serverPacketReceived);
-        }
-
-        //var peer = findPeerByLink(link);
-        //if (nonNull(peer)) {
-        //    log.info("initiator peer {} opened link (link lookup: {}), link destination hash: {}",
-        //        Hex.encodeHexString(peer.getDestinationHash()), link, Hex.encodeHexString(link.getDestination().getHash()));
-        //    // make sure the peerLink is active
-        //    peer.getOrInitPeerLink();
-        //    if (this.useBuffer) {
-        //        log.info("clientConnected -- buffer: {}", peer.getPeerBuffer());
-        //        //if (nonNull(peer.getPeerBuffer())) {
-        //        //    // close previous buffer
-        //        //    peer.getPeerBuffer().close();
-        //        //    log.info("clientConnected -- buffer after close old: {}", peer.getPeerBuffer());
-        //        //}
-        //        // get new buffer
-        //        peer.getOrInitPeerBuffer();
-        //        log.info("clientConnected -- buffer final: {}", peer.getPeerBuffer());
+        //latestClientLink = link;
+        ////
+        //log.info("***> Client connected, link: {}", link);
+        //link.setLinkClosedCallback(this::clientDisconnected);
+        ////
+        //if (useBuffer) {
+        //    // If a new connection is received, the old reader
+        //    // needs to be disconnected (only with global latestBuffer)
+        //    if (nonNull(latestBuffer)) {
+        //        this.latestBuffer.close();
         //    }
+        //    // Create buffer objects.
+        //    //   The streamId parameter to these functions is
+        //    //   a bit like a file description, except that it
+        //    //   is unique to the receiver.
+        //    //
+        //    //   In this example, both the reader and the writer
+        //    //   use streamId = 0, but there are actually two
+        //    //   separate unidirectional streams flowing in
+        //    //   opposite directions.
+        //    var channel = latestClientLink.getChannel();
+        //    latestBuffer = Buffer.createBidirectionalBuffer(0, 0, channel, this::serverBufferReady);
+        //} else {
+        //    link.setPacketCallback(this::serverPacketReceived);
         //}
+
+        var peer = findPeerByLink(link);
+        if (nonNull(peer)) {
+            log.info("existing peer {} opened link (link lookup: {}), link destination hash: {}",
+                Hex.encodeHexString(peer.getDestinationHash()), link, Hex.encodeHexString(link.getDestination().getHash()));
+            // make sure the peerLink is active
+            peer.getOrInitPeerLink();
+            var pl = peer.getPeerLink();
+            log.info("peerLink {} status: {}", pl, pl.getStatus());
+            if (this.useBuffer) {
+                // make sure the peer has a cannel and buffer
+                peer.getOrInitPeerBuffer();
+                log.info("clientConnected -- buffer final: {}", peer.getPeerBuffer());
+            }
+        }
+        else {
+            // instead of using a glboal last... - create "non-initiator" peer from link
+            // this way we have a reference for handling incoming requests and sending response.
+            List<RNSPeer> lps =  getLinkedPeers();
+            RNSPeer newPeer = new RNSPeer(link);
+            newPeer.setIsInitiator(false);
+            // do we need to set sendStreamId/receiveStreamId (?)
+            newPeer.getOrInitPeerBuffer();
+            lps.add(newPeer);
+        
+            log.info("non-initiator created peer (link: {}), link destination hash (initiator): {}",
+                    link, Hex.encodeHexString(link.getDestination().getHash()));
+        }
         //else {
-        //    //// non-initiator - create peer from link
-        //    //List<RNSPeer> lps =  getLinkedPeers();
-        //    //RNSPeer newPeer = new RNSPeer(link);
-        //    //newPeer.setIsInitiator(false);
-        //    ////log.info("peer channel status: {}", newPeer.getPeerLink().getStatus());
-        //    //// do we need to set sendStreamId/receiveStreamId (?)
-        //    //newPeer.getOrInitPeerBuffer();
-        //    //lps.add(newPeer);
-        //
-        //    // TODO: how do we create a peer at this point (somehow need destination = source from 'link')
-        //    //       create buffer data ready callback on non-initiator
-        //    //var channel = link.getChannel();
-        //    //Buffer.createBidirectionalBuffer(0, 0, channel, this::peerBufferReady);
-        //
-        //    log.info("non-initiator opened link (link: {}), link destination hash (initiator): {}",
-        //            link, Hex.encodeHexString(link.getDestination().getHash()));
+        //    log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
+        //        peer, link, Hex.encodeHexString(link.getDestination().getHash()));
         //}
-        ////else {
-        ////    log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
-        ////        peer, link, Hex.encodeHexString(link.getDestination().getHash()));
-        ////}
-        //incomingLinks.add(link);
+        incomingLinks.add(link);
     }
 
-    /*
-     * Callback from buffer when buffer has data available
-     * 
-     * :param readyBytes: The number of bytes ready to read
-     */
-    public void serverBufferReady(Integer readyBytes) {
-        var data = latestBuffer.read(readyBytes);
-        var decodedData = new String(data);
+    // Note: the following callback is no longer necesseary as
+    //       this is handled in the non-initiator type peer
+    ///*
+    // * Callback from buffer when buffer has data available
+    // * 
+    // * :param readyBytes: The number of bytes ready to read
+    // */
+    //public void serverBufferReady(Integer readyBytes) {
+    //    var data = latestBuffer.read(readyBytes);
+    //    var decodedData = new String(data);
+    //
+    //    log.info("Received data over the buffer: {}", decodedData);
+    //    log.debug("server - latestClientLink status: {}", latestClientLink.getStatus());
+    //
+    //    var replyText = "I received ** "+decodedData;
+    //    byte[] replyData = replyText.getBytes();
+    //    latestBuffer.write(replyData);
+    //    // Note: In Java we need to reset (flush) the reader buffer
+    //    //       rather than flush the write buffer.
+    //    latestBuffer.flush();
+    //    //log.info("reply text written: {}", replyText);
+    //}
 
-        log.info("Received data over the buffer: {}", decodedData);
-        log.debug("server - latestClientLink status: {}", latestClientLink.getStatus());
-
-        var replyText = "I received ** "+decodedData;
-        byte[] replyData = replyText.getBytes();
-        latestBuffer.write(replyData);
-        // Note: In Java we need to reset (flush) the reader buffer
-        //       rather than flush the write buffer.
-        latestBuffer.flush();
-        //log.info("reply text written: {}", replyText);
-    }
-
+    //@Synchronized
     public void clientDisconnected(Link link) {
         var peer = findPeerByLink(link);
         if (nonNull(peer)) {
@@ -757,11 +754,11 @@ public class MeshApp {
             log.info("Received data over the buffer: {}", decodedData);
             log.debug("server - latestClientLink status: {}", this.peerLink.getStatus());
 
-            // process data. In this example: reply data back to client
-            var replyText = "I received ** "+decodedData;
-            byte[] replyData = replyText.getBytes();
-            this.peerBuffer.write(replyData);
-            this.peerBuffer.flush();
+            //// process data. In this example: reply data back to client
+            //var replyText = "I received ** "+decodedData;
+            //byte[] replyData = replyText.getBytes();
+            //this.peerBuffer.write(replyData);
+            //this.peerBuffer.flush();
         }
 
         // PacketReceipt callbacks
