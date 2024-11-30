@@ -731,7 +731,7 @@ public class MeshApp {
                     }
                 }
             } else if (isFalse(useBuffer)) {
-                var decodedData = new String(packet.getData());
+                var decodedData = new String(packet.getPlaintext());
                 log.info("Received data over the buffer: {}", decodedData);
             }
         }
