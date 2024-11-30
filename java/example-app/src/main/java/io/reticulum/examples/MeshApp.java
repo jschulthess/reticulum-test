@@ -80,7 +80,8 @@ public class MeshApp {
     Boolean useBuffer = false;
     public BufferedRWPair latestBuffer;
     public Link latestClientLink;
-    //public BufferedRWPair buffer;
+    public BufferedRWPair buffer;   // A reference to the buffer object, needed to share the
+                                    // object from the link connected callback to the client loop.
     
     /************/
     /** Mesh   **/
@@ -218,6 +219,7 @@ public class MeshApp {
                                     var data = inData.getBytes(UTF_8);
                                     log.info("sending text \"{}\" to peer: {}", inData, Hex.encodeHexString(p.getDestinationHash()));
                                     if (useBuffer) {
+                                        // TODO: reference is not right for destination
                                         var peerBuffer = p.getOrInitPeerBuffer();
                                         peerBuffer.write(data);
                                         peerBuffer.flush();
@@ -226,7 +228,7 @@ public class MeshApp {
                                             var testPacket = new Packet(rpl, data);
                                             testPacket.send();
                                         } else {
-                                            log.info("Cannot send this packet, the data length of {} bytes exceeds link MDU of {} bytes", data.length, LinkConstant.MDU);
+                                            log.info("-!!!- Cannot send this packet, the data length of {} bytes exceeds link MDU of {} bytes -!!!-", data.length, LinkConstant.MDU);
                                         }
                                     }
                                 } else {
