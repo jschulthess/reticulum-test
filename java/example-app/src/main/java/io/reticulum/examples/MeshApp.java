@@ -268,10 +268,10 @@ public class MeshApp {
                 log.error("exception: {}", e);
             }
         }
-        // gracefully close links of peers that point to us
-        for (Link l: incomingLinks) {
-            sendCloseToRemote(l);
-        }
+        //// gracefully close links of peers that point to us
+        //for (Link l: incomingLinks) {
+        //    sendCloseToRemote(l);
+        //}
         // Note: we still need to get the packet timeout callback to work...
         reticulum.exitHandler();
     }
@@ -662,17 +662,19 @@ public class MeshApp {
         }
 
         public void shutdown() {
-            if (nonNull(peerLink)) {
-                log.info("shutdown - peerLink: {}, status: {}",
-                    this.peerLink, this.peerLink.getStatus());
-                if ((useBuffer) & nonNull(this.peerBuffer)) {
-                    this.peerBuffer.close();
-                    this.peerBuffer = null;
-                }
-                if (this.peerLink.getStatus() == ACTIVE) {
+            if (nonNull(this.peerLink)) {
+                if (this.isInitiator) {
+                    sendCloseToRemote(peerLink);
+                    if (useBuffer) {
+                        this.peerBuffer.close();
+                    }
+                    this.peerLink.teardown();
+                } else {
+                    if (useBuffer) {
+                        this.peerBuffer.close();
+                    }
                     this.peerLink.teardown();
                 }
-                this.peerLink = null;
             }
         }
 
@@ -734,7 +736,8 @@ public class MeshApp {
             } else if (isFalse(useBuffer)) {
                 var text = new String(message, StandardCharsets.UTF_8);
                 log.info("Received data on the link: \"{}\"", text);
-                if (doReply) {
+                if ((doReply) & (isFalse(this.isInitiator))) {
+                    // echo reply only makes sense on the non-initiator
                     String replyText = "I received \""+text+"\" over the link";
                     byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
                     Packet reply = new Packet(this.peerLink, replyData);
