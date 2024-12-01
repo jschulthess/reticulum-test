@@ -492,10 +492,10 @@ public class MeshApp {
         Link peerLink;
         Channel peerChannel;
         BufferedRWPair peerBuffer;
-        //int receiveStreamId = 0;
-        //int sendStreamId = 0;
-        int receiveStreamId = randomStreamId;
-        int sendStreamId = randomStreamId;
+        int receiveStreamId = 0;
+        int sendStreamId = 0;
+        //int receiveStreamId = randomStreamId;
+        //int sendStreamId = randomStreamId;
         Reticulum rns = reticulum;
 
         /**
