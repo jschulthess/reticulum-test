@@ -184,7 +184,7 @@ public class MeshApp {
                                 p.pingRemote();
                             } else if (inData.equalsIgnoreCase("close")) {
                                 if (isFalse(rpl.isInitiator())) {
-                                    linkedPeers.remove(p);
+                                    log.info("only closing initiators - ignoring {}", p.getPeerLink());
                                 } else if ((useBuffer) & (nonNull(p.getPeerBuffer()))) {
                                     p.getPeerBuffer().close();
                                     log.info("buffer after close(): {}", p.getPeerBuffer());
