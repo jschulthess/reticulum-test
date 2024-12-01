@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 //import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -76,6 +77,8 @@ public class MeshApp {
     private final List<Link> incomingLinks = Collections.synchronizedList(new ArrayList<>());
     Boolean useBuffer = false;   // program option -b
     Boolean doReply = false;     // program option -r
+    int randomStreamId = ThreadLocalRandom.current().nextInt(1, 101);
+    //(Note: int randomNum = ThreadLocalRandom.current().nextInt(min, max + 1);)
     
     /************/
     /** Mesh   **/
@@ -489,8 +492,10 @@ public class MeshApp {
         Link peerLink;
         Channel peerChannel;
         BufferedRWPair peerBuffer;
-        int receiveStreamId = 0;
-        int sendStreamId = 0;
+        //int receiveStreamId = 0;
+        //int sendStreamId = 0;
+        int receiveStreamId = randomStreamId;
+        int sendStreamId = randomStreamId;
         Reticulum rns = reticulum;
 
         /**
