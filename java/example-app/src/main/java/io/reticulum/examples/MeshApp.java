@@ -174,6 +174,9 @@ public class MeshApp {
                     //var randomPeer = linkedPeers.get(rand.nextInt(linkedPeers.size()));
                     if (linkedPeers.isEmpty()) {
                         log.info("no local peer objects (yet). We'll create on for every announce we receive.");
+                    } else if (inData.equalsIgnoreCase("prune")) {
+                        log.info("pruning peers");
+                        prunePeers();
                     } else {
                         for (RNSPeer p: linkedPeers) {
                             var rpl = p.getPeerLink();
@@ -357,7 +360,7 @@ public class MeshApp {
     }
 
     @Synchronized
-    public void prunePeers(Link link) {
+    public void prunePeers() {
         List<RNSPeer> lps =  getLinkedPeers();
         log.info("number of peers before pruning: {}", lps.size());
         for (RNSPeer p: lps) {
@@ -366,6 +369,14 @@ public class MeshApp {
                 log.info("link is null, removing peer");
                 lps.remove(p);
                 continue;
+            } else {
+                if (p.getPeerLink().getStatus() != ACTIVE) {
+                    if ((useBuffer) & (nonNull(p.getPeerBuffer()))) {
+                        p.getPeerBuffer().close();
+                    }
+                    p.getPeerLink().teardown();
+                    lps.remove(p);
+                }
             }
         }
         log.info("number of peers after pruning: {}, {}", lps.size(), getLinkedPeers().size());
