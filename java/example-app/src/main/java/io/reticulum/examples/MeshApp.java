@@ -196,10 +196,10 @@ public class MeshApp {
                             } else if (inData.equalsIgnoreCase("open")) {
                                 p.getOrInitPeerLink();
                                 log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
-                                if ((useBuffer) & (isNull(p.getPeerBuffer()))) {
-                                    p.getOrInitPeerBuffer();
-                                    log.info("buffer after 'open': {}", p.getPeerBuffer());
-                                }
+                                //if ((useBuffer) & (isNull(p.getPeerBuffer()))) {
+                                //    p.getOrInitPeerBuffer();
+                                //    log.info("buffer after 'open': {}", p.getPeerBuffer());
+                                //}
                             } else if (inData.equalsIgnoreCase("clean")) {
                                 if (p.getPeerLink().getStatus() != ACTIVE) {
                                     p.shutdown();
