@@ -194,7 +194,8 @@ public class MeshApp {
                                     p.setPeerBuffer(null);
                                 }
                                 sendCloseToRemote(rpl); // note: this has no effect unless remote is peer
-                                rpl.teardown();
+                                //rpl.teardown();
+                                p.teardownPeerLink();
                                 log.info("peerLink: {} - status: {}", rpl, rpl.getStatus());
                             } else if (inData.equalsIgnoreCase("open")) {
                                 if (p.getIsInitiator()) {
@@ -353,7 +354,8 @@ public class MeshApp {
                 peer.getPeerBuffer().close();
                 peer.setPeerBuffer(null);
             }
-            peer.getPeerLink().teardown();
+            //peer.getPeerLink().teardown();
+            peer.teardownPeerLink();
         }
         incomingLinks.remove(link);
         log.info("***> Client disconnected");
@@ -376,10 +378,11 @@ public class MeshApp {
                 continue;
             } else {
                 if (p.getPeerLink().getStatus() != ACTIVE) {
-                    if ((useBuffer) & (nonNull(p.getPeerBuffer()))) {
-                        p.getPeerBuffer().close();
-                    }
-                    p.getPeerLink().teardown();
+                    //if ((useBuffer) & (nonNull(p.getPeerBuffer()))) {
+                    //    p.getPeerBuffer().close();
+                    //}
+                    //p.getPeerLink().teardown();
+                    p.teardownPeerLink();
                     lps.remove(p);
                 }
             }
@@ -477,8 +480,8 @@ public class MeshApp {
             //        }
             //    }
             //}
-            //if ((!peerExists) | (!p.getIsInitiator()))) {
-            if (!peerExists) {
+            //if (!peerExists) {
+            if ((!peerExists) | (!p.getIsInitiator())) {
                 List<RNSPeer> lps =  getLinkedPeers();
                 RNSPeer newPeer = new RNSPeer(destinationHash);
                 newPeer.setServerIdentity(announcedIdentity);
@@ -583,26 +586,42 @@ public class MeshApp {
             if (this.peerLink.getStatus() == ACTIVE) {
                 return this.peerLink;
             } else {
+                if (nonNull(this.peerBuffer)) {
+                    this.peerBuffer.close();
+                    this.peerBuffer = null;
+                }
                 initPeerLink();
             }
             return this.peerLink;
         }
 
-        public void shutdown() {
-            if (nonNull(this.peerLink)) {
-                if (this.isInitiator) {
-                    //sendCloseToRemote(peerLink);  // blocks job
-                    if (useBuffer) {
-                        this.peerBuffer.close();
-                    }
-                    this.peerLink.teardown();
-                } else {
-                    if (useBuffer) {
-                        this.peerBuffer.close();
-                    }
-                    this.peerLink.teardown();
-                }
+        public void teardownPeerLink() {
+            if (nonNull(this.peerBuffer)) {
+                this.peerBuffer.close();
+                this.peerBuffer = null;
             }
+            this.peerChannel = null;
+            if ((nonNull(this.peerLink)) & (this.peerLink.getStatus() == ACTIVE)) {
+                this.peerLink.teardown();
+            }
+        }
+
+        public void shutdown() {
+            teardownPeerLink();
+            //if (nonNull(this.peerLink)) {
+            //    if (this.isInitiator) {
+            //        //sendCloseToRemote(peerLink);  // blocks job
+            //        if (useBuffer) {
+            //            this.peerBuffer.close();
+            //        }
+            //        this.peerLink.teardown();
+            //    } else {
+            //        if (useBuffer) {
+            //            this.peerBuffer.close();
+            //        }
+            //        this.peerLink.teardown();
+            //    }
+            //}
         }
 
         public void linkEstablished(Link link) {
@@ -632,6 +651,10 @@ public class MeshApp {
             } else {
                 log.info("Link closed callback");
             }
+            if (nonNull(this.peerBuffer)) {
+                this.peerBuffer.close();
+                this.peerBuffer = null;
+            }
         }
 
         public void linkPacketReceived(byte[] message, Packet packet) {
@@ -645,7 +668,8 @@ public class MeshApp {
                     Hex.encodeHexString(targetPeerHash));
                 if (Arrays.equals(destinationHash, targetPeerHash)) {
                     log.info("closing link: {}", this.peerLink.getDestination().getHexHash());
-                    peerLink.teardown();
+                    //peerLink.teardown();
+                    teardownPeerLink();
                 }
             } else if (msgText.startsWith("open::")) {
                 var targetPeerHash = subarray(message, 7, message.length);
@@ -700,7 +724,8 @@ public class MeshApp {
             log.info("packet timed out");
             if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
                 log.info("packet timed out, receipt status: {}", PacketReceiptStatus.FAILED);
-                peerLink.teardown();
+                //peerLink.teardown();
+                teardownPeerLink();
             }
         }
 
