@@ -480,8 +480,8 @@ public class MeshApp {
             //        }
             //    }
             //}
-            //if (!peerExists) {
-            if ((!peerExists) | (!p.getIsInitiator())) {
+            //if ((!peerExists) | (!p.getIsInitiator())) {
+            if (!peerExists) {
                 List<RNSPeer> lps =  getLinkedPeers();
                 RNSPeer newPeer = new RNSPeer(destinationHash);
                 newPeer.setServerIdentity(announcedIdentity);
@@ -490,6 +490,9 @@ public class MeshApp {
                 lps.add(newPeer);
                 log.info("added new RNSPeer, destinationHash: {}", Hex.encodeHexString(destinationHash));
             }
+            //else if (!p.getIsInitiator())) {
+            //    //...
+            //}
         }
     }
 
