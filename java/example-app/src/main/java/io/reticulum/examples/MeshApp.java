@@ -446,28 +446,40 @@ public class MeshApp {
                 log.debug("The announce contained the following app data: {}", new String(appData, UTF_8));
             }
 
-            List<RNSPeer> lps =  getLinkedPeers();
-            for (RNSPeer p : lps) {
-                if (Arrays.equals(p.getDestinationHash(), destinationHash)) {
-                    log.info("MeshAnnounceHandler - peer exists - found peer matching destinationHash");
-                    if (nonNull(p.getPeerLink())) {
-                        log.info("peer link: {}, status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
-                    }
-                    peerExists = true;
-                    if (p.getPeerLink().getStatus() != ACTIVE) {
-                        p.getOrInitPeerLink();
-                    }
-                    break;
-                } else {
-                    log.info("MeshAnnounceHandler - no matching peer,  peerLink hash: {}, link destination hash: {}",
-                            Hex.encodeHexString(p.getDestinationHash()),
-                            Hex.encodeHexString(destinationHash));
-                    if (nonNull(p.getPeerLink())) {
-                        log.info("peer link: {}, status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
-                    }
+            RNSPeer p = findPeerByDestinationHash(destinationHash);
+            if (nonNull(p)) {
+                peerExists = true;
+                log.info("MeshAnnounceHandler - peer exists - found peer matching destinationHash");
+                if (nonNull(p.getPeerLink())) {
+                    var pl = p.getPeerLink();
+                    var peerType = p.getIsInitiator() ? "initiator": "non-initiator";
+                    log.info("peer link: {}, status: {}, type: {}", pl, pl.getStatus(), peerType);
                 }
             }
+            //List<RNSPeer> lps =  getLinkedPeers();
+            //for (RNSPeer p : lps) {
+            //    if (Arrays.equals(p.getDestinationHash(), destinationHash)) {
+            //        log.info("MeshAnnounceHandler - peer exists - found peer matching destinationHash");
+            //        if (nonNull(p.getPeerLink())) {
+            //            log.info("peer link: {}, status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
+            //        }
+            //        peerExists = true;
+            //        if (p.getPeerLink().getStatus() != ACTIVE) {
+            //            p.getOrInitPeerLink();
+            //        }
+            //        break;
+            //    } else {
+            //        log.info("MeshAnnounceHandler - no matching peer,  peerLink hash: {}, link destination hash: {}",
+            //                Hex.encodeHexString(p.getDestinationHash()),
+            //                Hex.encodeHexString(destinationHash));
+            //        if (nonNull(p.getPeerLink())) {
+            //            log.info("peer link: {}, status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
+            //        }
+            //    }
+            //}
+            //if ((!peerExists) | (!p.getIsInitiator()))) {
             if (!peerExists) {
+                List<RNSPeer> lps =  getLinkedPeers();
                 RNSPeer newPeer = new RNSPeer(destinationHash);
                 newPeer.setServerIdentity(announcedIdentity);
                 newPeer.setIsInitiator(true);
