@@ -390,13 +390,19 @@ public class MeshApp {
         log.info("number of peers after pruning: {}, {}", lps.size(), getLinkedPeers().size());
     }
 
+    /**
+     * Search a peer list for a matching non-initiator peer.
+     * 
+     * @param link
+     * @return
+     */
     public RNSPeer findPeerByLink(Link link) {
         // find peer given a link. At the same time remove peers with no peerLink.
         List<RNSPeer> lps =  getLinkedPeers();
         RNSPeer peer = null;
         for (RNSPeer p : lps) {
             var pLink = p.getPeerLink();
-            if (nonNull(pLink)) {
+            if ((nonNull(pLink)) & (isFalse(p.getIsInitiator()))) {
                 //log.info("* findPeerByLink - peerLink hash: {}, link destination hash: {}",
                 //        Hex.encodeHexString(pLink.getDestination().getHash()),
                 //        Hex.encodeHexString(link.getDestination().getHash()));
@@ -410,6 +416,13 @@ public class MeshApp {
         return peer;
     }
 
+    /**
+     * Search the peer list for a matching initiator peer.
+     * Used by Announce Handler to potentially create an initiator peer.
+     * 
+     * @param dhash
+     * @return
+     */
     public RNSPeer findPeerByDestinationHash(byte[] dhash) {
         List<RNSPeer> lps = getLinkedPeers();
         RNSPeer peer = null;
@@ -442,6 +455,7 @@ public class MeshApp {
         @Synchronized
         public void receivedAnnounce(byte[] destinationHash, Identity announcedIdentity, byte[] appData) {
             var peerExists = false;
+            //var newPeerInitiatorDefault = true;
 
             log.info("Received an announce from {}", Hex.encodeHexString(destinationHash));
 
@@ -466,6 +480,16 @@ public class MeshApp {
                     if (nonNull(p.getPeerLink())) {
                         log.info("peer link: {}, status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
                     }
+                    //var peerType = p.getIsInitiator() ? "initiator": "non-initiator";
+                    //if (announcedIdentity.equals(p.getServerIdentity())) {
+                    //    log.info("===> announcedIdentity == serverIdentity ({}) => we need a non-initiator peer", peerType);
+                    //    newPeerInitiatorDefault = false;
+                    //    peerExists = false;
+                    //    continue;
+                    //} else {
+                    //    log.info("===> announcedIdentity != serverIdentity => {} peer exists", peerType);
+                    //    peerExists = true;
+                    //}
                     peerExists = true;
                     if (p.getPeerLink().getStatus() != ACTIVE) {
                         p.getOrInitPeerLink();
@@ -483,7 +507,8 @@ public class MeshApp {
             if (isFalse(peerExists)) {
                 //List<RNSPeer> lps =  getLinkedPeers();
                 RNSPeer newPeer = new RNSPeer(destinationHash);
-                //newPeer.setServerIdentity(announcedIdentity);
+                newPeer.setServerIdentity(announcedIdentity);
+                //newPeer.setIsInitiator(newPeerInitiatorDefault);
                 newPeer.setIsInitiator(true);
                 // we won't init the buffer. We can only do this once the link is established.
                 lps.add(newPeer);
@@ -517,7 +542,10 @@ public class MeshApp {
          */
         public RNSPeer(byte[] dhash) {
             this.destinationHash = dhash;
-            this.serverIdentity = recall(dhash);
+            // Note: this.serverIdentity is set by the announce handler
+            //       for non-initiator peers the destination hash is always the same,
+            //       however the remote identity is not.
+            //this.serverIdentity = recall(dhash);
             initPeerLink();
         }
 
