@@ -483,7 +483,7 @@ public class MeshApp {
             if (isFalse(peerExists)) {
                 //List<RNSPeer> lps =  getLinkedPeers();
                 RNSPeer newPeer = new RNSPeer(destinationHash);
-                newPeer.setServerIdentity(announcedIdentity);
+                //newPeer.setServerIdentity(announcedIdentity);
                 newPeer.setIsInitiator(true);
                 // we won't init the buffer. We can only do this once the link is established.
                 lps.add(newPeer);
@@ -593,14 +593,29 @@ public class MeshApp {
         }
 
         public void teardownPeerLink() {
-            if (nonNull(this.peerBuffer)) {
-                this.peerBuffer.close();
-                this.peerBuffer = null;
-            }
-            if ((nonNull(this.peerLink)) & (this.peerLink.getStatus() == ACTIVE)) {
-                this.peerLink.teardown();
-            }
+            //if (nonNull(this.peerBuffer)) {
+            //    this.peerBuffer.close();
+            //    this.peerBuffer = null;
+            //}
+            //if ((nonNull(this.peerLink)) & (this.peerLink.getStatus() == ACTIVE)) {
+            //    this.peerLink.teardown();
+            //}
             //this.peerChannel = null;
+            if (nonNull(this.peerLink)) {
+                if (this.isInitiator) {
+                    //sendCloseToRemote(peerLink);  // blocks job
+                    if (useBuffer) {
+                        this.peerBuffer.close();
+                    }
+                    this.peerLink.teardown();
+                }
+                //else {
+                //    if (useBuffer) {
+                //        this.peerBuffer.close();
+                //    }
+                //    this.peerLink.teardown();
+                //}
+            }
         }
 
         public void shutdown() {
