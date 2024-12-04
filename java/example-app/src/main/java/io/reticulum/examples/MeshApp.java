@@ -532,9 +532,9 @@ public class MeshApp {
             this.lastAccessTimestamp = null;
             this.isInitiator = false;
 
-            this.peerLink.setLinkEstablishedCallback(this::linkEstablished);
-            this.peerLink.setLinkClosedCallback(this::linkClosed);
-            this.peerLink.setPacketCallback(this::linkPacketReceived);
+            //this.peerLink.setLinkEstablishedCallback(this::linkEstablished);
+            //this.peerLink.setLinkClosedCallback(this::linkClosed);
+            //this.peerLink.setPacketCallback(this::linkPacketReceived);
         }
 
         public void initPeerLink() {
