@@ -314,7 +314,7 @@ public class MeshApp {
             log.info("non-initiator created peer (link: {}), link destination hash (initiator): {}",
                     link, Hex.encodeHexString(link.getDestination().getHash()));
         }
-        incomingLinks.add(link);
+        //incomingLinks.add(link);
     }
 
     public void clientDisconnected(Link link) {
@@ -520,12 +520,14 @@ public class MeshApp {
         public RNSPeer(Link link) {
             this.peerLink = link;
             //this.peerChannel = this.peerLink.getChannel();
-            //this.serverIdentity = this.peerLink.getRemoteIdentity();
+            this.serverIdentity = link.getRemoteIdentity();
             //log.info("peer from link {}, channel: {}, remote identity: {}",
             //    this.peerLink, this.peerChannel, this.serverIdentity);
 
             //this.peerDestination = this.peerLink.getDestination();
+            this.peerDestination = link.getDestination();
             //this.destinationHash = this.peerDestination.getHash();
+            this.destinationHash = this.peerDestination.getHash();
             //this.peerDestination.setProofStrategy(ProofStrategy.PROVE_ALL);
 
             setCreationTimestamp(System.currentTimeMillis());
