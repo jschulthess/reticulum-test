@@ -309,7 +309,7 @@ public class MeshApp {
             List<RNSPeer> lps =  getLinkedPeers();
             RNSPeer newPeer = new RNSPeer(link);
             newPeer.setIsInitiator(false);
-            newPeer.getOrInitPeerBuffer();
+            //newPeer.getOrInitPeerBuffer();
             lps.add(newPeer);
         
             log.info("non-initiator created peer (link: {}), link destination hash (initiator): {}",
