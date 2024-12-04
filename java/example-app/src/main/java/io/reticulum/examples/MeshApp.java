@@ -75,7 +75,7 @@ public class MeshApp {
     private volatile boolean isShuttingDown = false;
     private final List<RNSPeer> linkedPeers = Collections.synchronizedList(new ArrayList<>());
     private final List<Link> incomingLinks = Collections.synchronizedList(new ArrayList<>());
-    Boolean useBuffer = false;   // program option -b
+    //Boolean useBuffer = false;   // program option -b
     Boolean doReply = false;     // program option -r
     int randomStreamId = ThreadLocalRandom.current().nextInt(1, 101);
     //(Note: int randomNum = ThreadLocalRandom.current().nextInt(min, max + 1);)
@@ -188,11 +188,12 @@ public class MeshApp {
                             } else if (inData.equalsIgnoreCase("close")) {
                                 if (isFalse(rpl.isInitiator())) {
                                     log.info("only closing initiators - ignoring {}", p.getPeerLink());
-                                } else if ((useBuffer) & (nonNull(p.getPeerBuffer()))) {
-                                    p.getPeerBuffer().close();
-                                    log.info("buffer after close(): {}", p.getPeerBuffer());
-                                    p.setPeerBuffer(null);
                                 }
+                                //else if ((useBuffer) & (nonNull(p.getPeerBuffer()))) {
+                                //    p.getPeerBuffer().close();
+                                //    log.info("buffer after close(): {}", p.getPeerBuffer());
+                                //    p.setPeerBuffer(null);
+                                //}
                                 sendCloseToRemote(rpl); // note: this has no effect unless remote is peer
                                 //rpl.teardown();
                                 p.teardownPeerLink();
@@ -201,10 +202,10 @@ public class MeshApp {
                                 if (p.getIsInitiator()) {
                                     p.getOrInitPeerLink();
                                     log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
-                                    if ((useBuffer) & (isNull(p.getPeerBuffer()))) {
+                                    //if ((useBuffer) & (isNull(p.getPeerBuffer()))) {
                                         p.getOrInitPeerBuffer();
                                         log.info("buffer after 'open': {}", p.getPeerBuffer());
-                                    }
+                                    //}
                                 }
                             } else if (inData.equalsIgnoreCase("clean")) {
                                 if (p.getPeerLink().getStatus() != ACTIVE) {
@@ -216,26 +217,26 @@ public class MeshApp {
                                 log.info("peer destinationHash: {} ({}), peerLink: {} <=> status: {}",
                                     Hex.encodeHexString(p.getDestinationHash()), peerType,
                                     p.getPeerLink(), p.getPeerLink().getStatus());
-                                if (useBuffer) {
+                                //if (useBuffer) {
                                     log.info("peer buffer: {}", p.getPeerBuffer());
-                                }
+                                //}
                                 continue;
                             } else if (rpl.isInitiator()) {
                                 if (rpl.getStatus() == ACTIVE) {
                                     var data = inData.getBytes(UTF_8);
                                     log.info("sending text \"{}\" to peer: {}", inData, Hex.encodeHexString(p.getDestinationHash()));
-                                    if (useBuffer) {
+                                    //if (useBuffer) {
                                         var peerBuffer = p.getOrInitPeerBuffer();
                                         peerBuffer.write(data);
                                         peerBuffer.flush();
-                                    } else {
-                                        if (data.length <= LinkConstant.MDU) {
-                                            var testPacket = new Packet(rpl, data);
-                                            testPacket.send();
-                                        } else {
-                                            log.info("!!! Cannot send this packet, the data length of {} bytes exceeds link MDU of {} bytes !!!", data.length, LinkConstant.MDU);
-                                        }
-                                    }
+                                    //} else {
+                                    //    if (data.length <= LinkConstant.MDU) {
+                                    //        var testPacket = new Packet(rpl, data);
+                                    //        testPacket.send();
+                                    //    } else {
+                                    //        log.info("!!! Cannot send this packet, the data length of {} bytes exceeds link MDU of {} bytes !!!", data.length, LinkConstant.MDU);
+                                    //    }
+                                    //}
                                 } else {
                                     log.info("can't send data to link with status: {}", rpl.getStatus());
                                 }
@@ -315,11 +316,11 @@ public class MeshApp {
             peer.getOrInitPeerLink();
             var pl = peer.getPeerLink();
             log.info("peerLink {} status: {}", pl, pl.getStatus());
-            if (this.useBuffer) {
+            //if (this.useBuffer) {
                 // make sure the peer has a cannel and buffer
                 peer.getOrInitPeerBuffer();
                 log.info("clientConnected -- buffer final: {}", peer.getPeerBuffer());
-            }
+            //}
         }
         else {
             // instead of using a glboal last... - create "non-initiator" peer from link
@@ -619,9 +620,10 @@ public class MeshApp {
             if (nonNull(this.peerLink)) {
                 if (this.isInitiator) {
                     //sendCloseToRemote(peerLink);  // blocks job
-                    if (useBuffer) {
+                    //if (useBuffer) {
                         this.peerBuffer.close();
-                    }
+                        this.peerBuffer = null;
+                    //}
                     this.peerLink.teardown();
                 }
                 //else {
@@ -654,10 +656,10 @@ public class MeshApp {
         public void linkEstablished(Link link) {
             this.peerLink = link;
             link.setLinkClosedCallback(this::linkClosed);
-            if (useBuffer) {
+            //if (useBuffer) {
                 var channel = link.getChannel();
                 this.peerBuffer = Buffer.createBidirectionalBuffer(this.receiveStreamId, this.sendStreamId, channel, this::peerBufferReady);
-            }
+            //}
             log.info("peerLink {} established (link: {}) with peer: hash - {}, link destination hash: {}", 
                 this.peerLink, link, Hex.encodeHexString(this.destinationHash),
                 Hex.encodeHexString(link.getDestination().getHash()));
@@ -705,21 +707,21 @@ public class MeshApp {
                 if (Arrays.equals(destinationHash, targetPeerHash)) {
                     log.info("closing link: {}", peerLink.getDestination().getHexHash());
                     getOrInitPeerLink();
-                    if (useBuffer) {
+                    //if (useBuffer) {
                         // make sure we have a buffer if buffers are turned on
                         getOrInitPeerBuffer();
-                    }
+                    //}
                 }
-            } else if (isFalse(useBuffer)) {
-                var text = new String(message, StandardCharsets.UTF_8);
-                log.info("Received data on the link: \"{}\"", text);
-                if ((doReply) & (isFalse(this.isInitiator))) {
-                    // echo reply only makes sense on the non-initiator
-                    String replyText = "I received \""+text+"\" over the link";
-                    byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
-                    Packet reply = new Packet(this.peerLink, replyData);
-                    reply.send();
-                }
+            //} else if (isFalse(useBuffer)) {
+            //    var text = new String(message, StandardCharsets.UTF_8);
+            //    log.info("Received data on the link: \"{}\"", text);
+            //    if ((doReply) & (isFalse(this.isInitiator))) {
+            //        // echo reply only makes sense on the non-initiator
+            //        String replyText = "I received \""+text+"\" over the link";
+            //        byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
+            //        Packet reply = new Packet(this.peerLink, replyData);
+            //        reply.send();
+            //    }
             }
         }
 
@@ -820,12 +822,12 @@ public class MeshApp {
                             .desc("(optional) path to alternative Reticulum config directory "
                                   + "(default: .reticulum)").build();
         options.addOption(o_config);
-        Option o_buffer = Option.builder("b").longOpt("buffer")
-                            .hasArg(false)
-                            .required(false)
-                            .desc("use buffer for transfer (instead of raw link)")
-                            .build();
-        options.addOption(o_buffer);
+        //Option o_buffer = Option.builder("b").longOpt("buffer")
+        //                    .hasArg(false)
+        //                    .required(false)
+        //                    .desc("use buffer for transfer (instead of raw link)")
+        //                    .build();
+        //options.addOption(o_buffer);
         Option o_reply = Option.builder("r").longOpt("reply")
                             .hasArg(false)
                             .required(false)
@@ -847,10 +849,10 @@ public class MeshApp {
 
             var instance = new MeshApp();
 
-            if (cLine.hasOption("b")) {
-                System.out.println("buffer mode - using Reticulum Buffer for data transfer");
-                instance.setUseBuffer(true);
-            }
+            //if (cLine.hasOption("b")) {
+            //    System.out.println("buffer mode - using Reticulum Buffer for data transfer");
+            //    instance.setUseBuffer(true);
+            //}
 
             if (cLine.hasOption("r")) {
                 System.out.println("reply mode - echo back reply text");
