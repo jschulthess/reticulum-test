@@ -520,17 +520,17 @@ public class MeshApp {
         public RNSPeer(Link link) {
             this.peerLink = link;
             //this.peerChannel = this.peerLink.getChannel();
-            this.serverIdentity = this.peerLink.getRemoteIdentity();
+            //this.serverIdentity = this.peerLink.getRemoteIdentity();
             //log.info("peer from link {}, channel: {}, remote identity: {}",
             //    this.peerLink, this.peerChannel, this.serverIdentity);
 
-            this.peerDestination = this.peerLink.getDestination();
-            this.destinationHash = this.peerDestination.getHash();
-            this.peerDestination.setProofStrategy(ProofStrategy.PROVE_ALL);
+            //this.peerDestination = this.peerLink.getDestination();
+            //this.destinationHash = this.peerDestination.getHash();
+            //this.peerDestination.setProofStrategy(ProofStrategy.PROVE_ALL);
 
             setCreationTimestamp(System.currentTimeMillis());
             this.lastAccessTimestamp = null;
-            this.isInitiator = true;
+            this.isInitiator = false;
 
             this.peerLink.setLinkEstablishedCallback(this::linkEstablished);
             this.peerLink.setLinkClosedCallback(this::linkClosed);
