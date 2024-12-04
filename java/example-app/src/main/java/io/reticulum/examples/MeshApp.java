@@ -189,11 +189,6 @@ public class MeshApp {
                                 if (isFalse(rpl.isInitiator())) {
                                     log.info("only closing initiators - ignoring {}", p.getPeerLink());
                                 }
-                                //else if ((useBuffer) & (nonNull(p.getPeerBuffer()))) {
-                                //    p.getPeerBuffer().close();
-                                //    log.info("buffer after close(): {}", p.getPeerBuffer());
-                                //    p.setPeerBuffer(null);
-                                //}
                                 sendCloseToRemote(rpl); // note: this has no effect unless remote is peer
                                 //rpl.teardown();
                                 p.teardownPeerLink();
@@ -202,10 +197,8 @@ public class MeshApp {
                                 if (p.getIsInitiator()) {
                                     p.getOrInitPeerLink();
                                     log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
-                                    //if ((useBuffer) & (isNull(p.getPeerBuffer()))) {
-                                        p.getOrInitPeerBuffer();
-                                        log.info("buffer after 'open': {}", p.getPeerBuffer());
-                                    //}
+                                    p.getOrInitPeerBuffer();
+                                    log.info("buffer after 'open': {}", p.getPeerBuffer());
                                 }
                             } else if (inData.equalsIgnoreCase("clean")) {
                                 if (p.getPeerLink().getStatus() != ACTIVE) {
@@ -217,26 +210,15 @@ public class MeshApp {
                                 log.info("peer destinationHash: {} ({}), peerLink: {} <=> status: {}",
                                     Hex.encodeHexString(p.getDestinationHash()), peerType,
                                     p.getPeerLink(), p.getPeerLink().getStatus());
-                                //if (useBuffer) {
-                                    log.info("peer buffer: {}", p.getPeerBuffer());
-                                //}
+                                log.info("peer buffer: {}", p.getPeerBuffer());
                                 continue;
                             } else if (rpl.isInitiator()) {
                                 if (rpl.getStatus() == ACTIVE) {
                                     var data = inData.getBytes(UTF_8);
                                     log.info("sending text \"{}\" to peer: {}", inData, Hex.encodeHexString(p.getDestinationHash()));
-                                    //if (useBuffer) {
-                                        var peerBuffer = p.getOrInitPeerBuffer();
-                                        peerBuffer.write(data);
-                                        peerBuffer.flush();
-                                    //} else {
-                                    //    if (data.length <= LinkConstant.MDU) {
-                                    //        var testPacket = new Packet(rpl, data);
-                                    //        testPacket.send();
-                                    //    } else {
-                                    //        log.info("!!! Cannot send this packet, the data length of {} bytes exceeds link MDU of {} bytes !!!", data.length, LinkConstant.MDU);
-                                    //    }
-                                    //}
+                                    var peerBuffer = p.getOrInitPeerBuffer();
+                                    peerBuffer.write(data);
+                                    peerBuffer.flush();
                                 } else {
                                     log.info("can't send data to link with status: {}", rpl.getStatus());
                                 }
@@ -316,11 +298,9 @@ public class MeshApp {
             peer.getOrInitPeerLink();
             var pl = peer.getPeerLink();
             log.info("peerLink {} status: {}", pl, pl.getStatus());
-            //if (this.useBuffer) {
-                // make sure the peer has a cannel and buffer
-                peer.getOrInitPeerBuffer();
-                log.info("clientConnected -- buffer final: {}", peer.getPeerBuffer());
-            //}
+            // make sure the peer has a cannel and buffer
+            peer.getOrInitPeerBuffer();
+            log.info("clientConnected -- buffer final: {}", peer.getPeerBuffer());
         }
         else {
             // instead of using a glboal last... - create "non-initiator" peer from link
@@ -379,9 +359,6 @@ public class MeshApp {
                 continue;
             } else {
                 if (p.getPeerLink().getStatus() != ACTIVE) {
-                    //if ((useBuffer) & (nonNull(p.getPeerBuffer()))) {
-                    //    p.getPeerBuffer().close();
-                    //}
                     //p.getPeerLink().teardown();
                     p.teardownPeerLink();
                     lps.remove(p);
@@ -620,18 +597,10 @@ public class MeshApp {
             if (nonNull(this.peerLink)) {
                 if (this.isInitiator) {
                     //sendCloseToRemote(peerLink);  // blocks job
-                    //if (useBuffer) {
-                        this.peerBuffer.close();
-                        this.peerBuffer = null;
-                    //}
+                    this.peerBuffer.close();
+                    this.peerBuffer = null;
                     this.peerLink.teardown();
                 }
-                //else {
-                //    if (useBuffer) {
-                //        this.peerBuffer.close();
-                //    }
-                //    this.peerLink.teardown();
-                //}
             }
         }
 
@@ -640,14 +609,10 @@ public class MeshApp {
             //if (nonNull(this.peerLink)) {
             //    if (this.isInitiator) {
             //        //sendCloseToRemote(peerLink);  // blocks job
-            //        if (useBuffer) {
-            //            this.peerBuffer.close();
-            //        }
+            //        this.peerBuffer.close();
             //        this.peerLink.teardown();
             //    } else {
-            //        if (useBuffer) {
-            //            this.peerBuffer.close();
-            //        }
+            //        this.peerBuffer.close();
             //        this.peerLink.teardown();
             //    }
             //}
@@ -656,10 +621,8 @@ public class MeshApp {
         public void linkEstablished(Link link) {
             this.peerLink = link;
             link.setLinkClosedCallback(this::linkClosed);
-            //if (useBuffer) {
-                var channel = link.getChannel();
-                this.peerBuffer = Buffer.createBidirectionalBuffer(this.receiveStreamId, this.sendStreamId, channel, this::peerBufferReady);
-            //}
+            var channel = link.getChannel();
+            this.peerBuffer = Buffer.createBidirectionalBuffer(this.receiveStreamId, this.sendStreamId, channel, this::peerBufferReady);
             log.info("peerLink {} established (link: {}) with peer: hash - {}, link destination hash: {}", 
                 this.peerLink, link, Hex.encodeHexString(this.destinationHash),
                 Hex.encodeHexString(link.getDestination().getHash()));
@@ -707,21 +670,9 @@ public class MeshApp {
                 if (Arrays.equals(destinationHash, targetPeerHash)) {
                     log.info("closing link: {}", peerLink.getDestination().getHexHash());
                     getOrInitPeerLink();
-                    //if (useBuffer) {
-                        // make sure we have a buffer if buffers are turned on
-                        getOrInitPeerBuffer();
-                    //}
+                    // make sure we have a buffer if buffers are turned on
+                    getOrInitPeerBuffer();
                 }
-            //} else if (isFalse(useBuffer)) {
-            //    var text = new String(message, StandardCharsets.UTF_8);
-            //    log.info("Received data on the link: \"{}\"", text);
-            //    if ((doReply) & (isFalse(this.isInitiator))) {
-            //        // echo reply only makes sense on the non-initiator
-            //        String replyText = "I received \""+text+"\" over the link";
-            //        byte[] replyData = replyText.getBytes(StandardCharsets.UTF_8);
-            //        Packet reply = new Packet(this.peerLink, replyData);
-            //        reply.send();
-            //    }
             }
         }
 
