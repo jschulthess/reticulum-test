@@ -164,7 +164,7 @@ public class MeshApp {
                 } else if (inData.equalsIgnoreCase("help") || inData.equals("?")) {
                     log.info("**********************************  keywords  **********************************");
                     log.info("=> press Enter    to do a Reticulum announce (and initiate peers to connect)");
-                    log.info("=> enter 'probe' to ping peers to probe remote availability (closes peerLink on timeout)");
+                    log.info("=> enter 'ping' to ping peers to probe remote availability (closes peerLink on timeout)");
                     log.info("=> enter 'status' to see status of peer links");
                     log.info("=> enter some text (other than keywords) to send message to peers");
                     log.info("=> enter 'close'/'open' to teardown/re-open existing peer links");
@@ -183,7 +183,7 @@ public class MeshApp {
                     } else {
                         for (RNSPeer p: linkedPeers) {
                             var rpl = p.getPeerLink();
-                            if (inData.equalsIgnoreCase("probe")) {
+                            if (inData.equalsIgnoreCase("ping")) {
                                 p.pingRemote();
                             } else if (inData.equalsIgnoreCase("close")) {
                                 if (isFalse(rpl.isInitiator())) {
