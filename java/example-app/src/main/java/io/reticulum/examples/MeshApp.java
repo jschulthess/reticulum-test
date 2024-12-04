@@ -288,6 +288,7 @@ public class MeshApp {
     // When a client establishes a link to our server
     // destination, this function will be called with
     // a reference to the link.
+    @Synchronized
     public void clientConnected(Link link) {
 
         var peer = findPeerByLink(link);
