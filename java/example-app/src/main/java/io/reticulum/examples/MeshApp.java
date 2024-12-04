@@ -390,19 +390,13 @@ public class MeshApp {
         log.info("number of peers after pruning: {}, {}", lps.size(), getLinkedPeers().size());
     }
 
-    /**
-     * Search a peer list for a matching non-initiator peer.
-     * 
-     * @param link
-     * @return
-     */
     public RNSPeer findPeerByLink(Link link) {
         // find peer given a link. At the same time remove peers with no peerLink.
         List<RNSPeer> lps =  getLinkedPeers();
         RNSPeer peer = null;
         for (RNSPeer p : lps) {
             var pLink = p.getPeerLink();
-            if ((nonNull(pLink)) & (isFalse(p.getIsInitiator()))) {
+            if (nonNull(pLink)) {
                 //log.info("* findPeerByLink - peerLink hash: {}, link destination hash: {}",
                 //        Hex.encodeHexString(pLink.getDestination().getHash()),
                 //        Hex.encodeHexString(link.getDestination().getHash()));
@@ -416,13 +410,6 @@ public class MeshApp {
         return peer;
     }
 
-    /**
-     * Search the peer list for a matching initiator peer.
-     * Used by Announce Handler to potentially create an initiator peer.
-     * 
-     * @param dhash
-     * @return
-     */
     public RNSPeer findPeerByDestinationHash(byte[] dhash) {
         List<RNSPeer> lps = getLinkedPeers();
         RNSPeer peer = null;
