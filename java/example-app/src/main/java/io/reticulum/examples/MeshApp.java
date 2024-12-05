@@ -302,7 +302,7 @@ public class MeshApp {
             peer.getOrInitPeerBuffer();
             log.info("clientConnected -- buffer final: {}", peer.getPeerBuffer());
         }
-        else {
+        else if (isFalse(link.isInitiator())) {
             // instead of using a glboal last... - create "non-initiator" peer from link
             // this way we have a reference for handling incoming requests and sending response.
             List<RNSPeer> lps =  getLinkedPeers();
