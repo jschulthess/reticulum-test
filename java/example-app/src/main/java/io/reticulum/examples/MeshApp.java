@@ -621,6 +621,7 @@ public class MeshApp {
         }
 
         public void linkEstablished(Link link) {
+            log.info("begin linkEstablished, initiator: {}", link.isInitiator());
             this.peerLink = link;
             link.setLinkClosedCallback(this::linkClosed);
             var channel = link.getChannel();
