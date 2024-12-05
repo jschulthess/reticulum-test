@@ -69,6 +69,7 @@ public class MeshAppLink {
     //public Link latestClientLink;
     //public Link meshLink;
     //public Link clientLink;
+    private Boolean doReply;
     
     /************/
     /** Mesh   **/
@@ -619,6 +620,12 @@ public class MeshAppLink {
                             .desc("(optional) path to alternative Reticulum config directory "
                                   + "(default: .reticulum)").build();
         options.addOption(o_config);
+        Option o_reply = Option.builder("r").longOpt("reply")
+                            .hasArg(false)
+                            .required(false)
+                            .desc("send response to messages received")
+                            .build();
+        options.addOption(o_reply);
         // define parser
         CommandLine cLine;
         CommandLineParser parser = new DefaultParser();
@@ -633,6 +640,11 @@ public class MeshAppLink {
             }
 
             var instance = new MeshAppLink();
+
+            if (cLine.hasOption("r")) {
+                System.out.println("reply mode - echo back reply text");
+                instance.setDoReply(true);
+            }
 
             if (cLine.hasOption("config")) {
                 try {
