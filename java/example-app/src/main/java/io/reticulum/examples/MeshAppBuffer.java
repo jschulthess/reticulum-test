@@ -65,10 +65,12 @@ public class MeshAppBuffer {
     public Destination baseDestination;
     private volatile boolean isShuttingDown = false;
     private final List<RNSPeer> linkedPeers = Collections.synchronizedList(new ArrayList<>());
-    private final List<Link> incomingLinks = Collections.synchronizedList(new ArrayList<>());
+    private final List<RNSPeer> incomingPeers = Collections.synchronizedList(new ArrayList<>());
+    //private final List<Link> incomingLinks = Collections.synchronizedList(new ArrayList<>());
     //public Link latestClientLink;
     //public Link meshLink;
     //public Link clientLink;
+    private Boolean doReply;
     
     /************/
     /** Mesh   **/
@@ -162,14 +164,19 @@ public class MeshAppBuffer {
                     log.info("=> enter 'quit' to exit");
                     log.info("=> enter '?' or 'help' to see this message");
                     log.info("********************************************************************************");
-                } else {
+                } else if (inData.equalsIgnoreCase("prune")) {
+                    log.info("pruning peers");
+                    prunePeers();
+                }
+                else {
                     //var rand = new Random();
                     //var randomPeer = linkedPeers.get(rand.nextInt(linkedPeers.size()));
+                    Link rpl;
                     if (linkedPeers.isEmpty()) {
                         log.info("no local peer objects (yet). We'll create on for every announce we receive.");
                     } else {
                         for (RNSPeer p: linkedPeers) {
-                            var rpl = p.getPeerLink();
+                            rpl = p.getPeerLink();
                             if (inData.equalsIgnoreCase("probe")) {
                                 p.pingRemote();
                             } else if (inData.equalsIgnoreCase("close")) {
@@ -200,12 +207,21 @@ public class MeshAppBuffer {
                                 }
                             }
                         }
-                        //if (inData.equalsIgnoreCase("status")) {
-                        //    log.info("we have {} non-initiator links, list: {}", incomingLinks.size(), incomingLinks);
-                        //    //for (Link l: incomingLinks) {
-                        //    //    log.info("incoming link {}, destination: {}", l, encodeHexString(l.getDestination().getHash()));
-                        //    //}
-                        //}
+                        var nonInitiatorSize = incomingPeers.size();
+                        log.info("incoming (non-initiator) peers: {}", nonInitiatorSize);
+                        for (RNSPeer ip: incomingPeers) {
+                            rpl = ip.getPeerLink();
+                            if (inData.equalsIgnoreCase("status")) {
+                                log.info("incoming peer: {}", rpl);
+                            }
+                            else if ((inData.equalsIgnoreCase("clean")) & (rpl.getStatus() != ACTIVE )) {
+                                incomingPeers.remove(ip);
+                            }
+                        }
+                        if (incomingPeers.size() < nonInitiatorSize) {
+                            // pruning happened
+                            log.info("incoming (non-initiator) peers after pruning: {}", incomingPeers.size());
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -228,9 +244,9 @@ public class MeshAppBuffer {
             }
         }
         // gracefully close links of peers that point to us
-        for (Link l: incomingLinks) {
-            sendCloseToRemote(l);
-        }
+        //for (Link l: incomingLinks) {
+        //    sendCloseToRemote(l);
+        //}
         // Note: we still need to get the packet timeout callback to work...
         reticulum.exitHandler();
     }
@@ -279,10 +295,17 @@ public class MeshAppBuffer {
             // make sure the peerLink is active.
             peer.getOrInitPeerLink();
         } else {
-            log.info("non-initiator opened link (link lookup: {}), link destination hash (initiator): {}",
-                peer, link, encodeHexString(link.getDestination().getHash()));
+            peer = findIncomingPeerByLink(link);
+            if (nonNull(peer)) {
+                log.info("non-initiator peer exists. No action required");
+            } else {
+                log.info("New non-initiator link {} (creating new peer), link destination hash (initiator): {}",
+                    link, encodeHexString(link.getDestination().getHash()));
+                RNSPeer newPeer = new RNSPeer(link);
+                incomingPeers.add(newPeer);
+            }
         }
-        incomingLinks.add(link);
+        //incomingLinks.add(link);
         log.info("***> Client connected, link: {}", link);
     }
 
@@ -292,8 +315,8 @@ public class MeshAppBuffer {
             log.info("initiator peer closed link (link lookup: {}), link destination hash: {}",
                 encodeHexString(peer.getDestinationHash()), link, encodeHexString(link.getDestination().getHash()));
         } else {
-            log.info("non-initiator closed link (link lookup: {}), link destination hash (initiator): {}",
-                peer, link, encodeHexString(link.getDestination().getHash()));
+            log.info("non-initiator closed link {} (peer lookup: {}), link destination hash (initiator): {}",
+                link, peer, encodeHexString(link.getDestination().getHash()));
         }
         // if we have a peer pointing to that destination, we can close and remove it
         peer = findPeerByDestinationHash(link.getDestination().getHash());
@@ -302,7 +325,7 @@ public class MeshAppBuffer {
             //       keep it to reopen link later if possible.
             peer.getPeerLink().teardown();
         }
-        incomingLinks.remove(link);
+        //incomingLinks.remove(link);
         log.info("***> Client disconnected");
     }
 
@@ -327,18 +350,24 @@ public class MeshAppBuffer {
     }
 
     @Synchronized
-    public void prunePeers(Link link) {
+    public void prunePeers() {
+        // note: only prune initiator peers
         List<RNSPeer> lps =  getLinkedPeers();
         log.info("number of peers before pruning: {}", lps.size());
+        Link pl;
         for (RNSPeer p: lps) {
-            log.info("peerLink: {}", p.getPeerLink());
-            if (p.getPeerLink() == null) {
+            pl = p.getPeerLink();
+            log.info("peerLink: {}", pl);
+            if (pl == null) {
                 log.info("link is null, removing peer");
                 lps.remove(p);
                 continue;
             }
+            else if ((pl.getStatus() != ACTIVE)) {
+                pl.teardown();
+            }
         }
-        log.info("number of peers after pruning: {}, {}", lps.size(), getLinkedPeers().size());
+        log.info("number of peers before / after pruning: {} / {}", lps.size(), getLinkedPeers().size());
     }
 
     public RNSPeer findPeerByLink(Link link) {
@@ -353,6 +382,22 @@ public class MeshAppBuffer {
                         encodeHexString(link.getDestination().getHash()));
                 if (Arrays.equals(pLink.getDestination().getHash(),link.getDestination().getHash())) {
                     log.info("  findPeerByLink - found peer matching destinationHash");
+                    peer = p;
+                    break;
+                }
+            }
+        }
+        return peer;
+    }
+
+    public RNSPeer findIncomingPeerByLink(Link link) {
+        List<RNSPeer> lps = getIncomingPeers();
+        RNSPeer peer = null;
+        for (RNSPeer p : lps) {
+            var pLink = p.getPeerLink();
+            if (nonNull(pLink)) {
+                if (Arrays.equals(pLink.getDestination().getHash(),link.getDestination().getHash())) {
+                    log.info("findIncomingPeerByLink - found peer matching destinationHash");
                     peer = p;
                     break;
                 }
@@ -449,12 +494,30 @@ public class MeshAppBuffer {
         Long lastAccessTimestamp;
         Boolean isInitiator;
         Link peerLink;
-        Reticulum rns = reticulum;
+        //Reticulum rns = reticulum;
 
+        /**
+         * Constructor for initiator peers
+         */
         public RNSPeer(byte[] dhash) {
             this.destinationHash = dhash;
             this.serverIdentity = recall(dhash);
             initPeerLink();
+        }
+
+        /**
+         * Constructor for non-initiator peers
+         */
+        public RNSPeer(Link link) {
+            this.peerLink = link;
+
+            setCreationTimestamp(System.currentTimeMillis());
+            this.lastAccessTimestamp = null;
+            this.isInitiator = false;
+
+            //this.peerLink.setLinkEstablishedCallback(this::linkEstablished);
+            //this.peerLink.setLinkClosedCallback(this::linkClosed);
+            //this.peerLink.setPacketCallback(this::linkPacketReceived);
         }
 
         public void initPeerLink() {
@@ -619,6 +682,12 @@ public class MeshAppBuffer {
                             .desc("(optional) path to alternative Reticulum config directory "
                                   + "(default: .reticulum)").build();
         options.addOption(o_config);
+        Option o_reply = Option.builder("r").longOpt("reply")
+                            .hasArg(false)
+                            .required(false)
+                            .desc("send response to messages received")
+                            .build();
+        options.addOption(o_reply);
         // define parser
         CommandLine cLine;
         CommandLineParser parser = new DefaultParser();
@@ -633,6 +702,11 @@ public class MeshAppBuffer {
             }
 
             var instance = new MeshAppBuffer();
+
+            if (cLine.hasOption("r")) {
+                System.out.println("reply mode - echo back reply text");
+                instance.setDoReply(true);
+            }
 
             if (cLine.hasOption("config")) {
                 try {
