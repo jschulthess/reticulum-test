@@ -11,6 +11,8 @@ import io.reticulum.destination.ProofStrategy;
 import io.reticulum.identity.Identity;
 import io.reticulum.link.Link;
 //import io.reticulum.constant.LinkConstant;
+import io.reticulum.buffer.Buffer;
+import io.reticulum.buffer.BufferedRWPair;
 import io.reticulum.packet.Packet;
 import io.reticulum.packet.PacketReceipt;
 import io.reticulum.packet.PacketReceiptStatus;
@@ -39,7 +41,7 @@ import static java.nio.file.StandardOpenOption.WRITE;
 //import static java.util.Objects.isNull;
 //import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-//import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.ArrayUtils.subarray;
 
 import java.util.Arrays;
@@ -193,6 +195,7 @@ public class MeshAppBuffer {
                             } else if (inData.equalsIgnoreCase("open")) {
                                 p.getOrInitPeerLink();
                                 log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
+                                //p.getOrInitPeerBuffer();
                             } else if (inData.equalsIgnoreCase("clean")) {
                                 if (p.getPeerLink().getStatus() != ACTIVE) {
                                     //p.shutdown();
@@ -205,10 +208,13 @@ public class MeshAppBuffer {
                                     continue;
                             } else {
                                 if (rpl.getStatus() == ACTIVE) {
-                                var data = inData.getBytes(UTF_8);
-                                log.info("sending text \"{}\" to peer: {}", inData, encodeHexString(p.getDestinationHash()));
-                                var testPacket = new Packet(rpl, data);
-                                testPacket.send();
+                                    var data = inData.getBytes(UTF_8);
+                                    log.info("sending text \"{}\" to peer: {}", inData, encodeHexString(p.getDestinationHash()));
+                                    //var testPacket = new Packet(rpl, data);
+                                    //testPacket.send();var peerBuffer = p.getOrInitPeerBuffer();
+                                    var peerBuffer = p.getOrInitPeerBuffer();
+                                    peerBuffer.write(data);
+                                    peerBuffer.flush();
                                 } else {
                                     log.info("can't send data to link with status: {}", rpl.getStatus());
                                 }
@@ -298,6 +304,8 @@ public class MeshAppBuffer {
         log.info("clientConnected - link hash: {}, {}", link.getHash(), Hex.encodeHexString(link.getHash()));
         RNSPeer newPeer = new RNSPeer(link);
         newPeer.setPeerLinkHash(link.getHash());
+        // make sure the peer has a cannel and buffer
+        newPeer.getOrInitPeerBuffer();
         incomingPeers.add(newPeer);
         //var peer = findPeerByLink(link);
         //if (nonNull(peer)) {
@@ -322,26 +330,10 @@ public class MeshAppBuffer {
 
     public void clientDisconnected(Link link) {
         log.info("clientConnected - link, hash, status: {}, {}, {}", link.getHash(), Hex.encodeHexString(link.getHash()), link.getStatus());
-        var peer = findIncomingPeerByLink(link);
-        if (nonNull(peer)) {
-            getIncomingPeers().remove(peer);
-        }
-        //var peer = findPeerByLink(link);
+        //var peer = findIncomingPeerByLink(link);
         //if (nonNull(peer)) {
-        //    log.info("initiator peer closed link (link lookup: {}), link destination hash: {}",
-        //        encodeHexString(peer.getDestinationHash()), link, encodeHexString(link.getDestination().getHash()));
-        //} else {
-        //    log.info("non-initiator closed link {} (peer lookup: {}), link destination hash (initiator): {}",
-        //        link, peer, encodeHexString(link.getDestination().getHash()));
+        //    getIncomingPeers().remove(peer);
         //}
-        //// if we have a peer pointing to that destination, we can close and remove it
-        //peer = findPeerByDestinationHash(link.getDestination().getHash());
-        //if (nonNull(peer)) {
-        //    // Note: no shutdown as the remobe peer could be only rebooting.
-        //    //       keep it to reopen link later if possible.
-        //    peer.getPeerLink().teardown();
-        //}
-        ////incomingLinks.remove(link);
         log.info("***> Client disconnected");
     }
 
@@ -523,6 +515,9 @@ public class MeshAppBuffer {
         Boolean isInitiator;
         Link peerLink;
         byte[] peerLinkHash; // the actual local link hash
+        BufferedRWPair peerBuffer;
+        int receiveStreamId = 0;
+        int sendStreamId = 0;
         //Reticulum rns = reticulum;
 
         /**
@@ -570,6 +565,19 @@ public class MeshAppBuffer {
             peerLink.setLinkEstablishedCallback(this::linkEstablished);
             peerLink.setLinkClosedCallback(this::linkClosed);
             peerLink.setPacketCallback(this::linkPacketReceived);
+        }
+
+        public BufferedRWPair getOrInitPeerBuffer() {
+            var channel = this.peerLink.getChannel();
+            if (nonNull(this.peerBuffer)) {
+                log.info("peerBuffer exists: {}, link status: {}", this.peerBuffer, this.peerLink.getStatus());
+                return this.peerBuffer;
+            }
+            else {
+                log.info("creating buffer - peerLink status: {}, channel: {}", this.peerLink.getStatus(), channel);
+                this.peerBuffer = Buffer.createBidirectionalBuffer(receiveStreamId, sendStreamId, channel, this::peerBufferReady);
+            }
+            return getPeerBuffer();
         }
 
         public Link getOrInitPeerLink() {
@@ -637,7 +645,31 @@ public class MeshAppBuffer {
                 if (Arrays.equals(destinationHash, targetPeerHash)) {
                     log.info("closing link: {}", peerLink.getDestination().getHexHash());
                     getOrInitPeerLink();
+                    //// make sure we have a buffer if buffers are turned on
+                    //getOrInitPeerBuffer();
                 }
+            }
+        }
+
+        /*
+         * Callback from buffer when buffer has data available
+         * 
+         * :param readyBytes: The number of bytes ready to read
+         */
+        public void peerBufferReady(Integer readyBytes) {
+            var data = this.peerBuffer.read(readyBytes);
+            var decodedData = new String(data);
+
+            log.info("Received data over the buffer: {}", decodedData);
+
+            // process data. In this example: reply data back to client
+            if ((doReply) & (isFalse(this.isInitiator))) {
+                var replyText = "I received ** "+decodedData;
+                byte[] replyData = replyText.getBytes();
+                this.peerBuffer.write(replyData);
+                this.peerBuffer.flush(); // clear buffer
+            } else {
+                this.peerBuffer.flush(); // clear buffer
             }
         }
 
