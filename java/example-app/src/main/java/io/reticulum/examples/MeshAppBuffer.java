@@ -172,8 +172,13 @@ public class MeshAppBuffer {
                     //var rand = new Random();
                     //var randomPeer = linkedPeers.get(rand.nextInt(linkedPeers.size()));
                     Link rpl;
+                    if (incomingPeers.isEmpty()) {
+                        log.info("No local non-initiator peers yet");
+                    } else {
+                        log.info("{} non-initiator peers: {}", incomingPeers);
+                    }
                     if (linkedPeers.isEmpty()) {
-                        log.info("no local peer objects (yet). We'll create on for every announce we receive.");
+                        log.info("No local initiator peer objects (yet). We'll create on for every announce we receive.");
                     } else {
                         for (RNSPeer p: linkedPeers) {
                             rpl = p.getPeerLink();
