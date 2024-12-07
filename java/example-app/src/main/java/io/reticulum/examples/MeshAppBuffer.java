@@ -53,6 +53,7 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.codec.binary.Hex.encodeHexString;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.codec.binary.Hex;
 
 @Data
 @Slf4j
@@ -293,6 +294,7 @@ public class MeshAppBuffer {
     public void clientConnected(Link link) {
         link.setLinkClosedCallback(this::clientDisconnected);
         link.setPacketCallback(this::serverPacketReceived);
+        log.info("clientConnected - link hash: {}, {}", link.getHash(), Hex.encodeHexString(link.getHash()));
         var peer = findPeerByLink(link);
         if (nonNull(peer)) {
             log.info("initiator peer {} opened link (link lookup: {}), link destination hash: {}",
