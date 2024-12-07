@@ -318,6 +318,7 @@ public class MeshAppBuffer {
 
     public void clientDisconnected(Link link) {
         var peer = findPeerByLink(link);
+        log.info("clientConnected - link hash: {}, {}", link.getHash(), Hex.encodeHexString(link.getHash()));
         if (nonNull(peer)) {
             log.info("initiator peer closed link (link lookup: {}), link destination hash: {}",
                 encodeHexString(peer.getDestinationHash()), link, encodeHexString(link.getDestination().getHash()));
