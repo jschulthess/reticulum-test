@@ -295,45 +295,48 @@ public class MeshAppBuffer {
         link.setLinkClosedCallback(this::clientDisconnected);
         link.setPacketCallback(this::serverPacketReceived);
         log.info("clientConnected - link hash: {}, {}", link.getHash(), Hex.encodeHexString(link.getHash()));
-        var peer = findPeerByLink(link);
-        if (nonNull(peer)) {
-            log.info("initiator peer {} opened link (link lookup: {}), link destination hash: {}",
-                encodeHexString(peer.getDestinationHash()), link, encodeHexString(link.getDestination().getHash()));
-            // make sure the peerLink is active.
-            peer.getOrInitPeerLink();
-        } else {
-            peer = findIncomingPeerByLink(link);
-            if (nonNull(peer)) {
-                log.info("non-initiator peer exists. No action required");
-            } else {
-                log.info("New non-initiator link {} (creating new peer), link destination hash (initiator): {}",
-                    link, encodeHexString(link.getDestination().getHash()));
-                RNSPeer newPeer = new RNSPeer(link);
-                incomingPeers.add(newPeer);
-            }
-        }
+        RNSPeer newPeer = new RNSPeer(link);
+        newPeer.setPeerLinkHash(link.getHash());
+        incomingPeers.add(newPeer);
+        //var peer = findPeerByLink(link);
+        //if (nonNull(peer)) {
+        //    log.info("initiator peer {} opened link (link lookup: {}), link destination hash: {}",
+        //        encodeHexString(peer.getDestinationHash()), link, encodeHexString(link.getDestination().getHash()));
+        //    // make sure the peerLink is active.
+        //    peer.getOrInitPeerLink();
+        //} else {
+        //    peer = findIncomingPeerByLink(link);
+        //    if (nonNull(peer)) {
+        //        log.info("non-initiator peer exists. No action required");
+        //    } else {
+        //        log.info("New non-initiator link {} (creating new peer), link destination hash (initiator): {}",
+        //            link, encodeHexString(link.getDestination().getHash()));
+        //        RNSPeer newPeer = new RNSPeer(link);
+        //        incomingPeers.add(newPeer);
+        //    }
+        //}
         //incomingLinks.add(link);
         log.info("***> Client connected, link: {}", link);
     }
 
     public void clientDisconnected(Link link) {
-        var peer = findPeerByLink(link);
-        log.info("clientConnected - link hash: {}, {}", link.getHash(), Hex.encodeHexString(link.getHash()));
-        if (nonNull(peer)) {
-            log.info("initiator peer closed link (link lookup: {}), link destination hash: {}",
-                encodeHexString(peer.getDestinationHash()), link, encodeHexString(link.getDestination().getHash()));
-        } else {
-            log.info("non-initiator closed link {} (peer lookup: {}), link destination hash (initiator): {}",
-                link, peer, encodeHexString(link.getDestination().getHash()));
-        }
-        // if we have a peer pointing to that destination, we can close and remove it
-        peer = findPeerByDestinationHash(link.getDestination().getHash());
-        if (nonNull(peer)) {
-            // Note: no shutdown as the remobe peer could be only rebooting.
-            //       keep it to reopen link later if possible.
-            peer.getPeerLink().teardown();
-        }
-        //incomingLinks.remove(link);
+        log.info("clientConnected - link, hash, status: {}, {}, {}", link.getHash(), Hex.encodeHexString(link.getHash()));
+        //var peer = findPeerByLink(link);
+        //if (nonNull(peer)) {
+        //    log.info("initiator peer closed link (link lookup: {}), link destination hash: {}",
+        //        encodeHexString(peer.getDestinationHash()), link, encodeHexString(link.getDestination().getHash()));
+        //} else {
+        //    log.info("non-initiator closed link {} (peer lookup: {}), link destination hash (initiator): {}",
+        //        link, peer, encodeHexString(link.getDestination().getHash()));
+        //}
+        //// if we have a peer pointing to that destination, we can close and remove it
+        //peer = findPeerByDestinationHash(link.getDestination().getHash());
+        //if (nonNull(peer)) {
+        //    // Note: no shutdown as the remobe peer could be only rebooting.
+        //    //       keep it to reopen link later if possible.
+        //    peer.getPeerLink().teardown();
+        //}
+        ////incomingLinks.remove(link);
         log.info("***> Client disconnected");
     }
 
@@ -502,6 +505,7 @@ public class MeshAppBuffer {
         Long lastAccessTimestamp;
         Boolean isInitiator;
         Link peerLink;
+        byte[] peerLinkHash; // the actual local link hash
         //Reticulum rns = reticulum;
 
         /**
