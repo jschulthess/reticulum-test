@@ -176,7 +176,7 @@ public class MeshAppBuffer {
                     if (incomingPeers.isEmpty()) {
                         log.info("No local non-initiator peers yet");
                     } else {
-                        log.info("{} non-initiator peers: {}", incomingPeers.size(), incomingPeers);
+                        log.debug("{} non-initiator peers: {}", incomingPeers.size(), incomingPeers);
                     }
                     if (linkedPeers.isEmpty()) {
                         log.info("No local initiator peer objects (yet). We'll create on for every announce we receive.");
@@ -362,23 +362,34 @@ public class MeshAppBuffer {
 
     @Synchronized
     public void prunePeers() {
-        // note: only prune initiator peers
-        List<RNSPeer> lps =  getLinkedPeers();
-        log.info("number of peers before pruning: {}", lps.size());
+        // note: only prune non-initiator peers
+        List<RNSPeer> lps =  getIncomingPeers();
         Link pl;
-        for (RNSPeer p: lps) {
+        for (RNSPeer p : lps) {
             pl = p.getPeerLink();
-            log.info("peerLink: {}", pl);
-            if (pl == null) {
-                log.info("link is null, removing peer");
+            if (pl.getStatus() != ACTIVE) {
+                log.info("removing peer {} with link status {}", p, pl.getStatus());
                 lps.remove(p);
-                continue;
-            }
-            else if ((pl.getStatus() != ACTIVE)) {
-                pl.teardown();
             }
         }
-        log.info("number of peers before / after pruning: {} / {}", lps.size(), getLinkedPeers().size());
+        log.info("number of incoming/non-initiator peers before / after pruning: {} / {}", lps.size(), getIncomingPeers().size());
+        // note: only prune initiator peers
+        //List<RNSPeer> lps =  getLinkedPeers();
+        //log.info("number of peers before pruning: {}", lps.size());
+        //Link pl;
+        //for (RNSPeer p: lps) {
+        //    pl = p.getPeerLink();
+        //    log.info("peerLink: {}", pl);
+        //    if (pl == null) {
+        //        log.info("link is null, removing peer");
+        //        lps.remove(p);
+        //        continue;
+        //    }
+        //    else if ((pl.getStatus() != ACTIVE)) {
+        //        pl.teardown();
+        //    }
+        //}
+        //log.info("number of peers before / after pruning: {} / {}", lps.size(), getLinkedPeers().size());
     }
 
     public RNSPeer findPeerByLink(Link link) {
