@@ -213,7 +213,7 @@ public class MeshAppBuffer {
                             }
                         }
                         var nonInitiatorSize = incomingPeers.size();
-                        log.info("incoming (non-initiator) peers: {}", nonInitiatorSize);
+                        //log.info("incoming (non-initiator) peers: {}", nonInitiatorSize);
                         for (RNSPeer ip: incomingPeers) {
                             rpl = ip.getPeerLink();
                             if (inData.equalsIgnoreCase("status")) {
@@ -515,6 +515,8 @@ public class MeshAppBuffer {
          */
         public RNSPeer(Link link) {
             this.peerLink = link;
+            this.peerDestination = link.getDestination();
+            this.destinationHash = link.getDestination().getHash();
 
             setCreationTimestamp(System.currentTimeMillis());
             this.lastAccessTimestamp = null;
