@@ -175,7 +175,7 @@ public class MeshAppBuffer {
                     if (incomingPeers.isEmpty()) {
                         log.info("No local non-initiator peers yet");
                     } else {
-                        log.info("{} non-initiator peers: {}", incomingPeers);
+                        log.info("{} non-initiator peers: {}", incomingPeers.size(), incomingPeers);
                     }
                     if (linkedPeers.isEmpty()) {
                         log.info("No local initiator peer objects (yet). We'll create on for every announce we receive.");
@@ -556,10 +556,12 @@ public class MeshAppBuffer {
         }
 
         public void shutdown() {
-            if (nonNull(peerLink)) {
+            if (nonNull(this.peerLink)) {
                 log.info("shutdown - peerLink: {}, status: {}", peerLink, peerLink.getStatus());
                 if (peerLink.getStatus() == ACTIVE) {
                     peerLink.teardown();
+                } else {
+                    log.info("shutdown - status (non-ACTIVE): {}", peerLink.getStatus());
                 }
                 this.peerLink = null;
             }
