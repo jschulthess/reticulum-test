@@ -218,7 +218,7 @@ public class MeshAppBuffer {
                         for (RNSPeer ip: incomingPeers) {
                             rpl = ip.getPeerLink();
                             if (inData.equalsIgnoreCase("status")) {
-                                log.info("incoming peer: {}", rpl);
+                                log.info("incoming peer: {}, status: {}", rpl, rpl.getStatus());
                             }
                             else if ((inData.equalsIgnoreCase("clean")) & (rpl.getStatus() != ACTIVE )) {
                                 incomingPeers.remove(ip);
