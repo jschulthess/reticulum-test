@@ -188,8 +188,7 @@ public class MeshAppBuffer {
                                 p.getOrInitPeerBuffer();
                             } else if (inData.equalsIgnoreCase("clean")) {
                                 if (p.getPeerLink().getStatus() != ACTIVE) {
-                                    //p.shutdown();
-                                    linkedPeers.remove(p);
+                                    p.getPeerLink().teardown();
                                 }
                             } else if (inData.equalsIgnoreCase("status")) {
                                 log.info("peer destinationHash: {}, peerLink: {} <=> status: {}",
