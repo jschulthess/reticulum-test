@@ -314,23 +314,26 @@ public class MeshAppBuffer {
     //@Synchronized
     public void prunePeers() {
         // note: only prune non-initiator peers
-        List<RNSPeer> lps =  getIncomingPeers();
-        log.info("number of incoming/non-initiator peers before pruning: {}", lps.size());
+        //List<RNSPeer> lps =  getIncomingPeers();
+        //log.info("number of incoming/non-initiator peers before pruning: {}", lps.size());
         Link pl;
-        for (RNSPeer p : lps) {
-            pl = p.getPeerLink();
-            if (pl.getStatus() != ACTIVE) {
-                log.info("removing peer {} with link status {}", p, pl.getStatus());
-                pl.teardown();
-                //p.setPeerLink(null);
-                lps.remove(p);
-            }
-        }
-        //List<RNSPeer> lps = getLinkedPeers();
+        //for (RNSPeer p : lps) {
+        //    pl = p.getPeerLink();
+        //    if (pl.getStatus() != ACTIVE) {
+        //        log.info("removing peer {} with link status {}", p, pl.getStatus());
+        //        pl.teardown();
+        //        //p.setPeerLink(null);
+        //        lps.remove(p);
+        //    }
+        //}
+        List<RNSPeer> lps = getLinkedPeers();
         //log.info("nuber of initiator peers before pruning: {}", lps.size());
         for (RNSPeer p : lps) {
-            log.info("pinging peer {}", p);
-            p.pingRemote();
+            pl = p.getPeerLink();
+            if (nonNull(pl) & (pl.getStatus() == ACTIVE)) {
+                log.info("pinging peer {}", p);
+                p.pingRemote();
+            }
         }
     }
 
@@ -632,7 +635,7 @@ public class MeshAppBuffer {
             log.info("packet timed out");
             if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
                 log.info("packet timed out, receipt status: {}", PacketReceiptStatus.FAILED);
-                peerLink.teardown();
+                this.peerLink.teardown();
             }
         }
     
