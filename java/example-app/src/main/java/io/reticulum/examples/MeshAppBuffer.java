@@ -420,9 +420,13 @@ public class MeshAppBuffer {
                         log.info("peer link: {}, status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
                     }
                     peerExists = true;
-                    if (p.getPeerLink().getStatus() != ACTIVE) {
-                        p.getOrInitPeerLink();
-                    }
+                    //if (p.getPeerLink().getStatus() != ACTIVE) {
+                    //    p.getOrInitPeerLink();
+                    //}
+                    // make sure the link is active
+                    p.getOrInitPeerLink();
+                    // renew buffer
+                    p.getOrInitPeerBuffer();
                     break;
                 } else {
                     log.info("MeshAnnounceHandler - no matching peer,  peerLink hash: {}, link destination hash: {}",
