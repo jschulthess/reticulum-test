@@ -300,8 +300,8 @@ public class MeshAppBuffer {
     }
 
     public void clientConnected(Link link) {
-        link.setLinkClosedCallback(this::clientDisconnected);
-        link.setPacketCallback(this::serverPacketReceived);
+        //link.setLinkClosedCallback(this::clientDisconnected);
+        //link.setPacketCallback(this::serverPacketReceived);
         log.info("clientConnected - link hash: {}, {}", link.getHash(), Hex.encodeHexString(link.getHash()));
         RNSPeer newPeer = new RNSPeer(link);
         newPeer.setPeerLinkHash(link.getHash());
@@ -607,6 +607,7 @@ public class MeshAppBuffer {
 
         public void linkEstablished(Link link) {
             link.setLinkClosedCallback(this::linkClosed);
+            link.setPacketCallback(this::linkPacketReceived);
             log.info("peerLink {} established (link: {}) with peer: hash - {}, link destination hash: {}", 
                 peerLink, link, encodeHexString(destinationHash),
                 encodeHexString(link.getDestination().getHash()));
@@ -639,7 +640,7 @@ public class MeshAppBuffer {
                     encodeHexString(targetPeerHash));
                 if (Arrays.equals(destinationHash, targetPeerHash)) {
                     log.info("closing link: {}", peerLink.getDestination().getHexHash());
-                    peerLink.teardown();
+                peerLink.teardown();
                 }
             } else if (msgText.startsWith("open::")) {
                 var targetPeerHash = subarray(message, 7, message.length);
