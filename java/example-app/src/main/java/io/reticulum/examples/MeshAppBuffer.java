@@ -313,19 +313,19 @@ public class MeshAppBuffer {
 
     @Synchronized
     public void prunePeers() {
-        //// note: only prune non-initiator peers
-        //List<RNSPeer> lps =  getIncomingPeers();
-        //log.info("number of incoming/non-initiator peers before pruning: {}", lps.size());
+        // note: only prune non-initiator peers
+        List<RNSPeer> lps =  getIncomingPeers();
+        log.info("number of incoming/non-initiator peers before pruning: {}", lps.size());
         Link pl;
-        //for (RNSPeer p : lps) {
-        //    pl = p.getPeerLink();
-        //    if (pl.getStatus() != ACTIVE) {
-        //        log.info("removing peer {} with link status {}", p, pl.getStatus());
-        //        p.setPeerLink(null);
-        //        lps.remove(p);
-        //    }
-        //}
-        List<RNSPeer> lps = getLinkedPeers();
+        for (RNSPeer p : lps) {
+            pl = p.getPeerLink();
+            if (pl.getStatus() != ACTIVE) {
+                log.info("removing peer {} with link status {}", p, pl.getStatus());
+                p.setPeerLink(null);
+                lps.remove(p);
+            }
+        }
+        //List<RNSPeer> lps = getLinkedPeers();
         //log.info("nuber of initiator peers before pruning: {}", lps.size());
         for (RNSPeer p : lps) {
             log.info("pinging peer {}", p);
@@ -528,11 +528,11 @@ public class MeshAppBuffer {
 
         public void shutdown() {
             if (nonNull(this.peerLink)) {
-                if (this.isInitiator) {
-                    sendCloseToRemote(this.peerLink);
-                }
                 log.info("shutdown - peerLink: {}, status: {}", peerLink, peerLink.getStatus());
                 if (peerLink.getStatus() == ACTIVE) {
+                    if (this.isInitiator) {
+                        sendCloseToRemote(peerLink);
+                    }
                     peerLink.teardown();
                 } else {
                     log.info("shutdown - status (non-ACTIVE): {}", peerLink.getStatus());
