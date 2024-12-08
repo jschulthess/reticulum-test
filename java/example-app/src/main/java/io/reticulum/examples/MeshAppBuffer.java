@@ -311,7 +311,7 @@ public class MeshAppBuffer {
         log.info("Received data on the link, message: \"{}\"", text);
     }
 
-    @Synchronized
+    //@Synchronized
     public void prunePeers() {
         // note: only prune non-initiator peers
         List<RNSPeer> lps =  getIncomingPeers();
