@@ -608,7 +608,7 @@ public class MeshAppBuffer {
             var data = this.peerBuffer.read(readyBytes);
             var decodedData = new String(data);
 
-            if (decodedData.isBlank()) {
+            if (decodedData.isEmpty()) {
                 // this means we have a rogue 2nd buffer
                 // (can happen with aggressive getOrInitPeerBuffer())
                 this.peerBuffer.close();
