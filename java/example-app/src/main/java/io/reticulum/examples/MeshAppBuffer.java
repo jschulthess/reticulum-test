@@ -198,7 +198,8 @@ public class MeshAppBuffer {
                             } else {
                                 if (rpl.getStatus() == ACTIVE) {
                                     var data = inData.getBytes(UTF_8);
-                                    log.info("sending text \"{}\" to peer: {}", inData, encodeHexString(p.getDestinationHash()));
+                                    log.info("sending text ({} bytes) \"{}\" to peer: {}",
+                                        data.length, inData, encodeHexString(p.getDestinationHash()));
                                     //var testPacket = new Packet(rpl, data);
                                     //testPacket.send();var peerBuffer = p.getOrInitPeerBuffer();
                                     var peerBuffer = p.getOrInitPeerBuffer();
