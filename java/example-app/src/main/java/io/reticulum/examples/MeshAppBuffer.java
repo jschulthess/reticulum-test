@@ -10,6 +10,7 @@ import io.reticulum.destination.ProofStrategy;
 import io.reticulum.identity.Identity;
 import io.reticulum.link.Link;
 //import io.reticulum.constant.LinkConstant;
+import static io.reticulum.constant.ReticulumConstant.MTU;
 import io.reticulum.buffer.Buffer;
 import io.reticulum.buffer.BufferedRWPair;
 import io.reticulum.packet.Packet;
@@ -198,8 +199,8 @@ public class MeshAppBuffer {
                             } else {
                                 if (rpl.getStatus() == ACTIVE) {
                                     var data = inData.getBytes(UTF_8);
-                                    log.info("sending text ({} bytes) \"{}\" to peer: {}",
-                                        data.length, inData, encodeHexString(p.getDestinationHash()));
+                                    log.info("sending {} bytes (MTU={}) \"{}\" to peer: {}",
+                                        data.length, MTU, inData, encodeHexString(p.getDestinationHash()));
                                     //var testPacket = new Packet(rpl, data);
                                     //testPacket.send();var peerBuffer = p.getOrInitPeerBuffer();
                                     var peerBuffer = p.getOrInitPeerBuffer();
