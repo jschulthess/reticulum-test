@@ -11,6 +11,7 @@ import io.reticulum.destination.ProofStrategy;
 import io.reticulum.identity.Identity;
 import io.reticulum.link.Link;
 //import io.reticulum.constant.LinkConstant;
+import static io.reticulum.constant.ReticulumConstant.MTU;
 import io.reticulum.packet.Packet;
 import io.reticulum.packet.PacketReceipt;
 import io.reticulum.packet.PacketReceiptStatus;
@@ -192,10 +193,15 @@ public class MeshAppLink {
                                     continue;
                             } else {
                                 if (rpl.getStatus() == ACTIVE) {
-                                var data = inData.getBytes(UTF_8);
-                                log.info("sending text \"{}\" to peer: {}", inData, encodeHexString(p.getDestinationHash()));
-                                var testPacket = new Packet(rpl, data);
-                                testPacket.send();
+                                    var data = inData.getBytes(UTF_8);
+                                    if (data.length <= MTU) {
+                                        log.info("sending text \"{}\" to peer: {}", inData, encodeHexString(p.getDestinationHash()));
+                                        var testPacket = new Packet(rpl, data);
+                                        testPacket.send();
+                                    } else {
+                                        log.info("cant' send data larger than {}, data length: {}", MTU, data.length);
+                                    }
+
                                 } else {
                                     log.info("can't send data to link with status: {}", rpl.getStatus());
                                 }
