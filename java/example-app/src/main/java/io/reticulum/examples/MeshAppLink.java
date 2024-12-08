@@ -199,9 +199,8 @@ public class MeshAppLink {
                                         var testPacket = new Packet(rpl, data);
                                         testPacket.send();
                                     } else {
-                                        log.info("cant' send data larger than {}, data length: {}", MTU, data.length);
+                                        log.info("cant' send data larger than {} (MTU), data length: {}", MTU, data.length);
                                     }
-
                                 } else {
                                     log.info("can't send data to link with status: {}", rpl.getStatus());
                                 }
