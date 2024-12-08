@@ -684,7 +684,7 @@ public class MeshAppBuffer {
                 Packet closePacket = new Packet(link, data);
                 var packetReceipt = closePacket.send();
                 packetReceipt.setDeliveryCallback(this::closePacketDelivered);
-                packetReceipt.setTimeoutCallback(this::packetTimedOut);
+                //packetReceipt.setTimeoutCallback(this::packetTimedOut);
             } else {
                 log.debug("can't send to null link");
             }
@@ -696,9 +696,6 @@ public class MeshAppBuffer {
             if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
                 log.info("packet timed out, receipt status: {}", PacketReceiptStatus.FAILED);
                 peerLink.teardown();
-            } else {
-                log.info("packet timed out, receipt status: {}", receipt.getStatus());
-                //peerLink.teardown();
             }
         }
     
