@@ -615,7 +615,7 @@ public class MeshAppBuffer {
                 //shutdown();
             }
 
-            log.info("Received data over the buffer: {}", decodedData);
+            log.info("Received data over the buffer: *>{}<*", decodedData);
 
             // process data. In this example: reply data back to client
             if (nonNull(doReply) & isTrue(doReply) & (isFalse(this.isInitiator))) {
