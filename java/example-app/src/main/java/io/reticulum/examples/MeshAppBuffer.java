@@ -693,15 +693,13 @@ public class MeshAppBuffer {
         // PacketReceipt callbacks
         public void packetTimedOut(PacketReceipt receipt) {
             log.info("packet timed out");
-            log.info("packet timed out, receipt status: {}", receipt.getStatus());
-            peerLink.teardown();
-            //if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
-            //    log.info("packet timed out, receipt status: {}", PacketReceiptStatus.FAILED);
-            //    peerLink.teardown();
-            //} else {
-            //    log.info("packet timed out, receipt status: {}", receipt.getStatus());
-            //    peerLink.teardown();
-            //}
+            if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
+                log.info("packet timed out, receipt status: {}", PacketReceiptStatus.FAILED);
+                peerLink.teardown();
+            } else {
+                log.info("packet timed out, receipt status: {}", receipt.getStatus());
+                //peerLink.teardown();
+            }
         }
     
         public void closePacketDelivered(PacketReceipt receipt) {
