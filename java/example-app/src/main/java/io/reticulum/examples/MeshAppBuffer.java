@@ -42,6 +42,7 @@ import static java.nio.file.StandardOpenOption.WRITE;
 //import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.ArrayUtils.subarray;
 
 import java.util.Arrays;
@@ -663,7 +664,7 @@ public class MeshAppBuffer {
             log.info("Received data over the buffer: {}", decodedData);
 
             // process data. In this example: reply data back to client
-            if ((doReply) & (isFalse(this.isInitiator))) {
+            if (nonNull(doReply) & isTrue(doReply) & (isFalse(this.isInitiator))) {
                 var replyText = "I received ** "+decodedData;
                 byte[] replyData = replyText.getBytes();
                 this.peerBuffer.write(replyData);
@@ -771,6 +772,8 @@ public class MeshAppBuffer {
             if (cLine.hasOption("r")) {
                 System.out.println("reply mode - echo back reply text");
                 instance.setDoReply(true);
+            } else {
+                instance.setDoReply(false);
             }
 
             if (cLine.hasOption("config")) {
