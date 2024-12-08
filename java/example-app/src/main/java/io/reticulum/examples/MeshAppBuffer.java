@@ -425,8 +425,6 @@ public class MeshAppBuffer {
                     //}
                     // make sure the link is active
                     p.getOrInitPeerLink();
-                    // renew buffer
-                    p.getOrInitPeerBuffer();
                     break;
                 } else {
                     log.info("MeshAnnounceHandler - no matching peer,  peerLink hash: {}, link destination hash: {}",
@@ -524,8 +522,7 @@ public class MeshAppBuffer {
                 log.info("creating buffer - peerLink status: {}, channel: {}", this.peerLink.getStatus(), channel);
                 this.peerBuffer = Buffer.createBidirectionalBuffer(receiveStreamId, sendStreamId, channel, this::peerBufferReady);
             }
-            //return getPeerBuffer();
-            return this.peerBuffer;
+            return getPeerBuffer();
         }
 
         public Link getOrInitPeerLink() {
