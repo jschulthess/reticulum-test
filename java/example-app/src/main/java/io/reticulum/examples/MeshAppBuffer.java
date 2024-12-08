@@ -196,7 +196,7 @@ public class MeshAppBuffer {
                             } else if (inData.equalsIgnoreCase("open")) {
                                 p.getOrInitPeerLink();
                                 log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
-                                //p.getOrInitPeerBuffer();
+                                p.getOrInitPeerBuffer();
                             } else if (inData.equalsIgnoreCase("clean")) {
                                 if (p.getPeerLink().getStatus() != ACTIVE) {
                                     //p.shutdown();
