@@ -321,7 +321,8 @@ public class MeshAppBuffer {
             pl = p.getPeerLink();
             if (pl.getStatus() != ACTIVE) {
                 log.info("removing peer {} with link status {}", p, pl.getStatus());
-                p.setPeerLink(null);
+                pl.teardown();
+                //p.setPeerLink(null);
                 lps.remove(p);
             }
         }
