@@ -180,6 +180,7 @@ public class MeshAppBuffer {
                             if (inData.equalsIgnoreCase("probe")) {
                                 p.pingRemote();
                             } else if (inData.equalsIgnoreCase("close")) {
+                                p.getPeerBuffer().close();
                                 rpl.teardown();
                                 log.info("peerLink: {} - status: {}", rpl, rpl.getStatus());
                             } else if (inData.equalsIgnoreCase("open")) {
@@ -608,12 +609,12 @@ public class MeshAppBuffer {
             var data = this.peerBuffer.read(readyBytes);
             var decodedData = new String(data);
 
-            if (decodedData.isEmpty()) {
-                // this means we have a rogue 2nd buffer
-                // (can happen with aggressive getOrInitPeerBuffer())
-                this.peerBuffer.close();
-                //shutdown();
-            }
+            //if (decodedData.isEmpty()) {
+            //    // this means we have a rogue 2nd buffer
+            //    // (can happen with aggressive getOrInitPeerBuffer())
+            //    this.peerBuffer.close();
+            //    //shutdown();
+            //}
 
             log.info("Received data over the buffer: *>{}<*", decodedData);
 
