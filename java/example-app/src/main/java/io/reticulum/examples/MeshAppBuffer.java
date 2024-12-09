@@ -299,7 +299,7 @@ public class MeshAppBuffer {
         log.info("clientConnected - link hash: {}, {}", link.getHash(), Hex.encodeHexString(link.getHash()));
         //log.info("clientConnected - Identity: {}, pub: {}, pubBytes: {}",
         //        link.getRemoteIdentity(), link.getPub(), link.getPubBytes());
-        log.info("clientConnected - link id: {}", link.getLinkId());
+        //log.info("clientConnected - link id: {}", link.getLinkId());
         //if (nonNull(findIncomingPeerByLinkId(link))) {
         //    log.info("clientConnected - non-initiator peer already exists");
         //    // TODO: don't create new but rather use existing peer
@@ -652,17 +652,17 @@ public class MeshAppBuffer {
             }
         }
 
-        //public void sendCloseToRemote(Link link) {
-        //    if (nonNull(link)) {
-        //        var data = concatArrays("close::".getBytes(UTF_8),link.getDestination().getHash());
-        //        Packet closePacket = new Packet(link, data);
-        //        var packetReceipt = closePacket.send();
-        //        packetReceipt.setDeliveryCallback(this::closePacketDelivered);
-        //        //packetReceipt.setTimeoutCallback(this::packetTimedOut);
-        //    } else {
-        //        log.debug("can't send to null link");
-        //    }
-        //}
+        public void sendCloseToRemote(Link link) {
+            if (nonNull(link)) {
+                var data = concatArrays("close::".getBytes(UTF_8),link.getDestination().getHash());
+                Packet closePacket = new Packet(link, data);
+                var packetReceipt = closePacket.send();
+                packetReceipt.setDeliveryCallback(this::closePacketDelivered);
+                //packetReceipt.setTimeoutCallback(this::packetTimedOut);
+            } else {
+                log.debug("can't send to null link");
+            }
+        }
 
         // PacketReceipt callbacks
         public void packetTimedOut(PacketReceipt receipt) {
@@ -673,20 +673,20 @@ public class MeshAppBuffer {
             }
         }
     
-        //public void closePacketDelivered(PacketReceipt receipt) {
-        //    var rttString = new String("");
-        //    if (receipt.getStatus() == PacketReceiptStatus.DELIVERED) {
-        //        var rtt = receipt.getRtt();    // rtt (Java) is in miliseconds
-        //        if (rtt >= 1000) {
-        //            rtt = Math.round(rtt / 1000);
-        //            rttString = String.format("%d seconds", rtt);
-        //        } else {
-        //            rttString = String.format("%d miliseconds", rtt);
-        //        }
-        //        log.info("Shutdown packet confirmation received from {}, round-trip time is {}",
-        //                encodeHexString(receipt.getDestination().getHash()), rttString);
-        //    }
-        //}
+        public void closePacketDelivered(PacketReceipt receipt) {
+            var rttString = new String("");
+            if (receipt.getStatus() == PacketReceiptStatus.DELIVERED) {
+                var rtt = receipt.getRtt();    // rtt (Java) is in miliseconds
+                if (rtt >= 1000) {
+                    rtt = Math.round(rtt / 1000);
+                    rttString = String.format("%d seconds", rtt);
+                } else {
+                    rttString = String.format("%d miliseconds", rtt);
+                }
+                log.info("Shutdown packet confirmation received from {}, round-trip time is {}",
+                        encodeHexString(receipt.getDestination().getHash()), rttString);
+            }
+        }
 
         public void packetDelivered(PacketReceipt receipt) {
             var rttString = new String("");
