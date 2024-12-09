@@ -293,6 +293,7 @@ public class MeshAppBuffer {
         //link.setLinkClosedCallback(this::clientDisconnected);
         //link.setPacketCallback(this::serverPacketReceived);
         log.info("clientConnected - link hash: {}, {}", link.getHash(), Hex.encodeHexString(link.getHash()));
+        log.info("clientConnected - Identity: {}", link.getRemoteIdentity());
         RNSPeer newPeer = new RNSPeer(link);
         newPeer.setPeerLinkHash(link.getHash());
         // make sure the peer has a cannel and buffer
