@@ -296,6 +296,11 @@ public class MeshAppBuffer {
         log.info("clientConnected - link hash: {}, {}", link.getHash(), Hex.encodeHexString(link.getHash()));
         //log.info("clientConnected - Identity: {}, pub: {}, pubBytes: {}",
         //        link.getRemoteIdentity(), link.getPub(), link.getPubBytes());
+        log.info("clientConnected - link id: {}", link.getLinkId());
+        if (nonNull(findIncomingPeerByLinkId(link))) {
+            log.info("clientConnected - non-initiator peer already exists");
+            // TODO: don't create new but rather use existing peer
+        }
         RNSPeer newPeer = new RNSPeer(link);
         newPeer.setPeerLinkHash(link.getHash());
         // make sure the peer has a cannel and buffer
@@ -368,6 +373,22 @@ public class MeshAppBuffer {
             if (nonNull(pLink)) {
                 if (Arrays.equals(pLink.getDestination().getHash(),link.getDestination().getHash())) {
                     log.info("findIncomingPeerByLink - found peer matching destinationHash");
+                    peer = p;
+                    break;
+                }
+            }
+        }
+        return peer;
+    }
+
+    public RNSPeer findIncomingPeerByLinkId(Link link) {
+        List<RNSPeer> lps = getIncomingPeers();
+        var linkId = link.getLinkId();
+        RNSPeer peer = null;
+        for (RNSPeer p : lps) {
+            var pId = p.getPeerLinkId();
+            if (nonNull(pId)) {
+                if (Arrays.equals(pId, linkId)) {
                     peer = p;
                     break;
                 }
@@ -460,6 +481,7 @@ public class MeshAppBuffer {
         Long lastAccessTimestamp;
         Boolean isInitiator;
         Link peerLink;
+        byte[] peerLinkId;
         byte[] peerLinkHash; // the actual local link hash
         BufferedRWPair peerBuffer;
         int receiveStreamId = 0;
@@ -480,6 +502,7 @@ public class MeshAppBuffer {
          */
         public RNSPeer(Link link) {
             this.peerLink = link;
+            this.peerLinkId = link.getLinkId();
             this.peerDestination = link.getDestination();
             this.destinationHash = link.getDestination().getHash();
             this.serverIdentity = link.getRemoteIdentity();
