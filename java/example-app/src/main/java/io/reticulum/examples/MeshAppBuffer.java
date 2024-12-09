@@ -181,7 +181,8 @@ public class MeshAppBuffer {
                                 p.pingRemote();
                             } else if (inData.equalsIgnoreCase("close")) {
                                 //p.getPeerBuffer().close();
-                                rpl.teardown();
+                                //rpl.teardown();
+                                p.shutdown();
                                 log.info("peerLink: {} - status: {}", rpl, rpl.getStatus());
                             } else if (inData.equalsIgnoreCase("open")) {
                                 p.getOrInitPeerLink();
@@ -293,8 +294,8 @@ public class MeshAppBuffer {
         //link.setLinkClosedCallback(this::clientDisconnected);
         //link.setPacketCallback(this::serverPacketReceived);
         log.info("clientConnected - link hash: {}, {}", link.getHash(), Hex.encodeHexString(link.getHash()));
-        log.info("clientConnected - Identity: {}, pub: {}, pubBytes: {}",
-                link.getRemoteIdentity(), link.getPub(), link.getPubBytes());
+        //log.info("clientConnected - Identity: {}, pub: {}, pubBytes: {}",
+        //        link.getRemoteIdentity(), link.getPub(), link.getPubBytes());
         RNSPeer newPeer = new RNSPeer(link);
         newPeer.setPeerLinkHash(link.getHash());
         // make sure the peer has a cannel and buffer
