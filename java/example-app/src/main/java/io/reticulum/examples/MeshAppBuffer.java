@@ -479,6 +479,7 @@ public class MeshAppBuffer {
             this.peerLink = link;
             this.peerDestination = link.getDestination();
             this.destinationHash = link.getDestination().getHash();
+            this.serverIdentity = link.getRemoteIdentity();
 
             setCreationTimestamp(System.currentTimeMillis());
             this.lastAccessTimestamp = null;
