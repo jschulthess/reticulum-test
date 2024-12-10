@@ -179,10 +179,10 @@ public class MeshAppBuffer {
                             rpl = p.getPeerLink();
                             if (inData.equalsIgnoreCase("probe")) {
                                 if (nonNull(rpl) & (rpl.getStatus() == ACTIVE)) {
-                                    log.info("pinging peer {}", p);
+                                    //log.info("pinging peer {}", p);
                                     p.pingRemote();
                                 } else if (nonNull(rpl)) {
-                                    log.info("skipping peer {} with status {}", p, rpl.getStatus());
+                                    log.info("skipping peer link {} with status {}", rpl, rpl.getStatus());
                                 }
                             } else if (inData.equalsIgnoreCase("close")) {
                                 rpl.teardown();
@@ -362,38 +362,6 @@ public class MeshAppBuffer {
     //                    encodeHexString(link.getDestination().getHash()));
     //            if (Arrays.equals(pLink.getDestination().getHash(),link.getDestination().getHash())) {
     //                log.info("  findPeerByLink - found peer matching destinationHash");
-    //                peer = p;
-    //                break;
-    //            }
-    //        }
-    //    }
-    //    return peer;
-    //}
-
-    //public RNSPeer findIncomingPeerByLink(Link link) {
-    //    List<RNSPeer> lps = getIncomingPeers();
-    //    RNSPeer peer = null;
-    //    for (RNSPeer p : lps) {
-    //        var pLink = p.getPeerLink();
-    //        if (nonNull(pLink)) {
-    //            if (Arrays.equals(pLink.getDestination().getHash(),link.getDestination().getHash())) {
-    //                log.info("findIncomingPeerByLink - found peer matching destinationHash");
-    //                peer = p;
-    //                break;
-    //            }
-    //        }
-    //    }
-    //    return peer;
-    //}
-
-    //public RNSPeer findIncomingPeerByLinkId(Link link) {
-    //    List<RNSPeer> lps = getIncomingPeers();
-    //    var linkId = link.getLinkId();
-    //    RNSPeer peer = null;
-    //    for (RNSPeer p : lps) {
-    //        var pId = p.getPeerLinkId();
-    //        if (nonNull(pId)) {
-    //            if (Arrays.equals(pId, linkId)) {
     //                peer = p;
     //                break;
     //            }
