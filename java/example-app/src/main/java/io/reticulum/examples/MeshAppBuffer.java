@@ -180,9 +180,8 @@ public class MeshAppBuffer {
                             if (inData.equalsIgnoreCase("probe")) {
                                 p.pingRemote();
                             } else if (inData.equalsIgnoreCase("close")) {
-                                //p.getPeerBuffer().close();
-                                //rpl.teardown();
-                                p.shutdown();
+                                rpl.teardown();
+                                //p.shutdown();
                                 log.info("peerLink: {} - status: {}", rpl, rpl.getStatus());
                             } else if (inData.equalsIgnoreCase("open")) {
                                 p.getOrInitPeerLink();
@@ -221,7 +220,7 @@ public class MeshAppBuffer {
                             }
                             else if (inData.equalsIgnoreCase("close")) {
                                 //ip.shutdown();
-                                sendCloseToRemote(rpl);
+                                ip.sendCloseToRemote(rpl);
                             }
                             else if ((inData.equalsIgnoreCase("clean")) & (rpl.getStatus() != ACTIVE )) {
                                 incomingPeers.remove(ip);
