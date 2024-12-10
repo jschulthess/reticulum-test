@@ -257,7 +257,7 @@ public class MeshAppBuffer {
             var pl = p.getPeerLink();
             if (nonNull(pl) & (pl.getStatus() == ACTIVE)) {
                 //sendCloseToRemote(pl);
-                p.shutdown();
+                p.sendCloseToRemote(pl);
             }
         }
         // Note: we still need to get the packet timeout callback to work...
