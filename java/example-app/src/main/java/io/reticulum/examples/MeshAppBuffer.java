@@ -252,7 +252,8 @@ public class MeshAppBuffer {
         for (RNSPeer p: incomingPeers) {
             var pl = p.getPeerLink();
             if (nonNull(pl) & (pl.getStatus() == ACTIVE)) {
-                sendCloseToRemote(pl);
+                //sendCloseToRemote(pl);
+                p.shutdown();
             }
         }
         // Note: we still need to get the packet timeout callback to work...
@@ -568,9 +569,9 @@ public class MeshAppBuffer {
             if (nonNull(this.peerLink)) {
                 log.info("shutdown - peerLink: {}, status: {}", peerLink, peerLink.getStatus());
                 if (peerLink.getStatus() == ACTIVE) {
-                    //if (this.isInitiator) {
-                    //    sendCloseToRemote(peerLink);
-                    //}
+                    if (isFalse(this.isInitiator)) {
+                        sendCloseToRemote(peerLink);
+                    }
                     peerLink.teardown();
                 } else {
                     log.info("shutdown - status (non-ACTIVE): {}", peerLink.getStatus());
@@ -652,9 +653,17 @@ public class MeshAppBuffer {
             }
         }
 
+        /**
+         * Set a packet to remote with the message format "close::<our_destination_hash>"
+         * This method is only useful for non-initiator links to close the remote initiator.
+         * 
+         * @param link
+         */
         public void sendCloseToRemote(Link link) {
             if (nonNull(link)) {
-                var data = concatArrays("close::".getBytes(UTF_8),link.getDestination().getHash());
+                // Note: if part of link we need to get the baseDesitination hash
+                //var data = concatArrays("close::".getBytes(UTF_8),link.getDestination().getHash());
+                var data = concatArrays("close::".getBytes(UTF_8), getBaseDestination().getHash());
                 Packet closePacket = new Packet(link, data);
                 var packetReceipt = closePacket.send();
                 packetReceipt.setDeliveryCallback(this::closePacketDelivered);
