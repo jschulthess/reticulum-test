@@ -219,6 +219,9 @@ public class MeshAppBuffer {
                             if (inData.equalsIgnoreCase("status")) {
                                 log.info("incoming peer: {}, status: {}", rpl, rpl.getStatus());
                             }
+                            else if (inData.equalsIgnoreCase("close")) {
+                                ip.shutdown();
+                            }
                             else if ((inData.equalsIgnoreCase("clean")) & (rpl.getStatus() != ACTIVE )) {
                                 incomingPeers.remove(ip);
                             }
@@ -571,8 +574,9 @@ public class MeshAppBuffer {
                 if (peerLink.getStatus() == ACTIVE) {
                     if (isFalse(this.isInitiator)) {
                         sendCloseToRemote(peerLink);
+                    } else {
+                        peerLink.teardown();
                     }
-                    peerLink.teardown();
                 } else {
                     log.info("shutdown - status (non-ACTIVE): {}", peerLink.getStatus());
                 }
