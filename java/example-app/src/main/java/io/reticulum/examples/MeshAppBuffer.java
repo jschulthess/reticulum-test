@@ -152,7 +152,7 @@ public class MeshAppBuffer {
                 } else if (inData.equalsIgnoreCase("help") || inData.equals("?")) {
                     log.info("**********************************  keywords  **********************************");
                     log.info("=> press Enter    to do a Reticulum announce (and initiate peers to connect)");
-                    log.info("=> enter 'probe' to ping peers to probe remote availability (closes peerLink on timeout)");
+                    log.info("=> enter 'probe' to ping peers to probe remote availability");
                     log.info("=> enter 'status' to see status of peer links");
                     log.info("=> enter some text (other than keywords) to send message to peers");
                     log.info("=> enter 'close'/'open' to teardown/re-open existing peer links");
@@ -178,7 +178,12 @@ public class MeshAppBuffer {
                         for (RNSPeer p: linkedPeers) {
                             rpl = p.getPeerLink();
                             if (inData.equalsIgnoreCase("probe")) {
-                                p.pingRemote();
+                                if (nonNull(rpl) & (rpl.getStatus() == ACTIVE)) {
+                                    log.info("pinging peer {}", p);
+                                    p.pingRemote();
+                                } else if (nonNull(rpl)) {
+                                    log.info("skipping peer {} with status {}", p, rpl.getStatus());
+                                }
                             } else if (inData.equalsIgnoreCase("close")) {
                                 rpl.teardown();
                                 //p.shutdown();
@@ -301,13 +306,6 @@ public class MeshAppBuffer {
         //link.setLinkClosedCallback(this::clientDisconnected);
         //link.setPacketCallback(this::serverPacketReceived);
         log.info("clientConnected - link hash: {}, {}", link.getHash(), Hex.encodeHexString(link.getHash()));
-        //log.info("clientConnected - Identity: {}, pub: {}, pubBytes: {}",
-        //        link.getRemoteIdentity(), link.getPub(), link.getPubBytes());
-        //log.info("clientConnected - link id: {}", link.getLinkId());
-        //if (nonNull(findIncomingPeerByLinkId(link))) {
-        //    log.info("clientConnected - non-initiator peer already exists");
-        //    // TODO: don't create new but rather use existing peer
-        //}
         RNSPeer newPeer = new RNSPeer(link);
         newPeer.setPeerLinkHash(link.getHash());
         // make sure the peer has a cannel and buffer
@@ -352,41 +350,41 @@ public class MeshAppBuffer {
         }
     }
 
-    public RNSPeer findPeerByLink(Link link) {
-        // find peer given a link. At the same time remove peers with no peerLink.
-        List<RNSPeer> lps =  getLinkedPeers();
-        RNSPeer peer = null;
-        for (RNSPeer p : lps) {
-            var pLink = p.getPeerLink();
-            if (nonNull(pLink)) {
-                log.info("* findPeerByLink - peerLink hash: {}, link destination hash: {}",
-                        encodeHexString(pLink.getDestination().getHash()),
-                        encodeHexString(link.getDestination().getHash()));
-                if (Arrays.equals(pLink.getDestination().getHash(),link.getDestination().getHash())) {
-                    log.info("  findPeerByLink - found peer matching destinationHash");
-                    peer = p;
-                    break;
-                }
-            }
-        }
-        return peer;
-    }
+    //public RNSPeer findPeerByLink(Link link) {
+    //    // find peer given a link. At the same time remove peers with no peerLink.
+    //    List<RNSPeer> lps =  getLinkedPeers();
+    //    RNSPeer peer = null;
+    //    for (RNSPeer p : lps) {
+    //        var pLink = p.getPeerLink();
+    //        if (nonNull(pLink)) {
+    //            log.info("* findPeerByLink - peerLink hash: {}, link destination hash: {}",
+    //                    encodeHexString(pLink.getDestination().getHash()),
+    //                    encodeHexString(link.getDestination().getHash()));
+    //            if (Arrays.equals(pLink.getDestination().getHash(),link.getDestination().getHash())) {
+    //                log.info("  findPeerByLink - found peer matching destinationHash");
+    //                peer = p;
+    //                break;
+    //            }
+    //        }
+    //    }
+    //    return peer;
+    //}
 
-    public RNSPeer findIncomingPeerByLink(Link link) {
-        List<RNSPeer> lps = getIncomingPeers();
-        RNSPeer peer = null;
-        for (RNSPeer p : lps) {
-            var pLink = p.getPeerLink();
-            if (nonNull(pLink)) {
-                if (Arrays.equals(pLink.getDestination().getHash(),link.getDestination().getHash())) {
-                    log.info("findIncomingPeerByLink - found peer matching destinationHash");
-                    peer = p;
-                    break;
-                }
-            }
-        }
-        return peer;
-    }
+    //public RNSPeer findIncomingPeerByLink(Link link) {
+    //    List<RNSPeer> lps = getIncomingPeers();
+    //    RNSPeer peer = null;
+    //    for (RNSPeer p : lps) {
+    //        var pLink = p.getPeerLink();
+    //        if (nonNull(pLink)) {
+    //            if (Arrays.equals(pLink.getDestination().getHash(),link.getDestination().getHash())) {
+    //                log.info("findIncomingPeerByLink - found peer matching destinationHash");
+    //                peer = p;
+    //                break;
+    //            }
+    //        }
+    //    }
+    //    return peer;
+    //}
 
     //public RNSPeer findIncomingPeerByLinkId(Link link) {
     //    List<RNSPeer> lps = getIncomingPeers();
@@ -404,22 +402,22 @@ public class MeshAppBuffer {
     //    return peer;
     //}
 
-    public RNSPeer findPeerByDestinationHash(byte[] dhash) {
-        List<RNSPeer> lps = getLinkedPeers();
-        RNSPeer peer = null;
-        for (RNSPeer p : lps) {
-            var pLink = p.getPeerLink();
-            log.info("* findPeerByDestinationHash - peerLink destination hash: {}, search hash: {}",
-                    encodeHexString(pLink.getDestination().getHash()),
-                    encodeHexString(dhash));
-            if (Arrays.equals(p.getDestinationHash(), dhash)) {
-                log.info("  findPeerByDestinationHash - found peer matching destinationHash");
-                peer = p;
-                break;
-            }
-        }
-        return peer;
-    }
+    //public RNSPeer findPeerByDestinationHash(byte[] dhash) {
+    //    List<RNSPeer> lps = getLinkedPeers();
+    //    RNSPeer peer = null;
+    //    for (RNSPeer p : lps) {
+    //        var pLink = p.getPeerLink();
+    //        log.info("* findPeerByDestinationHash - peerLink destination hash: {}, search hash: {}",
+    //                encodeHexString(pLink.getDestination().getHash()),
+    //                encodeHexString(dhash));
+    //        if (Arrays.equals(p.getDestinationHash(), dhash)) {
+    //            log.info("  findPeerByDestinationHash - found peer matching destinationHash");
+    //            peer = p;
+    //            break;
+    //        }
+    //    }
+    //    return peer;
+    //}
 
     /***********************/
     /** AnnounceHandler   **/
