@@ -201,6 +201,7 @@ public class MeshAppBuffer {
                                     p.hardReset();
                                     getLinkedPeers().remove(p);
                                 }
+                                log.info("cleaning initiators done.");
                             } else if (inData.equalsIgnoreCase("status")) {
                                 log.info("peer destinationHash: {}, peerLink: {} <=> status: {}",
                                     encodeHexString(p.getDestinationHash()),
@@ -238,6 +239,7 @@ public class MeshAppBuffer {
                                     ip.hardReset();
                                     incomingPeers.remove(ip);
                                 }
+                                log.info("cleaning non-initiators done.");
                             }
                         }
                         if (incomingPeers.size() < nonInitiatorSize) {
@@ -655,14 +657,15 @@ public class MeshAppBuffer {
          * @param link
          */
         public void sendCloseToRemote(Link link) {
-            if (nonNull(link)) {
+            if (nonNull(link) & (isFalse(link.isInitiator()))) {
                 // Note: if part of link we need to get the baseDesitination hash
                 //var data = concatArrays("close::".getBytes(UTF_8),link.getDestination().getHash());
                 var data = concatArrays("close::".getBytes(UTF_8), getBaseDestination().getHash());
                 Packet closePacket = new Packet(link, data);
                 var packetReceipt = closePacket.send();
                 packetReceipt.setDeliveryCallback(this::closePacketDelivered);
-                //packetReceipt.setTimeoutCallback(this::packetTimedOut);
+                packetReceipt.setTimeout(1000L);
+                packetReceipt.setTimeoutCallback(this::packetTimedOut);
             } else {
                 log.debug("can't send to null link");
             }
@@ -673,6 +676,9 @@ public class MeshAppBuffer {
             log.info("packet timed out");
             if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
                 log.info("packet timed out, receipt status: {}", PacketReceiptStatus.FAILED);
+                if (nonNull(this.peerBuffer)) {
+                    this.peerBuffer.close();
+                }
                 this.peerLink.teardown();
             }
         }
