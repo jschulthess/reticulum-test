@@ -552,6 +552,7 @@ public class MeshAppBuffer {
             }
         }
 
+        @Synchronized
         public void reset() {
             destinationHash = null;
             peerDestination = null;
