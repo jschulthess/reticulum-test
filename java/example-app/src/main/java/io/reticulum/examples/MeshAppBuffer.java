@@ -676,10 +676,10 @@ public class MeshAppBuffer {
             log.info("packet timed out");
             if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
                 log.info("packet timed out, receipt status: {}", PacketReceiptStatus.FAILED);
-                if (nonNull(this.peerBuffer)) {
-                    this.peerBuffer.close();
-                }
-                this.peerLink.teardown();
+                //if (nonNull(this.peerBuffer)) {
+                //    this.peerBuffer.close();
+                //}
+                //this.peerLink.teardown();
             }
         }
     
