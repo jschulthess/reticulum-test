@@ -193,10 +193,14 @@ public class MeshAppBuffer {
                                 p.getOrInitPeerLink();
                                 log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
                                 p.getOrInitPeerBuffer();
-                            } else if ((inData.equalsIgnoreCase("clean")) & (rpl.getStatus() == CLOSED)) {
-                                //rpl.teardown();
-                                p.hardReset();
-                                getLinkedPeers().remove(p);
+                            }
+                            //else if ((inData.equalsIgnoreCase("clean")) & (rpl.getStatus() == CLOSED)) {
+                            else if (inData.equalsIgnoreCase("clean")) { 
+                                if ((rpl.getStatus() == CLOSED)) {
+                                    //rpl.teardown();
+                                    p.hardReset();
+                                    getLinkedPeers().remove(p);
+                                }
                             } else if (inData.equalsIgnoreCase("status")) {
                                 log.info("peer destinationHash: {}, peerLink: {} <=> status: {}",
                                     encodeHexString(p.getDestinationHash()),
@@ -228,14 +232,17 @@ public class MeshAppBuffer {
                                 //ip.shutdown();
                                 ip.sendCloseToRemote(rpl);
                             }
-                            else if ((inData.equalsIgnoreCase("clean")) & (rpl.getStatus() == CLOSED )) {
-                                ip.hardReset();
-                                incomingPeers.remove(ip);
+                            //else if ((inData.equalsIgnoreCase("clean")) & (rpl.getStatus() == CLOSED )) {
+                            else if (inData.equalsIgnoreCase("clean")) {
+                                if (rpl.getStatus() == CLOSED) {
+                                    ip.hardReset();
+                                    incomingPeers.remove(ip);
+                                }
                             }
                         }
                         if (incomingPeers.size() < nonInitiatorSize) {
                             // pruning happened
-                            log.info("incoming (non-initiator) peers after pruning: {}", incomingPeers.size());
+                            log.info("incoming (non-initiator) peers after pruning or cleaning: {}", incomingPeers.size());
                         }
                     }
                 }
