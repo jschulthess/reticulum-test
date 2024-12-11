@@ -195,7 +195,7 @@ public class MeshAppBuffer {
                             } else if (inData.equalsIgnoreCase("clean")) {
                                 if (p.getPeerLink().getStatus() != ACTIVE) {
                                     //p.getPeerLink().teardown();
-                                    p.reset();
+                                    p.hardReset();;
                                     getLinkedPeers().remove(p);
                                 }
                             } else if (inData.equalsIgnoreCase("status")) {
@@ -230,7 +230,7 @@ public class MeshAppBuffer {
                                 ip.sendCloseToRemote(rpl);
                             }
                             else if ((inData.equalsIgnoreCase("clean")) & (rpl.getStatus() != ACTIVE )) {
-                                ip.reset();
+                                ip.hardReset();
                                 incomingPeers.remove(ip);
                             }
                         }
@@ -552,21 +552,20 @@ public class MeshAppBuffer {
             }
         }
 
-        @Synchronized
-        public void reset() {
+        public void hardReset() {
             destinationHash = null;
             peerDestination = null;
             creationTimestamp = null;
             lastAccessTimestamp = null;
             isInitiator = null;
-            if (nonNull(peerLink)) {
-                peerLink.teardown();
-            }
+            //if (nonNull(peerLink)) {
+            //    peerLink.teardown();
+            //}
             peerLink = null;
             peerLinkHash = null;
-            if (nonNull(peerBuffer)) {
-                peerBuffer.close();
-            }
+            //if (nonNull(peerBuffer)) {
+            //    peerBuffer.close();
+            //}
             peerBuffer = null;
         }
 
