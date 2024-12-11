@@ -21,6 +21,7 @@ import static io.reticulum.link.TeardownSession.DESTINATION_CLOSED;
 import static io.reticulum.link.TeardownSession.INITIATOR_CLOSED;
 import static io.reticulum.link.TeardownSession.TIMEOUT;
 import static io.reticulum.link.LinkStatus.ACTIVE;
+import static io.reticulum.link.LinkStatus.CLOSED;
 //import static io.reticulum.packet.PacketContextType.LINKCLOSE;
 import static io.reticulum.identity.IdentityKnownDestination.recall;
 import static io.reticulum.utils.IdentityUtils.concatArrays;
@@ -192,12 +193,10 @@ public class MeshAppBuffer {
                                 p.getOrInitPeerLink();
                                 log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
                                 p.getOrInitPeerBuffer();
-                            } else if (inData.equalsIgnoreCase("clean")) {
-                                if (p.getPeerLink().getStatus() != ACTIVE) {
-                                    //p.getPeerLink().teardown();
-                                    p.hardReset();;
-                                    getLinkedPeers().remove(p);
-                                }
+                            } else if ((inData.equalsIgnoreCase("clean")) & (rpl.getStatus() == CLOSED)) {
+                                //rpl.teardown();
+                                p.hardReset();
+                                getLinkedPeers().remove(p);
                             } else if (inData.equalsIgnoreCase("status")) {
                                 log.info("peer destinationHash: {}, peerLink: {} <=> status: {}",
                                     encodeHexString(p.getDestinationHash()),
@@ -229,7 +228,7 @@ public class MeshAppBuffer {
                                 //ip.shutdown();
                                 ip.sendCloseToRemote(rpl);
                             }
-                            else if ((inData.equalsIgnoreCase("clean")) & (rpl.getStatus() != ACTIVE )) {
+                            else if ((inData.equalsIgnoreCase("clean")) & (rpl.getStatus() == CLOSED )) {
                                 ip.hardReset();
                                 incomingPeers.remove(ip);
                             }
