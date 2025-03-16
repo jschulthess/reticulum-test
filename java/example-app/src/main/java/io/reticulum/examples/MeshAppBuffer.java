@@ -641,7 +641,8 @@ public class MeshAppBuffer {
             byte[] emptyBuffer = {0,0,0};
 
             if (!ByteBuffer.wrap(data, 0, emptyBuffer.length).equals(ByteBuffer.wrap(emptyBuffer, 0, emptyBuffer.length))) {
-                log.info("Received data ({} bytes) {} over the buffer: \"{}\"", readyBytes, data, decodedData);
+                //log.info("Received data ({} bytes) {} over the buffer: \"{}\"", readyBytes, data, decodedData);
+                log.info("Received data ({} bytes) over the buffer: \"{}\"", readyBytes, decodedData);
             }
             
             // process data. In this example: reply data back to client
