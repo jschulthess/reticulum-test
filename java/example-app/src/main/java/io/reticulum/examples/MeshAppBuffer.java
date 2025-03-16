@@ -637,7 +637,7 @@ public class MeshAppBuffer {
             var data = this.peerBuffer.read(readyBytes);
             var decodedData = new String(data);
 
-            log.info("Received data ({} bytes) over the buffer: {}", readyBytes, decodedData);
+            log.info("Received data ({} bytes) over the buffer: \"{}\"", readyBytes, decodedData);
 
             // process data. In this example: reply data back to client
             if (nonNull(doReply) & isTrue(doReply) & (isFalse(this.isInitiator))) {
