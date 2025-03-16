@@ -646,10 +646,11 @@ public class MeshAppBuffer {
                 byte[] replyData = replyText.getBytes();
                 this.peerBuffer.write(replyData);
                 this.peerBuffer.flush(); // clear buffer
-            } else {
-                log.info("just flushing buffer.");
-                this.peerBuffer.flush(); // clear buffer
             }
+            //} else {
+            //    log.info("just clearing/flushing buffer.");
+            //    this.peerBuffer.flush(); // clear buffer
+            //}
         }
 
         /**
