@@ -637,7 +637,7 @@ public class MeshAppBuffer {
             var data = this.peerBuffer.read(readyBytes);
             var decodedData = new String(data);
 
-            if (nonNull(decodedData)) {
+            if (!decodedData.isEmpty()) {
                 log.info("Received data over the buffer: {}", decodedData);
             }
 
