@@ -40,6 +40,7 @@ import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
+import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static org.apache.commons.lang3.ArrayUtils.subarray;
 
 import java.util.Arrays;
@@ -637,7 +638,9 @@ public class MeshAppBuffer {
             var data = this.peerBuffer.read(readyBytes);
             var decodedData = new String(data);
 
-            log.info("Received data ({} bytes) over the buffer: \"{}\"", readyBytes, decodedData);
+            if (!isEmpty(decodedData)) {
+                log.info("Received data ({} bytes) over the buffer: \"{}\"", readyBytes, decodedData);
+            }
 
             // process data. In this example: reply data back to client
             if (nonNull(doReply) & isTrue(doReply) & (isFalse(this.isInitiator))) {
