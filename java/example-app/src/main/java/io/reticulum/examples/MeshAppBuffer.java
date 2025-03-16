@@ -636,7 +636,7 @@ public class MeshAppBuffer {
          * :param readyBytes: The number of bytes ready to read
          */
         public void peerBufferReady(Integer readyBytes) {
-            var data = this.peerBuffer.read(readyBytes);
+            byte[] data = this.peerBuffer.read(readyBytes);
             var decodedData = new String(data);
             byte[] emptyBuffer = {0,0,0};
 
