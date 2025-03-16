@@ -641,16 +641,18 @@ public class MeshAppBuffer {
 
             // process data. In this example: reply data back to client
             if (nonNull(doReply) & isTrue(doReply) & (isFalse(this.isInitiator))) {
-                //log.info("Received data over the buffer: {}", decodedData);
                 var replyText = "I received ** "+decodedData;
                 byte[] replyData = replyText.getBytes();
                 this.peerBuffer.write(replyData);
-                this.peerBuffer.flush(); // clear buffer
+                //this.peerBuffer.flush(); // clear buffer
             }
-            //} else {
-            //    log.info("just clearing/flushing buffer.");
+            //else {
+            //    // Note: we need to flush the buffer in any case or else
+            //    // sent content will acumulate.
+            //    //log.info("just clearing/flushing buffer.");
             //    this.peerBuffer.flush(); // clear buffer
             //}
+            this.peerBuffer.flush(); // clear buffer
         }
 
         /**
