@@ -259,7 +259,7 @@ public class MeshAppBuffer {
         isShuttingDown = true;
         log.info("shutting down Reticulum");
         for (RNSPeer p: linkedPeers) {
-            log.info("shutting down peer: {}", p);
+            log.info("shutting down peer: {}", Hex.encodeHexString(p.getDestinationHash()));
             p.shutdown();
             try {
                 TimeUnit.SECONDS.sleep(1); // allow for peers to disconnect gracefully
@@ -319,7 +319,7 @@ public class MeshAppBuffer {
         log.info("clientConnected - link hash: {}, {}", link.getHash(), Hex.encodeHexString(link.getHash()));
         RNSPeer newPeer = new RNSPeer(link);
         newPeer.setPeerLinkHash(link.getHash());
-        // make sure the peer has a cannel and buffer
+        // make sure the peer has a channel and buffer
         newPeer.getOrInitPeerBuffer();
         incomingPeers.add(newPeer);
         log.info("***> Client connected, link: {}", link);
@@ -637,10 +637,11 @@ public class MeshAppBuffer {
             var data = this.peerBuffer.read(readyBytes);
             var decodedData = new String(data);
 
-            log.info("Received data over the buffer: {}", decodedData);
+            #log.info("Received data over the buffer: {}", decodedData);
 
             // process data. In this example: reply data back to client
             if (nonNull(doReply) & isTrue(doReply) & (isFalse(this.isInitiator))) {
+                log.info("Received data over the buffer: {}", decodedData);
                 var replyText = "I received ** "+decodedData;
                 byte[] replyData = replyText.getBytes();
                 this.peerBuffer.write(replyData);
