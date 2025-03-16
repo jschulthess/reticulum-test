@@ -33,6 +33,7 @@ import lombok.Synchronized;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.ByteBuffer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardOpenOption.CREATE;
@@ -637,8 +638,11 @@ public class MeshAppBuffer {
         public void peerBufferReady(Integer readyBytes) {
             var data = this.peerBuffer.read(readyBytes);
             var decodedData = new String(data);
+            byte[] emptyBuffer = {0,0,0};
 
-            log.info("Received data ({} bytes) {} over the buffer: \"{}\"", readyBytes, data, decodedData);
+            if (!ByteBuffer.wrap(data, 0, emptyBuffer.length).equals(ByteBuffer.wrap(emptyBuffer, 0, emptyBuffer.length))) {
+                log.info("Received data ({} bytes) {} over the buffer: \"{}\"", readyBytes, data, decodedData);
+            }
             
             // process data. In this example: reply data back to client
             if (nonNull(doReply) & isTrue(doReply) & (isFalse(this.isInitiator))) {
