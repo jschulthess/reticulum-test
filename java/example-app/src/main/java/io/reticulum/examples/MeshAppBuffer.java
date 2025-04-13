@@ -527,9 +527,9 @@ public class MeshAppBuffer {
             var channel = this.peerLink.getChannel();
             if (nonNull(this.peerBuffer)) {
                 log.info("peerBuffer exists: {}, link status: {}", this.peerBuffer, this.peerLink.getStatus());
-                this.peerBuffer.close();
-                this.peerBuffer = Buffer.createBidirectionalBuffer(receiveStreamId, sendStreamId, channel, this::peerBufferReady);
-                //return this.peerBuffer;
+                //this.peerBuffer.close();
+                //this.peerBuffer = Buffer.createBidirectionalBuffer(receiveStreamId, sendStreamId, channel, this::peerBufferReady);
+                return this.peerBuffer;
             }
             else {
                 log.info("creating buffer - peerLink status: {}, channel: {}", this.peerLink.getStatus(), channel);
