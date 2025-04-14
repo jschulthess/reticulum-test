@@ -340,8 +340,8 @@ public class MeshAppBuffer {
     //@Synchronized
     public void prunePeers() {
         // note: only prune non-initiator peers
-        //List<RNSPeer> lps =  getIncomingPeers();
-        //log.info("number of incoming/non-initiator peers before pruning: {}", lps.size());
+        List<RNSPeer> ips =  getIncomingPeers();
+        log.info("number of incoming/non-initiator peers before pruning: {}", ips.size());
         Link pl;
         //for (RNSPeer p : lps) {
         //    pl = p.getPeerLink();
@@ -352,6 +352,15 @@ public class MeshAppBuffer {
         //        lps.remove(p);
         //    }
         //}
+        for (RNSPeer p : ips) {
+            pl = p.getPeerLink();
+            if (nonNull(pl) & (pl.getStatus() != ACTIVE)) {
+                pl.teardown();
+                p.hardReset();
+                getIncomingPeers().remove(p);
+            }
+            log.info("pruning initiators done.");
+        }
         List<RNSPeer> lps = getLinkedPeers();
         //log.info("nuber of initiator peers before pruning: {}", lps.size());
         for (RNSPeer p : lps) {
