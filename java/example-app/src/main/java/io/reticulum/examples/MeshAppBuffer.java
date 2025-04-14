@@ -341,7 +341,7 @@ public class MeshAppBuffer {
         // note: only prune non-initiator peers
         List<RNSPeer> ips =  getIncomingPeers();
         log.info("number of initiator,non-initiator peers before pruning: {},{}",
-                this.incomingPeers.size(), this.linkedPeers.size());
+                getLinkedPeers().size(), getIncomingPeers().size());
         Link pl;
         for (RNSPeer p : ips) {
             pl = p.getPeerLink();
@@ -357,13 +357,14 @@ public class MeshAppBuffer {
         for (RNSPeer p : lps) {
             pl = p.getPeerLink();
             if (nonNull(pl) & (pl.getStatus() != ACTIVE)) {
+                pl.teardown();
                 getLinkedPeers().remove(p);
                 //log.info("pinging peer {}", p);
                 //p.pingRemote();
             }
         }
         log.info("number of initiator,non-initiator peers after pruning: {},{}",
-                this.incomingPeers.size(), this.linkedPeers.size());
+                getLinkedPeers().size(), getIncomingPeers().size());
     }
 
     //public RNSPeer findPeerByLink(Link link) {
