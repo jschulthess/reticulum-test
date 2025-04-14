@@ -159,7 +159,7 @@ public class MeshAppBuffer {
                     log.info("=> enter 'status' to see status of peer links");
                     log.info("=> enter some text (other than keywords) to send message to peers");
                     log.info("=> enter 'close'/'open' to teardown/re-open existing peer links");
-                    log.info("=> enter 'clean' to shutdown and remove all non-ACTIVE local peer objects");
+                    log.info("=> enter 'prune' to shutdown and remove all non-ACTIVE local peer objects");
                     log.info("=> enter 'quit' to exit");
                     log.info("=> enter '?' or 'help' to see this message");
                     log.info("********************************************************************************");
@@ -197,13 +197,13 @@ public class MeshAppBuffer {
                                 p.getOrInitPeerBuffer();
                             }
                             //else if ((inData.equalsIgnoreCase("clean")) & (rpl.getStatus() == CLOSED)) {
-                            else if (inData.equalsIgnoreCase("clean")) { 
+                            else if (inData.equalsIgnoreCase("prune")) { 
                                 if ((rpl.getStatus() == CLOSED)) {
                                     //rpl.teardown();
                                     p.hardReset();
                                     getLinkedPeers().remove(p);
                                 }
-                                log.info("cleaning initiators done.");
+                                log.info("pruning initiators done.");
                             } else if (inData.equalsIgnoreCase("status")) {
                                 log.info("peer destinationHash: {}, peerLink: {} <=> status: {}",
                                     encodeHexString(p.getDestinationHash()),
@@ -236,17 +236,17 @@ public class MeshAppBuffer {
                                 ip.sendCloseToRemote(rpl);
                             }
                             //else if ((inData.equalsIgnoreCase("clean")) & (rpl.getStatus() == CLOSED )) {
-                            else if (inData.equalsIgnoreCase("clean")) {
+                            else if (inData.equalsIgnoreCase("prune")) {
                                 if (rpl.getStatus() == CLOSED) {
                                     ip.hardReset();
                                     incomingPeers.remove(ip);
                                 }
-                                log.info("cleaning non-initiators done.");
+                                log.info("pruning non-initiators done.");
                             }
                         }
                         if (incomingPeers.size() < nonInitiatorSize) {
                             // pruning happened
-                            log.info("incoming (non-initiator) peers after pruning or cleaning: {}", incomingPeers.size());
+                            log.info("incoming (non-initiator) peers after pruning: {}", incomingPeers.size());
                         }
                     }
                 }
@@ -659,7 +659,7 @@ public class MeshAppBuffer {
             //    //log.info("just clearing/flushing buffer.");
             //    this.peerBuffer.flush(); // clear buffer
             //}
-            this.peerBuffer.flush(); // clear buffer
+            //this.peerBuffer.flush(); // clear buffer
         }
 
         /**
