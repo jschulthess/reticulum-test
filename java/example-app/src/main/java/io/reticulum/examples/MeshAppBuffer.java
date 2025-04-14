@@ -41,7 +41,7 @@ import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
-import static org.apache.commons.lang3.ArrayUtils.isEmpty;
+//import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static org.apache.commons.lang3.ArrayUtils.subarray;
 
 import java.util.Arrays;
@@ -355,7 +355,7 @@ public class MeshAppBuffer {
         for (RNSPeer p : ips) {
             pl = p.getPeerLink();
             if (nonNull(pl) & (pl.getStatus() != ACTIVE)) {
-                pl.teardown();
+                //pl.teardown();
                 p.hardReset();
                 getIncomingPeers().remove(p);
             }
