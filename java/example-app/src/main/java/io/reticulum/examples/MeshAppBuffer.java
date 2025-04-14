@@ -346,21 +346,21 @@ public class MeshAppBuffer {
         for (RNSPeer p : ips) {
             pl = p.getPeerLink();
             if (nonNull(pl) & (pl.getStatus() != ACTIVE)) {
-                pl.teardown();
+                //pl.teardown();
                 //p.hardReset();
                 //getIncomingPeers().remove(p);
                 getIncomingPeers().remove(p);
             }
         }
         List<RNSPeer> lps = getLinkedPeers();
-        while (lps.get(0).getPeerLink().getStatus() != ACTIVE) {
-            getLinkedPeers().remove(0);
-        }
-        lps = getLinkedPeers();
+        //while (lps.get(0).getPeerLink().getStatus() != ACTIVE) {
+        //    getLinkedPeers().remove(0);
+        //}
+        //lps = getLinkedPeers();
         for (RNSPeer p : lps) {
             pl = p.getPeerLink();
             if (nonNull(pl) & (pl.getStatus() != ACTIVE)) {
-                pl.teardown();
+                //pl.teardown();
                 getLinkedPeers().remove(p);
                 //log.info("pinging peer {}", p);
                 //p.pingRemote();
