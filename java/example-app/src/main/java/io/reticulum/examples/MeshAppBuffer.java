@@ -357,19 +357,23 @@ public class MeshAppBuffer {
             if (nonNull(pl) & (pl.getStatus() != ACTIVE)) {
                 //pl.teardown();
                 p.hardReset();
-                getIncomingPeers().remove(p);
+                //getIncomingPeers().remove(p);
+                this.incomingPeers.remove(p);
             }
             log.info("pruning initiators done.");
         }
         List<RNSPeer> lps = getLinkedPeers();
-        //log.info("nuber of initiator peers before pruning: {}", lps.size());
+        //log.info("number of initiator peers before pruning: {}", lps.size());
         for (RNSPeer p : lps) {
             pl = p.getPeerLink();
-            if (nonNull(pl) & (pl.getStatus() == ACTIVE)) {
-                log.info("pinging peer {}", p);
-                p.pingRemote();
+            if (nonNull(pl) & (pl.getStatus() != ACTIVE)) {
+                this.linkedPeers.remove(p);
+                //log.info("pinging peer {}", p);
+                //p.pingRemote();
             }
         }
+        log.info("number of initiator,non-initiator peers after pruning: {},{}",
+                this.incomingPeers.size(), this.linkedPeers.size());
     }
 
     //public RNSPeer findPeerByLink(Link link) {
