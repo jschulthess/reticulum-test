@@ -354,7 +354,7 @@ public class MeshAppBuffer {
         }
         List<RNSPeer> lps = getLinkedPeers();
         while (lps.get(0).getPeerLink().getStatus() != ACTIVE) {
-            lps.remove(0);
+            getLinkedPeers().remove(0);
         }
         lps = getLinkedPeers();
         for (RNSPeer p : lps) {
