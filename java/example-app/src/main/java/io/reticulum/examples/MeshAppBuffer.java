@@ -353,7 +353,10 @@ public class MeshAppBuffer {
             }
         }
         List<RNSPeer> lps = getLinkedPeers();
-        //log.info("number of initiator peers before pruning: {}", lps.size());
+        while (lps.get(0).getPeerLink().getStatus() != ACTIVE) {
+            lps.remove(0);
+        }
+        lps = getLinkedPeers();
         for (RNSPeer p : lps) {
             pl = p.getPeerLink();
             if (nonNull(pl) & (pl.getStatus() != ACTIVE)) {
