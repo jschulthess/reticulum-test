@@ -326,7 +326,6 @@ public class MeshAppBuffer {
         newPeer.getOrInitPeerBuffer();
         incomingPeers.add(newPeer);
         // do our best to have ACTIVE links at teh beginnint of the list
-        Collections.sort(getIncomingPeers(), new LinkStatusComparator());
         log.info("***> Client connected, link: {}", link);
     }
 
@@ -484,7 +483,6 @@ public class MeshAppBuffer {
                 newPeer.setServerIdentity(announcedIdentity);
                 newPeer.setIsInitiator(true);
                 lps.add(newPeer);
-                Collections.sort(lps, new LinkStatusComparator());
                 log.info("added new RNSPeer, destinationHash: {}", encodeHexString(destinationHash));
             }
         }
