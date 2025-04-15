@@ -22,6 +22,7 @@ import static io.reticulum.link.TeardownSession.INITIATOR_CLOSED;
 import static io.reticulum.link.TeardownSession.TIMEOUT;
 import static io.reticulum.link.LinkStatus.ACTIVE;
 import static io.reticulum.link.LinkStatus.CLOSED;
+import io.reticulum.link.LinkStatus;
 //import static io.reticulum.packet.PacketContextType.LINKCLOSE;
 import static io.reticulum.identity.IdentityKnownDestination.recall;
 import static io.reticulum.utils.IdentityUtils.concatArrays;
@@ -51,6 +52,7 @@ import java.util.List;
 //import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
+import java.util.Comparator;
 
 import static org.apache.commons.codec.binary.Hex.encodeHexString;
 
@@ -336,32 +338,51 @@ public class MeshAppBuffer {
         log.info("Received data on the link, message: \"{}\"", text);
     }
 
+    //private class LinkStatusComparator implements Comparator<RNSPeer> {
+    //    @Override
+    //    public int compare(RNSPeer p1, RNSPeer p2) {
+    //        var ps1 = p1.getPeerLink().getStatus();
+    //        var ps2 = p2.getPeerLink().getStatus();
+    //        log.info("* ps1: {}, ps2: {}", ps1, ps2);
+    //        if ((ps1 != ACTIVE) && (ps2 == ACTIVE)) {
+    //            return 1;
+    //        } else {
+    //            return 0;
+    //        }
+    //    }
+    //}
+
     //@Synchronized
     public void prunePeers() {
         // note: only prune non-initiator peers
         List<RNSPeer> ips =  getIncomingPeers();
+        //Collections.sort(getIncomingPeers(), new LinkStatusComparator());
+        //for (RNSPeer p: getIncomingPeers()) {
+        //    log.info("=> status: {}", p.getPeerLink().getStatus());
+        //}
         log.info("number of initiator,non-initiator peers before pruning: {},{}",
                 getLinkedPeers().size(), getIncomingPeers().size());
         Link pl;
         for (RNSPeer p : ips) {
             pl = p.getPeerLink();
-            if (nonNull(pl) & (pl.getStatus() != ACTIVE)) {
+            if (nonNull(pl) && (pl.getStatus() != ACTIVE)) {
                 //pl.teardown();
                 //p.hardReset();
                 //getIncomingPeers().remove(p);
-                getIncomingPeers().remove(p);
+                ips.remove(p);
             }
         }
         List<RNSPeer> lps = getLinkedPeers();
+        //Collections.sort(getLinkedPeers(), new LinkStatusComparator());
         //while (lps.get(0).getPeerLink().getStatus() != ACTIVE) {
         //    getLinkedPeers().remove(0);
         //}
         //lps = getLinkedPeers();
         for (RNSPeer p : lps) {
             pl = p.getPeerLink();
-            if (nonNull(pl) & (pl.getStatus() != ACTIVE)) {
+            if (nonNull(pl) && (pl.getStatus() != ACTIVE)) {
                 //pl.teardown();
-                getLinkedPeers().remove(p);
+                lps.remove(p);
                 //log.info("pinging peer {}", p);
                 //p.pingRemote();
             }
