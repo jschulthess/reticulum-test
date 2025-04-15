@@ -325,6 +325,8 @@ public class MeshAppBuffer {
         // make sure the peer has a channel and buffer
         newPeer.getOrInitPeerBuffer();
         incomingPeers.add(newPeer);
+        // do our best to have ACTIVE links at teh beginnint of the list
+        Collections.sort(getIncomingPeers(), new LinkStatusComparator());
         log.info("***> Client connected, link: {}", link);
     }
 
@@ -338,25 +340,29 @@ public class MeshAppBuffer {
         log.info("Received data on the link, message: \"{}\"", text);
     }
 
-    //private class LinkStatusComparator implements Comparator<RNSPeer> {
-    //    @Override
-    //    public int compare(RNSPeer p1, RNSPeer p2) {
-    //        var ps1 = p1.getPeerLink().getStatus();
-    //        var ps2 = p2.getPeerLink().getStatus();
-    //        log.info("* ps1: {}, ps2: {}", ps1, ps2);
-    //        if ((ps1 != ACTIVE) && (ps2 == ACTIVE)) {
-    //            return 1;
-    //        } else {
-    //            return 0;
-    //        }
-    //    }
-    //}
+    private class LinkStatusComparator implements Comparator<RNSPeer> {
+        @Override
+        public int compare(RNSPeer p1, RNSPeer p2) {
+            var ps1 = p1.getPeerLink().getStatus();
+            var ps2 = p2.getPeerLink().getStatus();
+            log.info("* ps1: {}, ps2: {}", ps1, ps2);
+            if (ps1 == ACTIVE) {
+                return -1;
+            } else {
+                if (ps2 == ACTIVE) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        }
+    }
 
     //@Synchronized
     public void prunePeers() {
         // note: only prune non-initiator peers
-        List<RNSPeer> ips =  getIncomingPeers();
         //Collections.sort(getIncomingPeers(), new LinkStatusComparator());
+        List<RNSPeer> ips =  getIncomingPeers();
         //for (RNSPeer p: getIncomingPeers()) {
         //    log.info("=> status: {}", p.getPeerLink().getStatus());
         //}
@@ -478,6 +484,7 @@ public class MeshAppBuffer {
                 newPeer.setServerIdentity(announcedIdentity);
                 newPeer.setIsInitiator(true);
                 lps.add(newPeer);
+                Collections.sort(lps, new LinkStatusComparator());
                 log.info("added new RNSPeer, destinationHash: {}", encodeHexString(destinationHash));
             }
         }
