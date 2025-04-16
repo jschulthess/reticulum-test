@@ -143,6 +143,7 @@ public class MeshAppBuffer {
 
         Scanner scan = new Scanner( System.in );
         System.out.print("> ");
+        BufferedRWPair peerBuffer;
         while (true) {
             try {
                 inData = scan.nextLine();
@@ -166,7 +167,6 @@ public class MeshAppBuffer {
                     log.info("=> enter '?' or 'help' to see this message");
                     log.info("********************************************************************************");
                 } else if (inData.equalsIgnoreCase("prune")) {
-                    //log.info("pruning peers");
                     prunePeers();
                     }
                 else {
@@ -197,15 +197,14 @@ public class MeshAppBuffer {
                                 log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
                                 p.getOrInitPeerBuffer();
                             }
-                            //else if ((inData.equalsIgnoreCase("clean")) & (rpl.getStatus() == CLOSED)) {
-                            else if (inData.equalsIgnoreCase("prune")) { 
-                                if ((rpl.getStatus() == CLOSED)) {
-                                    //rpl.teardown();
-                                    p.hardReset();
-                                    getLinkedPeers().remove(p);
-                                }
-                                log.info("pruning initiators done.");
-                            } else if (inData.equalsIgnoreCase("status")) {
+                            //else if (inData.equalsIgnoreCase("prune")) { 
+                            //    if ((rpl.getStatus() == CLOSED)) {
+                            //        //rpl.teardown();
+                            //        p.hardReset();
+                            //        getLinkedPeers().remove(p);
+                            //    }
+                            //    log.info("pruning initiators done.");
+                            else if (inData.equalsIgnoreCase("status")) {
                                 log.info("peer destinationHash: {}, peerLink: {} <=> status: {}",
                                     encodeHexString(p.getDestinationHash()),
                                     p.getPeerLink(), p.getPeerLink().getStatus());
@@ -217,7 +216,7 @@ public class MeshAppBuffer {
                                         data.length, MTU, inData, encodeHexString(p.getDestinationHash()));
                                     //var testPacket = new Packet(rpl, data);
                                     //testPacket.send();var peerBuffer = p.getOrInitPeerBuffer();
-                                    var peerBuffer = p.getOrInitPeerBuffer();
+                                    peerBuffer = p.getOrInitPeerBuffer();
                                     peerBuffer.write(data);
                                     peerBuffer.flush();
                                 } else {
@@ -236,14 +235,13 @@ public class MeshAppBuffer {
                                 //ip.shutdown();
                                 ip.sendCloseToRemote(rpl);
                             }
-                            //else if ((inData.equalsIgnoreCase("clean")) & (rpl.getStatus() == CLOSED )) {
-                            else if (inData.equalsIgnoreCase("prune")) {
-                                if (rpl.getStatus() == CLOSED) {
-                                    ip.hardReset();
-                                    incomingPeers.remove(ip);
-                                }
-                                log.info("pruning non-initiators done.");
-                            }
+                            //else if (inData.equalsIgnoreCase("prune")) {
+                            //    if (rpl.getStatus() == CLOSED) {
+                            //        ip.hardReset();
+                            //        incomingPeers.remove(ip);
+                            //    }
+                            //    log.info("pruning non-initiators done.");
+                            //}
                         }
                         if (incomingPeers.size() < nonInitiatorSize) {
                             // pruning happened
@@ -339,25 +337,25 @@ public class MeshAppBuffer {
         log.info("Received data on the link, message: \"{}\"", text);
     }
 
-    private class LinkStatusComparator implements Comparator<RNSPeer> {
-        @Override
-        public int compare(RNSPeer p1, RNSPeer p2) {
-            var ps1 = p1.getPeerLink().getStatus();
-            var ps2 = p2.getPeerLink().getStatus();
-            log.info("* ps1: {}, ps2: {}", ps1, ps2);
-            if (ps1 == ACTIVE) {
-                return -1;
-            } else {
-                if (ps2 == ACTIVE) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
-        }
-    }
+    //private class LinkStatusComparator implements Comparator<RNSPeer> {
+    //    @Override
+    //    public int compare(RNSPeer p1, RNSPeer p2) {
+    //        var ps1 = p1.getPeerLink().getStatus();
+    //        var ps2 = p2.getPeerLink().getStatus();
+    //        log.info("* ps1: {}, ps2: {}", ps1, ps2);
+    //        if (ps1 == ACTIVE) {
+    //            return -1;
+    //        } else {
+    //            if (ps2 == ACTIVE) {
+    //                return 1;
+    //            } else {
+    //                return 0;
+    //            }
+    //        }
+    //    }
+    //}
 
-    //@Synchronized
+    @Synchronized
     public void prunePeers() {
         // note: only prune non-initiator peers
         //Collections.sort(getIncomingPeers(), new LinkStatusComparator());
@@ -562,6 +560,7 @@ public class MeshAppBuffer {
                 log.info("peerBuffer exists: {}, link status: {}", this.peerBuffer, this.peerLink.getStatus());
                 //this.peerBuffer.close();
                 //this.peerBuffer = Buffer.createBidirectionalBuffer(receiveStreamId, sendStreamId, channel, this::peerBufferReady);
+                //this.peerBuffer.flush();
                 return this.peerBuffer;
             }
             else {
