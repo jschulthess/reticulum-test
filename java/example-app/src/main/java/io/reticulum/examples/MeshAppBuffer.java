@@ -378,20 +378,26 @@ public class MeshAppBuffer {
             //}
             log.info("===> peerLink: {}", pl);
             if (nonNull(pl)) {
+                log.info("getting status");
                 if (pl.getStatus() != ACTIVE) {
+                    log.info("not ACTIVE");
                     if (nonNull(p.getPeerBuffer())) {
                         p.getPeerBuffer().close();
                     }
                     p.hardReset();
+                    log.info("hard reset done");
                     getIncomingPeers().remove(p);
                 }
-            } else {
-                if (nonNull(p.getPeerBuffer())) {
-                    p.getPeerBuffer().close();
-                }
-                p.hardReset();
-                getIncomingPeers().remove(p);
             }
+            //else {
+            //    log.info("peer link null");
+            //    //if (nonNull(p.getPeerBuffer())) {
+            //    //    p.getPeerBuffer().close();
+            //    //}
+            //    p.hardReset();
+            //    log.info("hard reset done");
+            //    getIncomingPeers().remove(p);
+            //}
         }
         //List<RNSPeer> lps = getLinkedPeers();
         ////Collections.sort(getLinkedPeers(), new LinkStatusComparator());
