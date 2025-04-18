@@ -395,7 +395,8 @@ public class MeshAppBuffer {
                     pl.teardown();
                     p.hardReset();
                     //log.info("hard reset done");
-                    getIncomingPeers().remove(p);
+                    //getIncomingPeers().remove(p);
+                    ips.remove(p);
                     log.info("peer removed.");
                     if (breakAfter) {
                         break;
