@@ -382,8 +382,10 @@ public class MeshAppBuffer {
                 if (pl.getStatus() != ACTIVE) {
                     log.info("not ACTIVE");
                     if (nonNull(p.getPeerBuffer())) {
+                        log.info("closing peerBuffer");
                         p.getPeerBuffer().close();
                     }
+                    pl.teardown();
                     p.hardReset();
                     log.info("hard reset done");
                     getIncomingPeers().remove(p);
