@@ -355,82 +355,33 @@ public class MeshAppBuffer {
     //    }
     //}
 
+    public List<RNSPeer> incomingNonActiveList() {
+        var ips = getIncomingPeers();
+        List<RNSPeer> result = Collections.synchronizedList(new ArrayList<>());
+        Link pl;
+        for (RNSPeer p: ips) {
+            pl = p.getPeerLink();
+            if (nonNull(pl)) {
+                if (pl.getStatus() != ACTIVE) {
+                    result.add(p);
+                }
+            } else {
+                result.add(p);
+            }
+        }
+        return result;
+    }
+
     //@Synchronized
     public void prunePeers() {
         // note: only prune non-initiator peers
-        //Collections.sort(getIncomingPeers(), new LinkStatusComparator());
-        List<RNSPeer> ips =  getIncomingPeers();
-        //for (RNSPeer p: getIncomingPeers()) {
-        //    log.info("=> status: {}", p.getPeerLink().getStatus());
-        //}
+        List<RNSPeer> inaps = incomingNonActiveList();
+        List<RNSPeer> ips = getIncomingPeers();
         log.info("number of initiator,non-initiator peers before pruning: {},{}",
                 getLinkedPeers().size(), getIncomingPeers().size());
-        Link pl;
-        Boolean breakAfter;
-        for (RNSPeer p : ips) {
-            //var breakAfter = false;
-            pl = p.getPeerLink();
-            //if (nonNull(pl) && (pl.getStatus() != ACTIVE)) {
-            //    log.info("resetting incomming peer before removing, peer link status: {}, : {}", 
-            //            pl.getStatus(), pl);
-            //    //pl.teardown();
-            //    p.hardReset();
-            //    //getIncomingPeers().remove(p);
-            //    ips.remove(p);
-            //}
-            log.info("===> peerLink: {}", pl);
-            if (ips.indexOf(p) == ips.size() - 1) {
-                breakAfter = true;
-            } else {
-                breakAfter = false;
-            }
-            if (nonNull(pl)) {
-                //log.info("getting status");
-                if (pl.getStatus() != ACTIVE) {
-                    //log.info("not ACTIVE");
-                    if (nonNull(p.getPeerBuffer())) {
-                        log.info("closing peerBuffer");
-                        p.getPeerBuffer().close();
-                    }
-                    pl.teardown();
-                    p.hardReset();
-                    //log.info("hard reset done");
-                    //getIncomingPeers().remove(p);
-                    ips.remove(p);
-                    log.info("peer removed.");
-                    if (breakAfter) {
-                        break;
-                    }
-                }
-            }
-            //else {
-            //    log.info("peer link null");
-            //    //if (nonNull(p.getPeerBuffer())) {
-            //    //    p.getPeerBuffer().close();
-            //    //}
-            //    p.hardReset();
-            //    log.info("hard reset done");
-            //    getIncomingPeers().remove(p);
-            //}
+        for (RNSPeer p: inaps) {
+            ips.remove(ips.indexOf(p));
         }
-        //List<RNSPeer> lps = getLinkedPeers();
-        ////Collections.sort(getLinkedPeers(), new LinkStatusComparator());
-        ////while (lps.get(0).getPeerLink().getStatus() != ACTIVE) {
-        ////    getLinkedPeers().remove(0);
-        ////}
-        ////lps = getLinkedPeers();
-        //for (RNSPeer p : lps) {
-        //    pl = p.getPeerLink();
-        //    if (nonNull(pl) && (pl.getStatus() != ACTIVE)) {
-        //        log.info("resetting initiator peer before removing, peer link status: {}, link: {}", 
-        //                pl.getStatus(), pl);
-        //        pl.teardown();
-        //        p.hardReset();
-        //        lps.remove(p);
-        //        //log.info("pinging peer {}", p);
-        //        //p.pingRemote();
-        //    }
-        //}
         log.info("number of initiator,non-initiator peers after pruning: {},{}",
                 getLinkedPeers().size(), getIncomingPeers().size());
     }
@@ -768,10 +719,10 @@ public class MeshAppBuffer {
             log.info("packet timed out");
             if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
                 log.info("packet timed out, receipt status: {}", PacketReceiptStatus.FAILED);
-                //if (nonNull(this.peerBuffer)) {
-                //    this.peerBuffer.close();
-                //}
-                //this.peerLink.teardown();
+                if (nonNull(this.peerBuffer)) {
+                    this.peerBuffer.close();
+                }
+                this.peerLink.teardown();
             }
         }
     
