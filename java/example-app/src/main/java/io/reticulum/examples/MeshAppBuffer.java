@@ -377,7 +377,19 @@ public class MeshAppBuffer {
             //    ips.remove(p);
             //}
             log.info("===> peerLink: {}", pl);
-            if (nonNull(pl) && (pl.getStatus() != ACTIVE)) {
+            if (nonNull(pl)) {
+                if (pl.getStatus() != ACTIVE) {
+                    if (nonNull(p.getPeerBuffer())) {
+                        p.getPeerBuffer().close();
+                    }
+                    p.hardReset();
+                    getIncomingPeers().remove(p);
+                }
+            } else {
+                if (nonNull(p.getPeerBuffer())) {
+                    p.getPeerBuffer().close();
+                }
+                p.hardReset();
                 getIncomingPeers().remove(p);
             }
         }
@@ -591,6 +603,9 @@ public class MeshAppBuffer {
         public void shutdown() {
             if (nonNull(this.peerLink)) {
                 log.info("shutdown - peerLink: {}, status: {}", peerLink, peerLink.getStatus());
+                if (nonNull(this.peerBuffer)) {
+                    peerBuffer.close();
+                }
                 if (peerLink.getStatus() == ACTIVE) {
                     if (isFalse(this.isInitiator)) {
                         sendCloseToRemote(peerLink);
@@ -655,10 +670,11 @@ public class MeshAppBuffer {
                         encodeHexString(targetPeerHash));
                 if (Arrays.equals(destinationHash, targetPeerHash)) {
                         log.info("closing link: {}", peerLink.getDestination().getHexHash());
-                    peerLink.teardown();
-                    if (! this.isInitiator) {
-                        this.peerLink = null;
+                    if (nonNull(this.peerBuffer)) {
+                        this.peerBuffer.close();
+                        this.peerBuffer = null;
                     }
+                    peerLink.teardown();
                 }
             } else if (msgText.startsWith("open::")) {
                 var targetPeerHash = subarray(message, 7, message.length);
