@@ -355,7 +355,7 @@ public class MeshAppBuffer {
     //    }
     //}
 
-    @Synchronized
+    //@Synchronized
     public void prunePeers() {
         // note: only prune non-initiator peers
         //Collections.sort(getIncomingPeers(), new LinkStatusComparator());
@@ -389,6 +389,7 @@ public class MeshAppBuffer {
                     p.hardReset();
                     log.info("hard reset done");
                     getIncomingPeers().remove(p);
+                    log.info("peer removed.");
                 }
             }
             //else {
