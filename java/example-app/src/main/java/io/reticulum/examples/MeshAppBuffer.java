@@ -143,7 +143,6 @@ public class MeshAppBuffer {
 
         Scanner scan = new Scanner( System.in );
         System.out.print("> ");
-        BufferedRWPair peerBuffer;
         while (true) {
             try {
                 inData = scan.nextLine();
@@ -216,9 +215,9 @@ public class MeshAppBuffer {
                                         data.length, MTU, inData, encodeHexString(p.getDestinationHash()));
                                     //var testPacket = new Packet(rpl, data);
                                     //testPacket.send();var peerBuffer = p.getOrInitPeerBuffer();
-                                    peerBuffer = p.getOrInitPeerBuffer();
-                                    peerBuffer.write(data);
-                                    peerBuffer.flush();
+                                    var pb = p.getOrInitPeerBuffer();
+                                    pb.write(data);
+                                    pb.flush();
                                 } else {
                                     log.info("can't send data to link with status: {}", rpl.getStatus());
                                 }
@@ -560,7 +559,7 @@ public class MeshAppBuffer {
                 log.info("peerBuffer exists: {}, link status: {}", this.peerBuffer, this.peerLink.getStatus());
                 //this.peerBuffer.close();
                 //this.peerBuffer = Buffer.createBidirectionalBuffer(receiveStreamId, sendStreamId, channel, this::peerBufferReady);
-                this.peerBuffer.flush();
+                //this.peerBuffer.flush();
                 //return this.peerBuffer;
             }
             else {
