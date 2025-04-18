@@ -379,7 +379,7 @@ public class MeshAppBuffer {
             //    ips.remove(p);
             //}
             log.info("===> peerLink: {}", pl);
-            if (ips.indexOf(p) == ips.size() -1) {
+            if (ips.indexOf(p) == ips.size() - 1) {
                 breakAfter = true;
             } else {
                 breakAfter = false;
