@@ -366,7 +366,9 @@ public class MeshAppBuffer {
         log.info("number of initiator,non-initiator peers before pruning: {},{}",
                 getLinkedPeers().size(), getIncomingPeers().size());
         Link pl;
+        Boolean breakAfter;
         for (RNSPeer p : ips) {
+            //var breakAfter = false;
             pl = p.getPeerLink();
             //if (nonNull(pl) && (pl.getStatus() != ACTIVE)) {
             //    log.info("resetting incomming peer before removing, peer link status: {}, : {}", 
@@ -377,19 +379,27 @@ public class MeshAppBuffer {
             //    ips.remove(p);
             //}
             log.info("===> peerLink: {}", pl);
+            if (ips.indexOf(p) == ips.size() -1) {
+                breakAfter = true;
+            } else {
+                breakAfter = false;
+            }
             if (nonNull(pl)) {
-                log.info("getting status");
+                //log.info("getting status");
                 if (pl.getStatus() != ACTIVE) {
-                    log.info("not ACTIVE");
+                    //log.info("not ACTIVE");
                     if (nonNull(p.getPeerBuffer())) {
                         log.info("closing peerBuffer");
                         p.getPeerBuffer().close();
                     }
                     pl.teardown();
                     p.hardReset();
-                    log.info("hard reset done");
+                    //log.info("hard reset done");
                     getIncomingPeers().remove(p);
                     log.info("peer removed.");
+                    if (breakAfter) {
+                        break;
+                    }
                 }
             }
             //else {
