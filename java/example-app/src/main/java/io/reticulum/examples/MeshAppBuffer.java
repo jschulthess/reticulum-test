@@ -39,6 +39,7 @@ import java.nio.ByteBuffer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.WRITE;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
@@ -367,33 +368,37 @@ public class MeshAppBuffer {
         Link pl;
         for (RNSPeer p : ips) {
             pl = p.getPeerLink();
+            //if (nonNull(pl) && (pl.getStatus() != ACTIVE)) {
+            //    log.info("resetting incomming peer before removing, peer link status: {}, : {}", 
+            //            pl.getStatus(), pl);
+            //    //pl.teardown();
+            //    p.hardReset();
+            //    //getIncomingPeers().remove(p);
+            //    ips.remove(p);
+            //}
+            log.info("===> peerLink: {}", pl);
             if (nonNull(pl) && (pl.getStatus() != ACTIVE)) {
-                log.info("resetting incomming peer before removing, peer link status: {}, : {}", 
-                        pl.getStatus(), pl);
-                pl.teardown();
-                p.hardReset();
-                //getIncomingPeers().remove(p);
-                ips.remove(p);
+                getIncomingPeers().remove(p);
             }
         }
-        List<RNSPeer> lps = getLinkedPeers();
-        //Collections.sort(getLinkedPeers(), new LinkStatusComparator());
-        //while (lps.get(0).getPeerLink().getStatus() != ACTIVE) {
-        //    getLinkedPeers().remove(0);
+        //List<RNSPeer> lps = getLinkedPeers();
+        ////Collections.sort(getLinkedPeers(), new LinkStatusComparator());
+        ////while (lps.get(0).getPeerLink().getStatus() != ACTIVE) {
+        ////    getLinkedPeers().remove(0);
+        ////}
+        ////lps = getLinkedPeers();
+        //for (RNSPeer p : lps) {
+        //    pl = p.getPeerLink();
+        //    if (nonNull(pl) && (pl.getStatus() != ACTIVE)) {
+        //        log.info("resetting initiator peer before removing, peer link status: {}, link: {}", 
+        //                pl.getStatus(), pl);
+        //        pl.teardown();
+        //        p.hardReset();
+        //        lps.remove(p);
+        //        //log.info("pinging peer {}", p);
+        //        //p.pingRemote();
+        //    }
         //}
-        //lps = getLinkedPeers();
-        for (RNSPeer p : lps) {
-            pl = p.getPeerLink();
-            if (nonNull(pl) && (pl.getStatus() != ACTIVE)) {
-                log.info("resetting initiator peer before removing, peer link status: {}, link: {}", 
-                        pl.getStatus(), pl);
-                pl.teardown();
-                p.hardReset();
-                lps.remove(p);
-                //log.info("pinging peer {}", p);
-                //p.pingRemote();
-            }
-        }
         log.info("number of initiator,non-initiator peers after pruning: {},{}",
                 getLinkedPeers().size(), getIncomingPeers().size());
     }
@@ -646,11 +651,14 @@ public class MeshAppBuffer {
             } else if (msgText.startsWith("close::")) {
                 var targetPeerHash = subarray(message, 7, message.length);
                 log.info("peer dest hash: {}, target hash: {}",
-                    encodeHexString(destinationHash),
-                    encodeHexString(targetPeerHash));
+                        encodeHexString(destinationHash),
+                        encodeHexString(targetPeerHash));
                 if (Arrays.equals(destinationHash, targetPeerHash)) {
-                    log.info("closing link: {}", peerLink.getDestination().getHexHash());
-                peerLink.teardown();
+                        log.info("closing link: {}", peerLink.getDestination().getHexHash());
+                    peerLink.teardown();
+                    if (! this.isInitiator) {
+                        this.peerLink = null;
+                    }
                 }
             } else if (msgText.startsWith("open::")) {
                 var targetPeerHash = subarray(message, 7, message.length);
