@@ -374,7 +374,17 @@ public class MeshAppBuffer {
 
     //@Synchronized
     public void prunePeers() {
-        // note: only prune non-initiator peers
+        // prune initiator peers
+        List<RNSPeer> lps =  getLinkedPeers();
+        for (RNSPeer p : lps) {
+            var pLink = p.getPeerLink();
+            if (nonNull(pLink)) {
+                if (pLink.getStatus() == ACTIVE) {
+                    p.pingRemote();
+                }
+            }
+        }
+        // prune non-initiator peers
         List<RNSPeer> inaps = incomingNonActiveList();
         List<RNSPeer> ips = getIncomingPeers();
         log.info("number of initiator,non-initiator peers before pruning: {},{}",
