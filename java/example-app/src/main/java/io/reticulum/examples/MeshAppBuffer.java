@@ -189,6 +189,10 @@ public class MeshAppBuffer {
                                     log.info("skipping peer link {} with status {}", rpl, rpl.getStatus());
                                 }
                             } else if (inData.equalsIgnoreCase("close")) {
+                                if (nonNull(p.getPeerBuffer())) {
+                                    p.getPeerBuffer().close();
+                                    p.setPeerBuffer(null);
+                                }
                                 rpl.teardown();
                                 //p.shutdown();
                                 log.info("peerLink: {} - status: {}", rpl, rpl.getStatus());
