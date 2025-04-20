@@ -382,6 +382,9 @@ public class MeshAppBuffer {
                 if (pLink.getStatus() == ACTIVE) {
                     p.pingRemote();
                 }
+                if (p.getPeerTimedOut()) {
+                    pLink.teardown();
+                }
             }
         }
         // prune non-initiator peers
@@ -505,6 +508,7 @@ public class MeshAppBuffer {
         BufferedRWPair peerBuffer;
         int receiveStreamId = 0;
         int sendStreamId = 0;
+        Boolean peerTimedOut = false;
         //Reticulum rns = reticulum;
 
         /**
@@ -627,6 +631,7 @@ public class MeshAppBuffer {
         public void linkClosed(Link link) {
             if (link.getTeardownReason() == TIMEOUT) {
                 log.info("The link timed out");
+                this.peerTimedOut = true;
             } else if (link.getTeardownReason() == INITIATOR_CLOSED) {
                 log.info("Link closed callback: The initiator closed the link");
                 log.info("peerLink {} closed (link: {}), link destination hash: {}",
@@ -729,9 +734,10 @@ public class MeshAppBuffer {
             log.info("packet timed out");
             if (receipt.getStatus() == PacketReceiptStatus.FAILED) {
                 log.info("packet timed out, receipt status: {}", PacketReceiptStatus.FAILED);
-                if (nonNull(this.peerBuffer)) {
-                    this.peerBuffer.close();
-                }
+                //if (nonNull(this.peerBuffer)) {
+                //    this.peerBuffer.close();
+                //}
+                this.peerTimedOut = true;
                 this.peerLink.teardown();
             }
         }
