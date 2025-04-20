@@ -200,6 +200,7 @@ public class MeshAppBuffer {
                                 p.getOrInitPeerLink();
                                 log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
                                 p.getOrInitPeerBuffer();
+                                destination.announce("mesh-node".getBytes());
                             }
                             //else if (inData.equalsIgnoreCase("prune")) { 
                             //    if ((rpl.getStatus() == CLOSED)) {
