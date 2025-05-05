@@ -22,6 +22,7 @@ import static io.reticulum.link.TeardownSession.INITIATOR_CLOSED;
 import static io.reticulum.link.TeardownSession.TIMEOUT;
 import static io.reticulum.link.LinkStatus.ACTIVE;
 import static io.reticulum.link.LinkStatus.CLOSED;
+import static io.reticulum.link.LinkStatus.PENDING;
 import io.reticulum.link.LinkStatus;
 //import static io.reticulum.packet.PacketContextType.LINKCLOSE;
 import static io.reticulum.identity.IdentityKnownDestination.recall;
@@ -386,6 +387,9 @@ public class MeshAppBuffer {
             if (nonNull(pLink)) {
                 if (pLink.getStatus() == ACTIVE) {
                     p.pingRemote();
+                }
+                if (pLink.getStatus() == PENDING) {
+                    pLink.teardown();
                 }
                 if (p.getPeerTimedOut()) {
                     pLink.teardown();
