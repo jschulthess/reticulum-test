@@ -391,6 +391,16 @@ public class MeshAppBuffer {
         return result;
     }
 
+    public List<RNSPeer> getImmutableActiveLinkedPeers() {
+        List<RNSPeer> activePeers = Collections.synchronizedList(new ArrayList<>());
+        for (RNSPeer p: this.immutableLinkedPeers) {
+            if (nonNull(p.getPeerLink()) && (p.getPeerLink().getStatus() == ACTIVE)) {
+                activePeers.add(p);
+            }
+        }
+        return activePeers;
+    }
+
     public void removeIncomingPeer(RNSPeer peer) {
         if (nonNull(peer.getPeerLink())) {
             peer.getPeerLink().teardown();
@@ -419,28 +429,36 @@ public class MeshAppBuffer {
     //@Synchronized
     public void prunePeers() {
         // prune initiator peers
-        //List<RNSPeer> lps =  getLinkedPeers();
-        var lps = getImmutableLinkedPeers();
-        for (RNSPeer p : lps) {
+        //var peerList = getImmutableLinkedPeers();
+        var initiatorPeerList = getImmutableLinkedPeers();
+        var initiatorActivePeerList = getImmutableActiveLinkedPeers();
+        var incomingPeerList = getImmutableIncomingPeers();
+        log.info("number of links (linkedPeers (active) / incomingPeers before prunig: {} ({}), {}",
+                initiatorPeerList.size(), getImmutableActiveLinkedPeers().size(),
+                incomingPeerList.size());
+        for (RNSPeer p: initiatorActivePeerList) {
+            var pLink = p.getOrInitPeerLink();
+            p.pingRemote();
+        }
+        for (RNSPeer p : initiatorPeerList) {
             var pLink = p.getPeerLink();
             if (nonNull(pLink)) {
-                if (pLink.getStatus() == ACTIVE) {
-                    p.pingRemote();
-                }
-                if (pLink.getStatus() == PENDING) {
-                    pLink.teardown();
-                }
                 if (p.getPeerTimedOut()) {
                     // options: keep in case peer reconnects or remove => we'll remove it
                     removeLinkedPeer(p);
+                    continue;
                 }
+                if (pLink.getStatus() == ACTIVE) {
+                    continue;
+                }
+                //if (pLink.getStatus() == PENDING) {
+                //    pLink.teardown();
+                //    continue;
+                //}
             }
         }
         // prune non-initiator peers
         List<RNSPeer> inaps = getIncomingNonActiveList();
-        List<RNSPeer> ips = getIncomingPeers();
-        log.info("number of initiator (active),non-initiator peers before pruning: {} ({}),{}",
-                getLinkedPeers().size(), getLinkedActiveList().size(), getIncomingPeers().size());
         for (RNSPeer p: inaps) {
             var pLink = p.getPeerLink();
             if (nonNull(pLink)) {
@@ -449,8 +467,12 @@ public class MeshAppBuffer {
             }
             removeIncomingPeer(p);
         }
-        log.info("number of initiator (active),non-initiator peers after pruning: {} ({}),{}",
-                getLinkedPeers().size(), getLinkedActiveList().size(), getIncomingPeers().size());
+        initiatorPeerList = getImmutableLinkedPeers();
+        initiatorActivePeerList = getImmutableActiveLinkedPeers();
+        incomingPeerList = getImmutableIncomingPeers();
+        log.info("number of links (linkedPeers (active) / incomingPeers after prunig: {} ({}), {}",
+                initiatorPeerList.size(), getImmutableActiveLinkedPeers().size(),
+                incomingPeerList.size());
     }
 
     //public RNSPeer findPeerByLink(Link link) {
