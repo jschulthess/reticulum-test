@@ -363,6 +363,10 @@ public class MeshAppBuffer {
     //    }
     //}
 
+    public void addLinkedPeer(RNSPeer peer) {
+        this.linkedPeers.add(peer);
+        this.immutableLinkedPeers = List.copyOf(this.linkedPeers); // thread safe
+    }
 
     public void removeLinkedPeer(RNSPeer peer) {
         if (nonNull(peer.getPeerLink())) {
@@ -509,7 +513,7 @@ public class MeshAppBuffer {
             }
 
             //List<RNSPeer> lps =  getLinkedPeers();
-            var lps = getImmutableLinkedPeers();
+            var lps =  getImmutableLinkedPeers();
             for (RNSPeer p : lps) {
                 if (Arrays.equals(p.getDestinationHash(), destinationHash)) {
                     log.info("MeshAnnounceHandler - peer exists - found peer matching destinationHash");
@@ -536,7 +540,8 @@ public class MeshAppBuffer {
                 RNSPeer newPeer = new RNSPeer(destinationHash);
                 newPeer.setServerIdentity(announcedIdentity);
                 newPeer.setIsInitiator(true);
-                lps.add(newPeer);
+                addLinkedPeer(newPeer);
+
                 log.info("added new RNSPeer, destinationHash: {}", encodeHexString(destinationHash));
             }
         }
