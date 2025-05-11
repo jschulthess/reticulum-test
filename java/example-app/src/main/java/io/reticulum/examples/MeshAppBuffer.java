@@ -415,12 +415,12 @@ public class MeshAppBuffer {
         List<RNSPeer> inaps = getIncomingNonActiveList();
         List<RNSPeer> ips = getIncomingPeers();
         log.info("number of initiator (active),non-initiator peers before pruning: {},{}",
-                getLinkedPeers().size(), getLinkedActiveList(), getIncomingPeers().size());
+                getLinkedPeers().size(), getLinkedActiveList().size(), getIncomingPeers().size());
         for (RNSPeer p: inaps) {
             ips.remove(ips.indexOf(p));
         }
         log.info("number of initiator (active),non-initiator peers after pruning: {},{}",
-                getLinkedPeers().size(), getLinkedActiveList(), getIncomingPeers().size());
+                getLinkedPeers().size(), getLinkedActiveList().size(), getIncomingPeers().size());
     }
 
     //public RNSPeer findPeerByLink(Link link) {
