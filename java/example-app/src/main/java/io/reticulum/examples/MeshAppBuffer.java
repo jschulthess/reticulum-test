@@ -330,7 +330,7 @@ public class MeshAppBuffer {
         newPeer.setPeerLinkHash(link.getHash());
         // make sure the peer has a channel and buffer
         newPeer.getOrInitPeerBuffer();
-        incomingPeers.add(newPeer);
+        addIncomingPeer(newPeer);
         // do our best to have ACTIVE links at teh beginnint of the list
         log.info("***> Client connected, link: {}", link);
     }
@@ -399,6 +399,11 @@ public class MeshAppBuffer {
             }
         }
         return activePeers;
+    }
+
+    public void addIncomingPeer(RNSPeer peer) {
+        this.incomingPeers.add(peer);
+        this.immutableIncomingPeers = List.copyOf(this.incomingPeers);
     }
 
     public void removeIncomingPeer(RNSPeer peer) {
