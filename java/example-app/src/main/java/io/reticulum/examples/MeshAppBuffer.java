@@ -361,7 +361,22 @@ public class MeshAppBuffer {
     //    }
     //}
 
-    public List<RNSPeer> incomingNonActiveList() {
+    public List<RNSPeer> getLinkedActiveList() {
+        var lps = this.linkedPeers;
+        List<RNSPeer> result = Collections.synchronizedList(new ArrayList<>());
+        Link pl;
+        for (RNSPeer p: lps) {
+            pl = p.getOrInitPeerLink();
+            if (nonNull(pl)) {
+                if (pl.getStatus() == ACTIVE) {
+                    result.add(p);
+                }
+            }
+        }
+        return result;
+    }
+
+    public List<RNSPeer> getIncomingNonActiveList() {
         var ips = getIncomingPeers();
         List<RNSPeer> result = Collections.synchronizedList(new ArrayList<>());
         Link pl;
@@ -397,15 +412,15 @@ public class MeshAppBuffer {
             }
         }
         // prune non-initiator peers
-        List<RNSPeer> inaps = incomingNonActiveList();
+        List<RNSPeer> inaps = getIncomingNonActiveList();
         List<RNSPeer> ips = getIncomingPeers();
-        log.info("number of initiator,non-initiator peers before pruning: {},{}",
-                getLinkedPeers().size(), getIncomingPeers().size());
+        log.info("number of initiator (active),non-initiator peers before pruning: {},{}",
+                getLinkedPeers().size(), getLinkedActiveList(), getIncomingPeers().size());
         for (RNSPeer p: inaps) {
             ips.remove(ips.indexOf(p));
         }
-        log.info("number of initiator,non-initiator peers after pruning: {},{}",
-                getLinkedPeers().size(), getIncomingPeers().size());
+        log.info("number of initiator (active),non-initiator peers after pruning: {},{}",
+                getLinkedPeers().size(), getLinkedActiveList(), getIncomingPeers().size());
     }
 
     //public RNSPeer findPeerByLink(Link link) {
