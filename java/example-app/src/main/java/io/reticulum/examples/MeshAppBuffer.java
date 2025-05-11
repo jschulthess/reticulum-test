@@ -414,7 +414,7 @@ public class MeshAppBuffer {
         // prune non-initiator peers
         List<RNSPeer> inaps = getIncomingNonActiveList();
         List<RNSPeer> ips = getIncomingPeers();
-        log.info("number of initiator (active),non-initiator peers before pruning: {} ({}}),{}",
+        log.info("number of initiator (active),non-initiator peers before pruning: {} ({}),{}",
                 getLinkedPeers().size(), getLinkedActiveList().size(), getIncomingPeers().size());
         for (RNSPeer p: inaps) {
             ips.remove(ips.indexOf(p));
