@@ -36,15 +36,15 @@
         <updatePolicy>always</updatePolicy>
       </snapshots>
     </repository>
-		<!-- jitpack for build-on-demand of altcoinj -->
-		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
+    <!-- jitpack for build-on-demand of altcoinj -->
+	<repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
       <snapshots>
         <enabled>true</enabled>
         <updatePolicy>always</updatePolicy>
       </snapshots>
-		</repository>
+    </repository>
   </repositories>
 
   <!--
@@ -76,12 +76,12 @@
   -->
 
   <dependencies>
-		<!-- Build Reticulum from Source -->
-		<dependency>
-			<groupId>com.github.sergst83</groupId>
-			<artifactId>reticulum-network-stack</artifactId>
-			<version>${reticulum.version}</version>
-		</dependency>
+    <!-- Build Reticulum from Source -->
+    <dependency>
+      <groupId>com.github.sergst83</groupId>
+      <artifactId>reticulum-network-stack</artifactId>
+      <version>${reticulum.version}</version>
+    </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
