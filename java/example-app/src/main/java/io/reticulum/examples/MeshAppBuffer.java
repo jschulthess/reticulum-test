@@ -72,7 +72,9 @@ public class MeshAppBuffer {
     public Destination baseDestination;
     private volatile boolean isShuttingDown = false;
     private final List<RNSPeer> linkedPeers = Collections.synchronizedList(new ArrayList<>());
+    private List<RNSPeer> immutableLinkedPeers = Collections.emptyList();
     private final List<RNSPeer> incomingPeers = Collections.synchronizedList(new ArrayList<>());
+    private List<RNSPeer> immutableIncomingPeers = Collections.emptyList();
     private Boolean doReply;
     
     /************/
@@ -361,8 +363,17 @@ public class MeshAppBuffer {
     //    }
     //}
 
+
+    public void removeLinkedPeer(RNSPeer peer) {
+        if (nonNull(peer.getPeerLink())) {
+            peer.getPeerLink().teardown();
+        }
+        this.linkedPeers.remove(this.linkedPeers.indexOf(peer)); //thread safe
+        this.immutableLinkedPeers = List.copyOf(this.linkedPeers);
+    }
+
     public List<RNSPeer> getLinkedActiveList() {
-        var lps = this.linkedPeers;
+        var lps = getImmutableLinkedPeers();
         List<RNSPeer> result = Collections.synchronizedList(new ArrayList<>());
         Link pl;
         for (RNSPeer p: lps) {
@@ -376,8 +387,16 @@ public class MeshAppBuffer {
         return result;
     }
 
+    public void removeIncomingPeer(RNSPeer peer) {
+        if (nonNull(peer.getPeerLink())) {
+            peer.getPeerLink().teardown();
+        }
+        this.incomingPeers.remove(this.incomingPeers.indexOf(peer)); // thread safe
+        this.immutableIncomingPeers = List.copyOf(this.incomingPeers);
+    }
+
     public List<RNSPeer> getIncomingNonActiveList() {
-        var ips = getIncomingPeers();
+        var ips = getImmutableIncomingPeers();
         List<RNSPeer> result = Collections.synchronizedList(new ArrayList<>());
         Link pl;
         for (RNSPeer p: ips) {
@@ -396,7 +415,8 @@ public class MeshAppBuffer {
     //@Synchronized
     public void prunePeers() {
         // prune initiator peers
-        List<RNSPeer> lps =  getLinkedPeers();
+        //List<RNSPeer> lps =  getLinkedPeers();
+        var lps = getImmutableLinkedPeers();
         for (RNSPeer p : lps) {
             var pLink = p.getPeerLink();
             if (nonNull(pLink)) {
@@ -407,7 +427,8 @@ public class MeshAppBuffer {
                     pLink.teardown();
                 }
                 if (p.getPeerTimedOut()) {
-                    pLink.teardown();
+                    // options: keep in case peer reconnects or remove => we'll remove it
+                    removeLinkedPeer(p);
                 }
             }
         }
@@ -422,7 +443,7 @@ public class MeshAppBuffer {
                 // could be eg. PENDING
                 pLink.teardown();
             }
-            ips.remove(ips.indexOf(p));
+            removeIncomingPeer(p);
         }
         log.info("number of initiator (active),non-initiator peers after pruning: {} ({}),{}",
                 getLinkedPeers().size(), getLinkedActiveList().size(), getIncomingPeers().size());
@@ -487,7 +508,8 @@ public class MeshAppBuffer {
                 log.debug("The announce contained the following app data: {}", new String(appData, UTF_8));
             }
 
-            List<RNSPeer> lps =  getLinkedPeers();
+            //List<RNSPeer> lps =  getLinkedPeers();
+            var lps = getImmutableLinkedPeers();
             for (RNSPeer p : lps) {
                 if (Arrays.equals(p.getDestinationHash(), destinationHash)) {
                     log.info("MeshAnnounceHandler - peer exists - found peer matching destinationHash");
