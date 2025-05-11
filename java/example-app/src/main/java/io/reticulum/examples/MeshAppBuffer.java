@@ -417,6 +417,11 @@ public class MeshAppBuffer {
         log.info("number of initiator (active),non-initiator peers before pruning: {} ({}),{}",
                 getLinkedPeers().size(), getLinkedActiveList().size(), getIncomingPeers().size());
         for (RNSPeer p: inaps) {
+            var pLink = p.getPeerLink();
+            if (nonNull(pLink)) {
+                // could be eg. PENDING
+                pLink.teardown();
+            }
             ips.remove(ips.indexOf(p));
         }
         log.info("number of initiator (active),non-initiator peers after pruning: {} ({}),{}",
