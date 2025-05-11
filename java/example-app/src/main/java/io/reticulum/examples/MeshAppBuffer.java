@@ -456,6 +456,10 @@ public class MeshAppBuffer {
                 if (pLink.getStatus() == ACTIVE) {
                     continue;
                 }
+                if (pLink.getStatus() == CLOSED) {
+                    removeLinkedPeer(p);
+                    continue;
+                }
                 if (pLink.getStatus() == PENDING) {
                     pLink.teardown();
                     removeLinkedPeer(p);
