@@ -456,10 +456,11 @@ public class MeshAppBuffer {
                 if (pLink.getStatus() == ACTIVE) {
                     continue;
                 }
-                //if (pLink.getStatus() == PENDING) {
-                //    pLink.teardown();
-                //    continue;
-                //}
+                if (pLink.getStatus() == PENDING) {
+                    pLink.teardown();
+                    removeLinkedPeer(p);
+                    continue;
+                }
             }
         }
         // prune non-initiator peers
