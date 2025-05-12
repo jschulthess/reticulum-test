@@ -376,12 +376,12 @@ public class MeshAppBuffer {
         this.immutableLinkedPeers = List.copyOf(this.linkedPeers);
     }
 
-    public List<RNSPeer> getLinkedActiveList() {
+    public List<RNSPeer> getActiveLinkedPeers() {
         var lps = getImmutableLinkedPeers();
         List<RNSPeer> result = Collections.synchronizedList(new ArrayList<>());
         Link pl;
         for (RNSPeer p: lps) {
-            pl = p.getOrInitPeerLink();
+            pl = p.getOrInitPeerLink();   // note: tries to initialise if not ACTIVE
             if (nonNull(pl)) {
                 if (pl.getStatus() == ACTIVE) {
                     result.add(p);
@@ -391,7 +391,7 @@ public class MeshAppBuffer {
         return result;
     }
 
-    public List<RNSPeer> getImmutableActiveLinkedPeers() {
+    public List<RNSPeer> getActiveImmutableLinkedPeers() {
         List<RNSPeer> activePeers = Collections.synchronizedList(new ArrayList<>());
         for (RNSPeer p: this.immutableLinkedPeers) {
             if (nonNull(p.getPeerLink()) && (p.getPeerLink().getStatus() == ACTIVE)) {
@@ -414,7 +414,7 @@ public class MeshAppBuffer {
         this.immutableIncomingPeers = List.copyOf(this.incomingPeers);
     }
 
-    public List<RNSPeer> getIncomingNonActiveList() {
+    public List<RNSPeer> getNonActiveIncomingPeers() {
         var ips = getImmutableIncomingPeers();
         List<RNSPeer> result = Collections.synchronizedList(new ArrayList<>());
         Link pl;
@@ -436,10 +436,10 @@ public class MeshAppBuffer {
         // prune initiator peers
         //var peerList = getImmutableLinkedPeers();
         var initiatorPeerList = getImmutableLinkedPeers();
-        var initiatorActivePeerList = getImmutableActiveLinkedPeers();
+        var initiatorActivePeerList = getActiveImmutableLinkedPeers();
         var incomingPeerList = getImmutableIncomingPeers();
         log.info("number of links (linkedPeers (active) / incomingPeers before prunig: {} ({}), {}",
-                initiatorPeerList.size(), getImmutableActiveLinkedPeers().size(),
+                initiatorPeerList.size(), getActiveImmutableLinkedPeers().size(),
                 incomingPeerList.size());
         for (RNSPeer p: initiatorActivePeerList) {
             var pLink = p.getOrInitPeerLink();
@@ -468,7 +468,7 @@ public class MeshAppBuffer {
             }
         }
         // prune non-initiator peers
-        List<RNSPeer> inaps = getIncomingNonActiveList();
+        List<RNSPeer> inaps = getNonActiveIncomingPeers();
         for (RNSPeer p: inaps) {
             var pLink = p.getPeerLink();
             if (nonNull(pLink)) {
@@ -478,10 +478,10 @@ public class MeshAppBuffer {
             removeIncomingPeer(p);
         }
         initiatorPeerList = getImmutableLinkedPeers();
-        initiatorActivePeerList = getImmutableActiveLinkedPeers();
+        initiatorActivePeerList = getActiveImmutableLinkedPeers();
         incomingPeerList = getImmutableIncomingPeers();
         log.info("number of links (linkedPeers (active) / incomingPeers after prunig: {} ({}), {}",
-                initiatorPeerList.size(), getImmutableActiveLinkedPeers().size(),
+                initiatorPeerList.size(), getActiveImmutableLinkedPeers().size(),
                 incomingPeerList.size());
     }
 
