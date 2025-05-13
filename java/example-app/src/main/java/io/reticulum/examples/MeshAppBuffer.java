@@ -438,9 +438,10 @@ public class MeshAppBuffer {
         var initiatorPeerList = getImmutableLinkedPeers();
         var initiatorActivePeerList = getActiveImmutableLinkedPeers();
         var incomingPeerList = getImmutableIncomingPeers();
-        log.info("number of links (linkedPeers (active) / incomingPeers before prunig: {} ({}), {}",
+        var numActiveIncomingPeers = incomingPeerList.size() - getNonActiveIncomingPeers().size();
+        log.info("number of links (linkedPeers (active) / incomingPeers (active) before prunig: {} ({}), {}",
                 initiatorPeerList.size(), getActiveImmutableLinkedPeers().size(),
-                incomingPeerList.size());
+                incomingPeerList.size(), numActiveIncomingPeers);
         for (RNSPeer p: initiatorActivePeerList) {
             var pLink = p.getOrInitPeerLink();
             p.pingRemote();
@@ -480,9 +481,10 @@ public class MeshAppBuffer {
         initiatorPeerList = getImmutableLinkedPeers();
         initiatorActivePeerList = getActiveImmutableLinkedPeers();
         incomingPeerList = getImmutableIncomingPeers();
-        log.info("number of links (linkedPeers (active) / incomingPeers after prunig: {} ({}), {}",
+        numActiveIncomingPeers = incomingPeerList.size() - getNonActiveIncomingPeers().size();
+        log.info("number of links (linkedPeers (active) / incomingPeers (active) after prunig: {} ({}), {}",
                 initiatorPeerList.size(), getActiveImmutableLinkedPeers().size(),
-                incomingPeerList.size());
+                incomingPeerList.size(), numActiveIncomingPeers);
     }
 
     //public RNSPeer findPeerByLink(Link link) {
