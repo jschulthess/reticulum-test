@@ -469,6 +469,14 @@ public class MeshAppBuffer {
             }
         }
         // prune non-initiator peers
+        incomingPeerList = this.incomingPeers;
+        for (RNSPeer p: incomingPeerList) {
+            var pLink = p.getOrInitPeerLink();
+            if (nonNull(pLink) && (pLink.getStatus() == ACTIVE)) {
+                // make false active links to timeout (and teardown in timeout callback)
+                p.pingRemote();
+            }
+        }
         List<RNSPeer> inaps = getNonActiveIncomingPeers();
         for (RNSPeer p: inaps) {
             var pLink = p.getPeerLink();
