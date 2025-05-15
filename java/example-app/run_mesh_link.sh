@@ -2,7 +2,7 @@
 
 ARGS=$*
 
-source run_dependencies_env
+source run_dependencies.env
 
 #echo "command: .... -cp ${DEPENDENCIES} io.reticulum.examples.MeshAppLink $ARGS"
 

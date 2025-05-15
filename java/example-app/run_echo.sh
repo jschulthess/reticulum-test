@@ -10,7 +10,7 @@
 
 ARGS=$*
 
-source run_dependencies_env
+source run_dependencies.env
 
 java \
   --add-opens=java.base/java.lang=ALL-UNNAMED \
