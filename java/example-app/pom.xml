@@ -168,6 +168,8 @@
       <groupId>io.netty</groupId>
       <artifactId>netty-all</artifactId>
       <!--<version>4.1.106.Final</version>-->
+      <!--<version>4.1.121.Final</version>-->
+      <!--<version>4.2.1.Final</version>-->
       <version>5.0.0.Alpha2</version>
     </dependency>
     <dependency>
