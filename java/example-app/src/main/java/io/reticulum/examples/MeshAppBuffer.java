@@ -866,8 +866,10 @@ public class MeshAppBuffer {
                 } else {
                     rttString = String.format("%d miliseconds", rtt);
                 }
-                log.info("Valid reply received from {}, round-trip time is {}",
-                        encodeHexString(receipt.getDestination().getHash()), rttString);
+                if (this.isInitiator) {
+                    log.info("Valid reply received from {}, round-trip time is {}",
+                            encodeHexString(receipt.getDestination().getHash()), rttString);
+                }
             }
         }
 
