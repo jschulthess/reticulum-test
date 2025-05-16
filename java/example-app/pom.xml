@@ -26,7 +26,7 @@
     <!-- head of reticulum 'buffer' branch -->
     <!--<reticulum.version>c0eeadf</reticulum.version>-->
     <!-- head of reticulum 'master' branch -->
-    <reticulum.version>d75cef2</reticulum.version>
+    <reticulum.version>bb5f807</reticulum.version>
   </properties>
 
   <repositories>
@@ -81,7 +81,8 @@
   <dependencies>
     <!-- Build Reticulum from Source -->
     <dependency>
-      <groupId>com.github.sergst83</groupId>
+      <!--<groupId>com.github.sergst83</groupId>-->
+      <groupId>com.github.jschulthess</groupId>
       <artifactId>reticulum-network-stack</artifactId>
       <version>${reticulum.version}</version>
     </dependency>
