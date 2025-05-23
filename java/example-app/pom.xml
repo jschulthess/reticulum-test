@@ -26,7 +26,7 @@
     <!-- head of reticulum 'buffer' branch -->
     <!--<reticulum.version>c0eeadf</reticulum.version>-->
     <!-- head of reticulum 'master' branch -->
-    <reticulum.version>bb5f807</reticulum.version>
+    <reticulum.version>81e5ed5</reticulum.version>
   </properties>
 
   <repositories>
