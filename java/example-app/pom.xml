@@ -29,7 +29,7 @@
     <!--<reticulum.version>81e5ed5</reticulum.version>-->
     <!-- head of reticulum 'master-debug' branch -->
     <!--<reticulum.version>2a94770</reticulum.version>-->
-    <reticulum.version>7c64cda</reticulum.version>
+    <reticulum.version>fa04fcb</reticulum.version>
   </properties>
 
   <repositories>
