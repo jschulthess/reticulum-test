@@ -29,7 +29,10 @@
     <!--<reticulum.version>81e5ed5</reticulum.version>-->
     <!-- head of reticulum 'master-debug' branch -->
     <!--<reticulum.version>2a94770</reticulum.version>-->
-    <reticulum.version>ace00f8</reticulum.version>
+    <!-- head of reticulum 'ifac' branch -->
+    <!--<reticulum.version>ace00f8</reticulum.version>-->
+    <!-- head of reticulum 'ifac-debug' branch -->
+    <reticulum.version>7cb59a6</reticulum.version>
   </properties>
 
   <repositories>
