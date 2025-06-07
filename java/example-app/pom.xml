@@ -32,7 +32,7 @@
     <!-- head of reticulum 'ifac' branch -->
     <!--<reticulum.version>ace00f8</reticulum.version>-->
     <!-- head of reticulum 'ifac-debug' branch -->
-    <reticulum.version>9d9fbc9</reticulum.version>
+    <reticulum.version>efae7c9</reticulum.version>
   </properties>
 
   <repositories>
