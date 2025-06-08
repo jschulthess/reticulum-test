@@ -32,7 +32,9 @@
     <!-- head of reticulum 'ifac' branch -->
     <!--<reticulum.version>ace00f8</reticulum.version>-->
     <!-- head of reticulum 'ifac-debug' branch -->
-    <reticulum.version>db2b2b7</reticulum.version>
+    <reticulum.version>9d9fbc9</reticulum.version>
+    <!--<reticulum.version>db2b2b7</reticulum.version>-->
+    <!--<reticulum.version>ifac-debug-SNAPSHOT</reticulum.version>-->
   </properties>
 
   <repositories>
@@ -46,7 +48,7 @@
       </snapshots>
     </repository>
     <!-- jitpack for build-on-demand of altcoinj -->
-	<repository>
+    <repository>
       <id>jitpack.io</id>
       <url>https://jitpack.io</url>
       <snapshots>
