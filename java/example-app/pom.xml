@@ -33,7 +33,7 @@
     <!--<reticulum.version>ace00f8</reticulum.version>-->
     <!-- head of reticulum 'ifac-debug' branch -->
     <!--<reticulum.version>9d9fbc9</reticulum.version>-->
-    <reticulum.version>140d3e7</reticulum.version>
+    <reticulum.version>b263e52</reticulum.version>
     <!--<reticulum.version>ifac-debug-SNAPSHOT</reticulum.version>-->
   </properties>
 
