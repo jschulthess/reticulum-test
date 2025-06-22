@@ -23,18 +23,8 @@
     <commons-lang3.version>3.14.0</commons-lang3.version>
     <nitrite.version>4.3.0</nitrite.version>
     <junit.version>5.9.2</junit.version>
-    <!-- head of reticulum 'buffer' branch -->
-    <!--<reticulum.version>c0eeadf</reticulum.version>-->
-    <!-- head of reticulum 'master' branch -->
-    <!--<reticulum.version>81e5ed5</reticulum.version>-->
-    <!-- head of reticulum 'master-debug' branch -->
-    <!--<reticulum.version>2a94770</reticulum.version>-->
-    <!-- head of reticulum 'ifac' branch -->
-    <!--<reticulum.version>ace00f8</reticulum.version>-->
-    <!-- head of reticulum 'ifac-debug' branch -->
-    <!--<reticulum.version>9d9fbc9</reticulum.version>-->
-    <reticulum.version>b263e52</reticulum.version>
-    <!--<reticulum.version>ifac-debug-SNAPSHOT</reticulum.version>-->
+    <!-- head of reticulum 'master' branch (jschulthess) -->
+    <reticulum.version>8623ce3</reticulum.version>
   </properties>
 
   <repositories>
