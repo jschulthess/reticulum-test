@@ -24,7 +24,7 @@
     <nitrite.version>4.3.0</nitrite.version>
     <junit.version>5.9.2</junit.version>
     <!-- head of reticulum 'master' branch (jschulthess) -->
-    <reticulum.version>90bfc6d</reticulum.version>
+    <reticulum.version>e47f1be</reticulum.version>
   </properties>
 
   <repositories>
