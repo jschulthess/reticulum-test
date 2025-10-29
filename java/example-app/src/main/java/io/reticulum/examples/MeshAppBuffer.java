@@ -189,7 +189,7 @@ public class MeshAppBuffer {
                                     //log.info("pinging peer {}", p);
                                     p.pingRemote();
                                 } else if (nonNull(rpl)) {
-                                    log.info("skipping peer link {} with status {}", rpl, rpl.getStatus());
+                                    log.info("skipping peer link {} with status {}", rpl.toString(), rpl.getStatus());
                                 }
                             } else if (inData.equalsIgnoreCase("close")) {
                                 if (nonNull(p.getPeerBuffer())) {
@@ -198,10 +198,10 @@ public class MeshAppBuffer {
                                 }
                                 rpl.teardown();
                                 //p.shutdown();
-                                log.info("peerLink: {} - status: {}", rpl, rpl.getStatus());
+                                log.info("peerLink: {} - status: {}", rpl.toString(), rpl.getStatus());
                             } else if (inData.equalsIgnoreCase("open")) {
                                 p.getOrInitPeerLink();
-                                log.info("peerLink: {} - status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
+                                log.info("peerLink: {} - status: {}", p.getPeerLink().toString(), p.getPeerLink().getStatus());
                                 p.getOrInitPeerBuffer();
                                 destination.announce("mesh-node".getBytes());
                             }
@@ -215,7 +215,7 @@ public class MeshAppBuffer {
                             else if (inData.equalsIgnoreCase("status")) {
                                 log.info("peer destinationHash: {}, peerLink: {} <=> status: {}",
                                     encodeHexString(p.getDestinationHash()),
-                                    p.getPeerLink(), p.getPeerLink().getStatus());
+                                    p.getPeerLink().toString(), p.getPeerLink().getStatus());
                                     continue;
                             } else {
                                 if (rpl.getStatus() == ACTIVE) {
@@ -237,7 +237,7 @@ public class MeshAppBuffer {
                         for (RNSPeer ip: incomingPeers) {
                             rpl = ip.getPeerLink();
                             if (inData.equalsIgnoreCase("status")) {
-                                log.info("incoming peer: {}, status: {}", rpl, rpl.getStatus());
+                                log.info("incoming peer: {}, status: {}", rpl.toString(), rpl.getStatus());
                             }
                             else if (inData.equalsIgnoreCase("close")) {
                                 //ip.shutdown();
@@ -325,14 +325,17 @@ public class MeshAppBuffer {
     public void clientConnected(Link link) {
         //link.setLinkClosedCallback(this::clientDisconnected);
         //link.setPacketCallback(this::serverPacketReceived);
-        log.info("clientConnected - link hash: {}, {}", link.getHash(), Hex.encodeHexString(link.getHash()));
+        //log.info("clientConnected - link hash: {}, {}", link.getHash(), Hex.encodeHexString(link.getHash()));
         RNSPeer newPeer = new RNSPeer(link);
         newPeer.setPeerLinkHash(link.getHash());
+        log.info("clientConnected - link hash: {}, destination: {}",
+                Hex.encodeHexString(link.getHash()),
+                Hex.encodeHexString(newPeer.peerDestination.getHash()));
         // make sure the peer has a channel and buffer
         newPeer.getOrInitPeerBuffer();
         addIncomingPeer(newPeer);
-        // do our best to have ACTIVE links at teh beginnint of the list
-        log.info("***> Client connected, link: {}", link);
+        // do our best to have ACTIVE links at the beginning of the list
+        log.info("***> Client connected, link: {}", link.toString());
     }
 
     public void clientDisconnected(Link link) {
@@ -560,7 +563,7 @@ public class MeshAppBuffer {
                 if (Arrays.equals(p.getDestinationHash(), destinationHash)) {
                     log.info("MeshAnnounceHandler - peer exists - found peer matching destinationHash");
                     if (nonNull(p.getPeerLink())) {
-                        log.info("peer link: {}, status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
+                        log.info("peer link: {}, status: {}", p.getPeerLink().toString(), p.getPeerLink().getStatus());
                     }
                     peerExists = true;
                     //if (p.getPeerLink().getStatus() != ACTIVE) {
@@ -574,7 +577,7 @@ public class MeshAppBuffer {
                             encodeHexString(p.getDestinationHash()),
                             encodeHexString(destinationHash));
                     if (nonNull(p.getPeerLink())) {
-                        log.info("peer link: {}, status: {}", p.getPeerLink(), p.getPeerLink().getStatus());
+                        log.info("peer link: {}, status: {}", p.getPeerLink().toString(), p.getPeerLink().getStatus());
                     }
                 }
             }
@@ -685,7 +688,7 @@ public class MeshAppBuffer {
 
         public void shutdown() {
             if (nonNull(this.peerLink)) {
-                log.info("shutdown - peerLink: {}, status: {}", peerLink, peerLink.getStatus());
+                log.info("shutdown - peerLink: {}, status: {}", peerLink.toString(), peerLink.getStatus());
                 if (nonNull(this.peerBuffer)) {
                     peerBuffer.close();
                 }
@@ -722,7 +725,7 @@ public class MeshAppBuffer {
             link.setLinkClosedCallback(this::linkClosed);
             link.setPacketCallback(this::linkPacketReceived);
             log.info("peerLink {} established (link: {}) with peer: hash - {}, link destination hash: {}", 
-                peerLink, link, encodeHexString(destinationHash),
+                peerLink.toString(), link.toString(), encodeHexString(destinationHash),
                 encodeHexString(link.getDestination().getHash()));
         }
 
@@ -733,11 +736,11 @@ public class MeshAppBuffer {
             } else if (link.getTeardownReason() == INITIATOR_CLOSED) {
                 log.info("Link closed callback: The initiator closed the link");
                 log.info("peerLink {} closed (link: {}), link destination hash: {}",
-                    peerLink, link, encodeHexString(link.getDestination().getHash()));
+                    peerLink.toString(), link.toString(), encodeHexString(link.getDestination().getHash()));
             } else if (link.getTeardownReason() == DESTINATION_CLOSED) {
                 log.info("Link closed callback: The link was closed by the peer, removing peer");
                 log.info("peerLink {} closed (link: {}), link destination hash: {}",
-                    peerLink, link, encodeHexString(link.getDestination().getHash()));
+                    peerLink.toString(), link.toString(), encodeHexString(link.getDestination().getHash()));
             } else {
                 log.info("Link closed callback");
             }
@@ -878,7 +881,7 @@ public class MeshAppBuffer {
             var link = this.peerLink;
             if (nonNull(link)) {
                 if (peerLink.getStatus() == ACTIVE) {
-                    log.info("pinging remote: {}", link);
+                    log.info("pinging remote: {}", link.toString());
                     var data = "ping".getBytes(UTF_8);
                     link.setPacketCallback(this::linkPacketReceived);
                     Packet pingPacket = new Packet(link, data);
