@@ -607,8 +607,10 @@ public class MeshAppBuffer {
         //byte[] peerLinkId;
         byte[] peerLinkHash; // the actual local link hash
         BufferedRWPair peerBuffer;
-        int receiveStreamId = 0;
-        int sendStreamId = 0;
+        //int receiveStreamId = 0;
+        //int sendStreamId = 0;
+        int receiveStreamId = 1001;
+        int sendStreamId = 1001;
         Boolean peerTimedOut = false;
         //Reticulum rns = reticulum;
 
