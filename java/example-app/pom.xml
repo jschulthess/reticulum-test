@@ -25,7 +25,7 @@
     <junit.version>5.9.2</junit.version>
     <!-- head of reticulum 'master' branch (jschulthess) -->
     <!--<reticulum.version>837f08f</reticulum.version>-->
-    <reticulum.version>9b27cb6</reticulum.version>
+    <reticulum.version>8924ed0</reticulum.version>
   </properties>
 
   <repositories>

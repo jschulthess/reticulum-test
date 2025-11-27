@@ -418,7 +418,11 @@ public class MeshApp {
 
         @Override
         @Synchronized
-        public void receivedAnnounce(byte[] destinationHash, Identity announcedIdentity, byte[] appData) {
+        public void receivedAnnounce(byte[] destinationHash,
+                                     Identity announcedIdentity,
+                                     byte[] appData,
+                                     byte[] announcePacketHash,
+                                     boolean isPathResponse) {
             var peerExists = false;
             //var newPeerInitiatorDefault = true;
 
