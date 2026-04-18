@@ -24,8 +24,7 @@
     <nitrite.version>4.3.0</nitrite.version>
     <junit.version>5.9.2</junit.version>
     <!-- head of reticulum 'master' branch (jschulthess) -->
-    <!--<reticulum.version>837f08f</reticulum.version>-->
-    <reticulum.version>8924ed0</reticulum.version>
+    <reticulum.version>520a108</reticulum.version>
   </properties>
 
   <repositories>
@@ -170,6 +169,7 @@
       <!--<version>4.1.106.Final</version>-->
       <!--<version>4.1.121.Final</version>-->
       <!--<version>4.2.1.Final</version>-->
+      <!--<version>4.2.12.Final</version>-->
       <version>5.0.0.Alpha2</version>
     </dependency>
     <dependency>
@@ -253,6 +253,13 @@
       <groupId>commons-cli</groupId>
       <artifactId>commons-cli</artifactId>
       <version>1.8.0</version>
+    </dependency>
+    <!-- Source: https://mvnrepository.com/artifact/net.sf.py4j/py4j -->
+    <dependency>
+       <groupId>net.sf.py4j</groupId>
+        <artifactId>py4j</artifactId>
+        <version>0.10.9.7</version>
+        <!--<scope>compile</scope>-->
     </dependency>
   </dependencies>
 
