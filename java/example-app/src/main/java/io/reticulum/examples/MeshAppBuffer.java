@@ -706,7 +706,7 @@ public class MeshAppBuffer {
                 } else {
                     log.info("shutdown - status (non-ACTIVE): {}", peerLink.getStatus());
                 }
-                this.peerLink = null;
+                //this.peerLink = null;
             }
         }
 
@@ -765,7 +765,7 @@ public class MeshAppBuffer {
                         log.info("closing link: {}", peerLink.getDestination().getHexHash());
                     if (nonNull(this.peerBuffer)) {
                         this.peerBuffer.close();
-                        this.peerBuffer = null;
+                        //this.peerBuffer = null;
                     }
                     peerLink.teardown();
                 }
